@@ -3,7 +3,7 @@ module pc_reg #(parameter WIDTH=32)(
     input wire en,
     input wire rst,
     input wire [WIDTH-1:0] pc_next,
-    
+
     output reg [ WIDTH-1:0] pc,
     output reg ce
 );
@@ -18,7 +18,9 @@ module pc_reg #(parameter WIDTH=32)(
 
     always @(posedge clk) begin
         if(!ce) begin
-            pc <= 32'hbfc00000;
+            // pc <= 32'hbfc00000;
+            pc <= 32'h0000_0000;
+
         end
         else if(en) begin
             pc <= pc_next;

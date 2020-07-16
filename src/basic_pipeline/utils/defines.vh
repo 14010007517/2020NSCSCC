@@ -88,16 +88,11 @@
    
 `define EXE_ERET 32'b01000010000000000000000000011000
 
-`define EXE_SYNC		6'b001111
-`define EXE_PREF		6'b110011
-`define EXE_SPECIAL_INST 6'b000000
-`define EXE_REGIMM_INST 6'b000001
-`define EXE_SPECIAL2_INST 6'b011100
+`define EXE_SYNC 6'b001111
+`define EXE_PREF 6'b110011
 
-`define EXE_MTCMFC 6'b010000
-
-`define EXE_MTC 5'b00100
-`define EXE_MFC 5'b00000
+`define EXE_MTC0 5'b00100
+`define EXE_MFC0 5'b00000
 
 //Exception code
 `define EXC_CODE_INT        5'h00     

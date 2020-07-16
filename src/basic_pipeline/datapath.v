@@ -151,6 +151,7 @@ module datapath (
         .pc_plus4E(pc_plus4E)
     );
 //EX
+    assign src_aE = rd1E;
     alu alu0(
         .src_aE(src_aE), .src_bE(src_bE),
         .alu_controlE(alu_controlE),

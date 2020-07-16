@@ -32,7 +32,7 @@ module main_decoder(
     reg reg_write_enM, mem_to_regM;
 
 	reg [0:0] main_control;
-	reg [2:0] regfile_ctrl;
+	reg [3:0] regfile_ctrl;
 	reg [2:0] mem_ctrl;
 	
 	// assign {} = main_control;
@@ -47,37 +47,37 @@ module main_decoder(
 			`EXE_R_TYPE:
 				case(funct)
 					`EXE_ADD: begin
-						regfile_ctrl <= 3'b1_00_0;
+						regfile_ctrl <= 4'b1_00_0;
 						mem_ctrl <= 3'b0_0_0;
 						// main_control <= 1'b0;
 					end
 					default: begin
-						regfile_ctrl <= 3'b0;
+						regfile_ctrl <= 4'b0;
 						mem_ctrl <= 3'b0;
 					end
 				endcase
 			`EXE_ADDI: begin
-				regfile_ctrl <= 3'b1_01_1;
+				regfile_ctrl <= 4'b1_01_1;
 				mem_ctrl <= 3'b0_0_0;
 				// main_control <= 1'b1;
 			end
 			`EXE_BEQ: begin
-				regfile_ctrl <= 3'b0_00_1;
+				regfile_ctrl <= 4'b0_00_1;
 				mem_ctrl <= 3'b0_0_0;
 				// main_control <= 1'b1;
 			end
 			`EXE_LW: begin
-				regfile_ctrl <= 3'b1_01_1;
+				regfile_ctrl <= 4'b1_01_1;
 				mem_ctrl <= 3'b1_1_0;
 				// main_control <= 1'b1;
 			end
 			`EXE_SW: begin
-				regfile_ctrl <= 3'b0_00_1;
+				regfile_ctrl <= 4'b0_00_1;
 				mem_ctrl <= 3'b0_0_1;
 				// main_control <= 1'b1;
 			end
 			default: begin
-				regfile_ctrl <= 3'b0;
+				regfile_ctrl <= 4'b0;
 				mem_ctrl <= 3'b0;
 			end
 		endcase
