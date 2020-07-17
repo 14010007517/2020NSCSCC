@@ -8,7 +8,7 @@ module main_decoder(
     output wire sign_extD,          //立即数是否为符号扩展
     //EX
     output reg [1:0] reg_dstE,     //写寄存器选择  00-> rd, 01-> rt, 10-> 写$ra
-    output reg alu_srcE,           //alu srcb选择 0->rd2E, 1->immE
+    output reg alu_imm_selE,           //alu srcb选择 0->rd2E, 1->immE
     //MEM
 	output reg mem_read_enM, mem_write_enM,
     //WB
@@ -27,7 +27,7 @@ module main_decoder(
 	assign funct = instrD[5:0];
 
     wire [1:0] reg_dstD;
-    wire alu_srcD, reg_write_enD, mem_to_regD, mem_read_enD, mem_write_enD;
+    wire alu_imm_selD, reg_write_enD, mem_to_regD, mem_read_enD, mem_write_enD;
     reg reg_write_enE, mem_to_regE, mem_read_enE, mem_write_enE;
     reg reg_write_enM, mem_to_regM;
 
@@ -36,7 +36,7 @@ module main_decoder(
 	reg [2:0] mem_ctrl;
 	
 	// assign {} = main_control;
-	assign {reg_write_enD, reg_dstD, alu_srcD} = regfile_ctrl;
+	assign {reg_write_enD, reg_dstD, alu_imm_selD} = regfile_ctrl;
 	assign {mem_to_regD, mem_read_enD, mem_write_enD} = mem_ctrl;
 	
 	//一部分能够容易判断的信号
@@ -86,7 +86,7 @@ module main_decoder(
 // ID-EX flow 
     always@(posedge clk) begin
 		reg_dstE		<= reg_dstD 		; 
-        alu_srcE		<= alu_srcD 		;
+        alu_imm_selE		<= alu_imm_selD ;
 		mem_read_enE	<= mem_read_enD		;
 		mem_write_enE	<= mem_write_enD	;
         reg_write_enE	<= reg_write_enD 	;

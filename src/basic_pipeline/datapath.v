@@ -37,13 +37,17 @@ module datapath (
     wire [4:0] alu_controlE;
 
     wire [31:0] src_aE, src_bE, alu_outE;
-    wire alu_srcE;
+    wire alu_imm_selE;
     wire [4:0] reg_writeE;
+    wire [31:0] instrE;
+    wire [4:0] rsE, rtE;
+
 //MEM
     wire [31:0] pcM;
     wire [31:0] alu_outM;
     wire [31:0] rd2M;
     wire [4:0] reg_writeM;
+    wire [31:0] instrM;
     wire mem_read_enM;
     wire mem_write_enM;
 //WB
@@ -64,7 +68,7 @@ module datapath (
         .sign_extD(sign_extD),
         //EX
         .reg_dstE(reg_dstE),
-        .alu_srcE(alu_srcE),
+        .alu_imm_selE(alu_imm_selE),
         //MEM
         .mem_read_enM(mem_read_enM),
         .mem_write_enM(mem_write_enM),
@@ -78,6 +82,25 @@ module datapath (
         .instrD(instrD),
 
         .alu_controlE(alu_controlE)
+    );
+
+    wire stallF, stallD, stallE;
+    wire flushM;
+    wire [1:0] forward_aE, forward_bE;
+    hazzard hazzard0(
+        .instrE(instrE),
+        .instrM(instrM),
+        .rsE(rsE),
+        .rtE(rtE),
+        .reg_write_enM(reg_write_enM),
+        .reg_write_enW(reg_write_enW),
+        .reg_writeM(reg_writeM),
+        .reg_writeW(reg_writeW),
+        .mem_read_enM(mem_read_enM)
+
+        .stallF(stallF), .stallD(stallD), .stallE(stallE), 
+        .flushM(flushM), 
+        .forward_aE(forward_aE), .forward_bE(forward_bE)
     );
 
 //IF
@@ -134,7 +157,6 @@ module datapath (
 
         .branch_takeD(branch_takeD)
     );
-
 //ID_EX
     id_ex id_ex0(
         .clk(clk),
@@ -143,15 +165,20 @@ module datapath (
         .rtD(rtD), .rdD(rdD),
         .immD(immD),
         .pc_plus4D(pc_plus4D),
+        .instrD(instrD),
+        .rsD(rsD),
+        .rtD(rtD),
         
         .pcE(pcE),
         .rd1E(rd1E), .rd2E(rd2E),
         .rtE(rtE), .rdE(rdE),
         .immE(immE),
-        .pc_plus4E(pc_plus4E)
+        .pc_plus4E(pc_plus4E),
+        .instrE(instrE),
+        .rsE(rsE),
+        .rtE(rtE)
     );
 //EX
-    assign src_aE = rd1E;
     alu alu0(
         .src_aE(src_aE), .src_bE(src_bE),
         .alu_controlE(alu_controlE),
@@ -162,8 +189,13 @@ module datapath (
     //mux write reg
     mux4 #(5) mux4_reg_dst(rdE, rtE, 5'd31, 5'b0, reg_dstE, reg_writeE);
 
-    //mux alu
-    mux2 #(32) mux2_alu_srcb(rd2E, immE, alu_srcE, src_bE);
+    //mux alu imm sel
+    // mux2 #(32) mux2_alu_imm_selb(rd2E, immE, alu_imm_selE, src_bE);
+
+    //数据前推(bypass)
+    mux4 #(32) mux4_forward_aE(rd1E, alu_outM, mem_rdataW, 32'b0, forward_aE, src_aE); 
+    mux4 #(32) mux4_forward_bE(rd2E, alu_outM, mem_rdataW, immE, {alu_imm_selE|forward_bE[1], alu_imm_selE|forward_bE[0]}, src_bE);
+    
 //EX_MEM
     ex_mem ex_mem0(
         .clk(clk),
@@ -171,11 +203,13 @@ module datapath (
         .alu_outE(alu_outE),
         .rd2E(rd2E),
         .reg_writeE(reg_writeE),
+        .instrE(instrE),
 
         .pcM(pcM),
         .alu_outM(alu_outM),
         .rd2M(rd2M),
         .reg_writeM(reg_writeM)
+        .instrM(instrM)
     );
 //MEM
     assign mem_addrM = alu_outM;
@@ -189,10 +223,12 @@ module datapath (
         .pcM(pcM),
         .alu_outM(alu_outM),
         .reg_writeM(reg_writeM),
+        .reg_write_enM(reg_write_enM),
 
         .pcW(pcW),
         .alu_outW(alu_outW),
-        .reg_writeW(reg_writeW)
+        .reg_writeW(reg_writeW),
+        .reg_write_enW(reg_write_enW)
     );
 
 //WB
