@@ -19,7 +19,7 @@ module if_id(
             pc_plus4D <= 0;
             instrD <= 0;
         end
-        if(~stallD) begin
+        else if(~stallD) begin
             pcD <= pcF;
             pc_plus4D <= pc_plus4F;
             instrD <= instrF;

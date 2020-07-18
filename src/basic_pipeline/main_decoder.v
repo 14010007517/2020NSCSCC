@@ -10,7 +10,8 @@ module main_decoder(
     //EX
     output reg [1:0] reg_dstE,     	//写寄存器选择  00-> rd, 01-> rt, 10-> 写$ra
     output reg alu_imm_selE,        //alu srcb选择 0->rd2E, 1->immE
-    //MEM
+    output reg reg_write_enE,
+	//MEM
 	output reg mem_read_enM, mem_write_enM,
 	output reg reg_write_enM,		//写寄存器堆使能
     output reg mem_to_regM         	//result选择 0->alu_out, 1->read_data
@@ -29,7 +30,7 @@ module main_decoder(
 
     wire [1:0] reg_dstD;
     wire alu_imm_selD, reg_write_enD, mem_to_regD, mem_read_enD, mem_write_enD;
-    reg reg_write_enE, mem_to_regE, mem_read_enE, mem_write_enE;
+    reg mem_to_regE, mem_read_enE, mem_write_enE;
 
 	reg [0:0] main_control;
 	reg [3:0] regfile_ctrl;
@@ -46,19 +47,27 @@ module main_decoder(
 		case(op_code)
 			`EXE_R_TYPE:
 				case(funct)
+					`EXE_JR: begin
+						regfile_ctrl <= 4'b0;
+						mem_ctrl <= 3'b0;
+					end
+					`EXE_JALR: begin
+						regfile_ctrl <= 4'b1_10_0;	//先不考虑jalr rs, rd的情况
+						mem_ctrl <= 3'b0;
+					end
 					default: begin
 						regfile_ctrl <= 4'b1_00_0;
-						mem_ctrl <= 3'b0_0_0;
+						mem_ctrl <= 3'b0;
 					end
 				endcase
 			`EXE_ADDI: begin
 				regfile_ctrl <= 4'b1_01_1;
-				mem_ctrl <= 3'b0_0_0;
+				mem_ctrl <= 3'b0;
 				// main_control <= 1'b1;
 			end
 			`EXE_BEQ: begin
 				regfile_ctrl <= 4'b0_00_1;
-				mem_ctrl <= 3'b0_0_0;
+				mem_ctrl <= 3'b0;
 				// main_control <= 1'b1;
 			end
 			`EXE_LW: begin
@@ -70,6 +79,11 @@ module main_decoder(
 				regfile_ctrl <= 4'b0_00_1;
 				mem_ctrl <= 3'b0_0_1;
 				// main_control <= 1'b1;
+			end
+			//`EXE_J: default
+			`EXE_JAL: begin
+				regfile_ctrl <= 4'b1_10_0;
+				mem_ctrl <= 3'b0;
 			end
 			default: begin
 				regfile_ctrl <= 4'b0;

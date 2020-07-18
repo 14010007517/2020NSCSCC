@@ -4,14 +4,14 @@ module mycpu_top (
 
     //instr
     output inst_sram_en,
-    output [4:0] inst_sram_wen    ,
+    output [3:0] inst_sram_wen    ,
     output [31:0] inst_sram_addr  ,
     output [31:0] inst_sram_wdata ,
     input [31:0] inst_sram_rdata  , 
 
     //data
     output data_sram_en,
-    output [4:0] data_sram_wen    ,
+    output [3:0] data_sram_wen    ,
     output [31:0] data_sram_addr  ,
     output [31:0] data_sram_wdata ,
     input [31:0] data_sram_rdata  ,
@@ -31,7 +31,7 @@ module mycpu_top (
     wire data_en           ;
     wire [31:0] data_addr  ;
     wire [31:0] data_rdata ;
-    wire [4:0] data_wen    ;
+    wire [3:0] data_wen    ;
     wire [31:0] data_wdata ;
     wire d_cache_stall     ;
 

@@ -31,10 +31,13 @@ module datapath (
     wire [31:0] pc_branchD;
     wire pred_takeD;
     wire branchD;
-    wire pred_failed_flushD;
+    wire pred_failed_flushDE;
+    wire [31:0] pc_jumpD;
+    wire jumpD;
+    wire jump_conflictD;
 //EX
     wire [31:0] pcE;
-    wire [31:0] rd1E, rd2E;
+    wire [31:0] rd1E, rd2E, mem_wdataE;
     wire [4:0] rsE, rtE, rdE;
     wire [31:0] immE;
     wire [31:0] pc_plus4E;
@@ -48,13 +51,13 @@ module datapath (
     wire [4:0] reg_writeE;
     wire [31:0] instrE;
     wire branchE;
-    wire succE;
-    wire actual_takeE;
     wire [31:0] pc_branchE;
+    wire [31:0] pc_jumpE;
+    wire jump_conflictE;
+    wire reg_write_enE;
 //MEM
     wire [31:0] pcM;
     wire [31:0] alu_outM;
-    wire [31:0] rd2M;
     wire [4:0] reg_writeM;
     wire [31:0] instrM;
     wire mem_read_enM;
@@ -62,6 +65,11 @@ module datapath (
     wire reg_write_enM;
     wire mem_to_regM;
     wire [31:0] resultM;
+    wire actual_takeM;
+    wire succM;
+    wire pred_takeM;
+    wire branchM;
+    wire [31:0] pc_branchM;
 //WB
     wire [31:0] pcW;
     wire reg_write_enW;
@@ -81,6 +89,7 @@ module datapath (
         //EX
         .reg_dstE(reg_dstE),
         .alu_imm_selE(alu_imm_selE),
+        .reg_write_enE(reg_write_enE),
         //MEM
         .mem_read_enM(mem_read_enM),
         .mem_write_enM(mem_write_enM),
@@ -117,7 +126,12 @@ module datapath (
 //IF
     assign pc_plus4F = pcF + 4;
 
-    mux4 #(32) mux4_pc(pc_plus4F, pc_branchD, pc_branchE, pc_plus4D, pc_sel, pc_next); //pc_plus4D等价于branch指令的PC+8
+    wire [31:0] pc_next_temp;
+    mux4 #(32) mux4_pc(pc_plus4F, pc_branchD, pc_branchM, pc_plus4E, pc_sel, pc_next_temp); //pc_plus4D等价于branch指令的PC+8
+    // pc_jumpD <- jumpD & ~jump_conflictD
+    // pc_jumpE <- jump_conflictE
+    assign pc_next = jumpD & ~jump_conflictD ? pc_jumpD : 
+                        jump_conflictE ? pc_jumpE : pc_next_temp;
 
     pc_reg pc_reg0(
         .clk(clk),
@@ -133,17 +147,17 @@ module datapath (
 
     pc_ctrl pc_ctrl0(
         .branchD(branchD),
-        .branchE(branchE),
+        .branchM(branchM),
         .pred_takeD(pred_takeD),
-        .succE(succE),
-        .actual_takeE(actual_takeE),
+        .succM(succM),
+        .actual_takeM(actual_takeM),
 
         .pc_sel(pc_sel)
     );
 //IF_ID
     if_id if_id0(
         .clk(clk), .rst(rst),
-        .flushD(pred_failed_flushD),
+        .flushD(pred_failed_flushDE),
         .stallD(stallD),
         .pcF(pcF),
         .pc_plus4F(pc_plus4F),
@@ -160,7 +174,6 @@ module datapath (
         .instr(instrD),
         .ascii(ascii)
     );
-
 //ID
     assign rsD = instrD[25:21];
     assign rtD = instrD[20:16];
@@ -192,11 +205,26 @@ module datapath (
         .pred_takeD(pred_takeD)
     );
 
+    //jump
+    wire jr, j;
+    assign jr = ~(|instrD[31:26]) & ~(|(instrD[5:1] ^ 5'b00100)); //jr, jalr
+    assign j = ~(|(instrD[31:27] ^ 5'b00001));                   //j, jal
+    assign jumpD = jr | j;
+
+    assign jump_conflictD = jr &&
+                            ((reg_write_enE && rsD == reg_writeE) ||          
+                            (reg_write_enM && rsD == reg_writeM));
+    
+    wire [31:0] pc_jump_immD;
+    assign pc_jump_immD = {pc_plus4D[31:28], instrD[25:0], 2'b00};
+
+    assign pc_jumpD = j ?  pc_jump_immD : rd1D;
 //ID_EX
     id_ex id_ex0(
         .clk(clk),
         .rst(rst),
         .stallE(stallE),
+        .flushE(pred_failed_flushDE),
         .pcD(pcD),
         .rsD(rsD), .rd1D(rd1D), .rd2D(rd2D),
         .rtD(rtD), .rdD(rdD),
@@ -206,6 +234,7 @@ module datapath (
         .branchD(branchD),
         .pred_takeD(pred_takeD),
         .pc_branchD(pc_branchD),
+        .jump_conflictD(jump_conflictD),
         
         .pcE(pcE),
         .rsE(rsE), .rd1E(rd1E), .rd2E(rd2E),
@@ -215,7 +244,8 @@ module datapath (
         .instrE(instrE),
         .branchE(branchE),
         .pred_takeE(pred_takeE),
-        .pc_branchE(pc_branchE)
+        .pc_branchE(pc_branchE),
+        .jump_conflictE(jump_conflictE)
     );
 //EX
     alu alu0(
@@ -234,11 +264,10 @@ module datapath (
     //数据前推(bypass)
     mux4 #(32) mux4_forward_aE(rd1E, resultM, resultW, 32'b0, forward_aE, src_aE); 
     mux4 #(32) mux4_forward_bE(rd2E, resultM, resultW, immE, {alu_imm_selE|forward_bE[1], alu_imm_selE|forward_bE[0]}, src_bE);
-    
-    //branch predict result
-    assign actual_takeE = branchE & alu_outE[0];
-    assign succE = ~(pred_takeE ^ actual_takeE);
-    assign pred_failed_flushD = ~succE;
+    mux4 #(32) mux4_mem_wdata(rd2E, resultM, resultW, 32'b0, forward_bE, mem_wdataE);   //可以将上面一行拆成二级的多路选择器，但这里采用并行的方案
+
+    //jump
+    assign pc_jumpE = src_aE;
 //EX_MEM
     ex_mem ex_mem0(
         .clk(clk),
@@ -246,24 +275,34 @@ module datapath (
         .stallM(stallM),
         .pcE(pcE),
         .alu_outE(alu_outE),
-        .rd2E(rd2E),
+        .mem_wdataE(mem_wdataE),
         .reg_writeE(reg_writeE),
         .instrE(instrE),
+        .branchE(branchE),
+        .pred_takeE(pred_takeE),
+        .pc_branchE(pc_branchE),
 
         .pcM(pcM),
         .alu_outM(alu_outM),
-        .rd2M(rd2M),
+        .mem_wdataM(mem_wdataM),
         .reg_writeM(reg_writeM),
-        .instrM(instrM)
+        .instrM(instrM),
+        .branchM(branchM),
+        .pred_takeM(pred_takeM),
+        .pc_branchM(pc_branchM)
     );
 //MEM
     assign mem_addrM = alu_outM;
-    assign mem_wdataM = rd2M;
 
     assign mem_enM = mem_read_enM | mem_write_enM; //读或者写
     assign mem_wenM = {4{mem_write_enM}};           //暂时只有sw
 
     mux2 #(32) mux2_mem_to_reg(alu_outM, mem_rdataM, mem_to_regM, resultM);
+
+    //branch predict result
+    assign actual_takeM = branchM & alu_outM[0];
+    assign succM = ~(pred_takeM ^ actual_takeM);
+    assign pred_failed_flushDE = ~succM;
 //MEM_WB
     mem_wb mem_wb0(
         .clk(clk),

@@ -72,7 +72,6 @@ data_ram data_ram
     .douta (cpu_data_rdata      )    //31:0
 );
 
-wire clk_n;
 wire read, write;
 assign write = | cpu_data_wen;
 assign read = cpu_data_en & ~write;
