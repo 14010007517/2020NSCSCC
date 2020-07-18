@@ -21,6 +21,7 @@ wire [3 :0] cpu_data_wen;
 wire [31:0] cpu_data_addr;
 wire [31:0] cpu_data_wdata;
 wire [31:0] cpu_data_rdata;
+reg cpu_data_ok;
 
 //cpu
 mycpu_top cpu(
@@ -39,6 +40,7 @@ mycpu_top cpu(
     .data_sram_addr   (cpu_data_addr ),
     .data_sram_wdata  (cpu_data_wdata),
     .data_sram_rdata  (cpu_data_rdata),
+    .data_sram_data_ok    (cpu_data_ok),
 
     //debug
     .debug_wb_pc      (debug_wb_pc      ),
@@ -50,7 +52,7 @@ mycpu_top cpu(
 //inst ram
 inst_ram inst_ram
 (
-    .clka  (clk                 ),   
+    .clka  (~clk                ),   
     // .rsta  (~resetn             ),
     .ena   (cpu_inst_en         ),
     .wea   (cpu_inst_wen        ),   //3:0
@@ -63,11 +65,20 @@ inst_ram inst_ram
 data_ram data_ram
 (
     .clka  (clk                 ),   
-    .ena   (cpu_data_en         ),
+    .ena   (cpu_data_en & ~cpu_data_ok       ),
     .wea   (cpu_data_wen        ),   //3:0
     .addra (cpu_data_addr       ),   //15:0
     .dina  (cpu_data_wdata      ),   //31:0
     .douta (cpu_data_rdata      )    //31:0
 );
+
+wire clk_n;
+wire read, write;
+assign write = | cpu_data_wen;
+assign read = cpu_data_en & ~write;
+
+always @(posedge clk) begin
+    cpu_data_ok <= read & ~cpu_data_ok ? 1'b1 : 1'b0;
+end
 endmodule
 

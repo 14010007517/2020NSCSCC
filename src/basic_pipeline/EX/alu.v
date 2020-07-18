@@ -13,11 +13,17 @@ module alu (
             `ALU_OR:        alu_outE <= src_aE | src_bE;
             `ALU_NOR:       alu_outE <=~(src_aE | src_bE);
             `ALU_XOR:       alu_outE <= src_aE ^ src_bE;
+            `ALU_XNOR:      alu_outE <= ~(src_aE ^ src_bE);
 
             `ALU_ADD:       alu_outE <= src_aE + src_bE;
             `ALU_ADDU:      alu_outE <= src_aE + src_bE;
             `ALU_SUB:       alu_outE <= src_aE - src_bE;
             `ALU_SUBU:      alu_outE <= src_aE - src_bE;
+
+            `ALU_GTZ:       alu_outE <= ~src_aE[31] & (|src_aE);
+            `ALU_GEZ:       alu_outE <= ~src_aE[31];
+            `ALU_LTZ:       alu_outE <= src_aE[31];
+            `ALU_LEZ:       alu_outE <= src_aE[31] | ~(|src_aE);
 
             `ALU_SLT:       alu_outE <= $signed(src_aE) < $signed(src_bE);
             `ALU_SLTU:      alu_outE <= src_aE < src_bE;

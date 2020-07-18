@@ -15,6 +15,7 @@ module mycpu_top (
     output [31:0] data_sram_addr  ,
     output [31:0] data_sram_wdata ,
     input [31:0] data_sram_rdata  ,
+    input data_sram_data_ok           , //sram没有这个信号，只是为了产生stall而编造的
 
     //debug
     output [31:0] debug_wb_pc     ,
@@ -32,6 +33,7 @@ module mycpu_top (
     wire [31:0] data_rdata ;
     wire [4:0] data_wen    ;
     wire [31:0] data_wdata ;
+    wire d_cache_stall     ;
 
     assign inst_sram_wen = 4'b0;
     assign inst_sram_wdata = 32'b0;
@@ -42,14 +44,15 @@ module mycpu_top (
         //inst
         .inst_addrF(inst_addr),
         .inst_enF(inst_en),
-        .instrD(inst_rdata),
+        .instrF(inst_rdata),
 
         //data
         .mem_enM(data_en),              
         .mem_addrM(data_addr),
-        .mem_rdataW(data_rdata),
+        .mem_rdataM(data_rdata),
         .mem_wenM(data_wen),
-        .mem_wdataM(data_wdata)
+        .mem_wdataM(data_wdata),
+        .d_cache_stall(d_cache_stall)
     );
 
     assign debug_wb_pc          = datapath.pcW;
@@ -71,25 +74,19 @@ module mycpu_top (
 
     d_cache d_cache(
         .clk(clk), .rst(~resetn),
-
+        //datapath
         .data_en(data_en),
         .data_addr(data_addr),
         .data_rdata(data_rdata),
         .data_wen(data_wen),
         .data_wdata(data_wdata),
-
+        .stall(d_cache_stall),
+        //outer
         .data_sram_en(data_sram_en),
         .data_sram_wen(data_sram_wen),
         .data_sram_addr(data_sram_addr),
         .data_sram_wdata(data_sram_wdata),
-        .data_sram_rdata(data_sram_rdata)
+        .data_sram_rdata(data_sram_rdata),
+        .data_sram_data_ok(data_sram_data_ok)
     );
-
-    //use for debug
-    wire [39:0] ascii;
-    inst_ascii_decoder inst_ascii_decoder0(
-        .instr(inst_sram_rdata),
-        .ascii(ascii)
-    );
-
 endmodule

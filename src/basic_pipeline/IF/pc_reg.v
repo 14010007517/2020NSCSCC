@@ -1,6 +1,6 @@
 module pc_reg #(parameter WIDTH=32)(
     input wire clk,
-    input wire en,
+    input wire stallF,
     input wire rst,
     input wire [WIDTH-1:0] pc_next,
 
@@ -20,9 +20,8 @@ module pc_reg #(parameter WIDTH=32)(
         if(!ce) begin
             // pc <= 32'hbfc00000;
             pc <= 32'h0000_0000;
-
         end
-        else if(en) begin
+        else if(~stallF) begin
             pc <= pc_next;
         end
     end

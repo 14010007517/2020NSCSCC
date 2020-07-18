@@ -6,19 +6,20 @@
 `include "defines.vh"
 
 module alu_decoder(
-	input wire clk,
+	input wire clk, rst,
 	input wire [31:0] instrD,
 	
     output reg [4:0] alu_controlE
     );
 	
     wire [5:0] op_code;
-	wire [4:0] rt;
+	wire [4:0] rs, rt;
 	wire [5:0] funct;
     reg  [4:0] alu_control;
 
     assign op_code = instrD[31:26];
-    assign rt = instrD[25:21];
+    assign rs = instrD[25:21];
+    assign rt = instrD[20:16];
     assign funct = instrD[5:0];
     
 	always @* begin
@@ -73,21 +74,28 @@ module alu_decoder(
 				//memory
 			`EXE_LW, `EXE_LB, `EXE_LBU, `EXE_LH, `EXE_LHU, `EXE_SW, `EXE_SB, `EXE_SH:
 						alu_control <= `ALU_ADD;
-			`EXE_BRANCHS:
-				case(rt)
-					// `EXE_BLTZAL,`EXE_BGEZAL:      
-                        // alu_control <= `ALU_PC_PLUS8;
-                    `EXE_BLTZ, `EXE_BGEZ: 
-                        alu_control <= `ALU_DONOTHING;
+			`EXE_BEQ:
+                alu_control <= `ALU_XNOR;
+            `EXE_BGTZ:
+                alu_control <= `ALU_GTZ;
+            `EXE_BLEZ:   
+                alu_control <= `ALU_LEZ;
+            `EXE_BNE:
+                alu_control <= `ALU_XOR;
+            `EXE_BRANCHS:   //bltz, bltzal, bgez, bgezal
+                case(rt)
+                    `EXE_BLTZ, `EXE_BLTZAL:      
+                        alu_control <= `ALU_LTZ;
+                    `EXE_BGEZ, `EXE_BGEZAL: 
+                        alu_control <= `ALU_GEZ;
                     default:
-                        alu_control <= `ALU_DONOTHING;
-				endcase
-			
+                        alu_control <= `ALU_DONOTHING; 
+                endcase	
 			//J type
 			`EXE_J:		alu_control <= `ALU_DONOTHING;
 			// `EXE_JAL:	alu_control <= `ALU_PC_PLUS8;
 			default:
-					alu_control <= `ALU_DONOTHING;
+						alu_control <= `ALU_DONOTHING;
 		endcase
 	end
 
