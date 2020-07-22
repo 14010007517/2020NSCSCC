@@ -23,8 +23,10 @@ module datapath (
     wire [1:0] pc_sel;
     wire [31:0] instrF_temp;
     wire is_in_delayslot_iF;
+    wire stallF;
     // wire pcerrorD, pcerrorE, pcerrorM; 
 //ID
+    wire stallD;
     wire [31:0] instrD;
     wire [31:0] pcD, pc_plus4D;
     wire [4:0] rsD, rtD, rdD, saD;
@@ -41,9 +43,10 @@ module datapath (
     wire jump_conflictD;
     wire is_in_delayslot_iD;
 //EX
+    wire stallE;
     wire [31:0] pcE;
     wire [31:0] rd1E, rd2E, mem_wdataE;
-    wire [4:0] rsE, rtE, rdE;
+    wire [4:0] rsE, rtE, rdE, saE;
     wire [31:0] immE;
     wire [31:0] pc_plus4E;
     wire pred_takeE;
@@ -66,6 +69,7 @@ module datapath (
     wire is_in_delayslot_iE;
     wire overflowE;
 //MEM
+    wire stallM;
     wire [31:0] pcM;
     wire [31:0] alu_outM;
     wire [4:0] reg_writeM;
@@ -109,7 +113,8 @@ module datapath (
     wire is_in_delayslot_iM;
     wire [4:0] rdM;
     wire cp0_to_regM;
-    wire mem_ctrl_enM;
+    wire mem_error_enM;
+    wire cp0_wenM;
 //WB
     wire [31:0] pcW;
     wire reg_write_enW;
@@ -118,6 +123,9 @@ module datapath (
     wire [31:0] resultW;
 
     wire [31:0] cp0_statusW, cp0_causeW, cp0_epcW, data_oW;
+    wire stallW;
+
+// stall
 
 //-------------------------------------------------------------------
 //模块实例化
@@ -155,7 +163,6 @@ module datapath (
         .alu_controlE(alu_controlE)
     );
 
-    wire stallF, stallD, stallE, stallM, stallW;
     wire [1:0] forward_aE, forward_bE;
     hazard hazard0(
         .rst(rst),
@@ -293,6 +300,7 @@ module datapath (
         .pc_branchD(pc_branchD),
         .jump_conflictD(jump_conflictD),
         .is_in_delayslot_iD(is_in_delayslot_iD),
+        .saD(saD),
         
         .pcE(pcE),
         .rsE(rsE), .rd1E(rd1E), .rd2E(rd2E),
@@ -304,13 +312,16 @@ module datapath (
         .pred_takeE(pred_takeE),
         .pc_branchE(pc_branchE),
         .jump_conflictE(jump_conflictE),
-        .is_in_delayslot_iE(is_in_delayslot_iE)
+        .is_in_delayslot_iE(is_in_delayslot_iE),
+        .saE(saE)
     );
 //EX
     alu alu0(
+        .clk(clk),
+        .rst(rst),
         .src_aE(src_aE), .src_bE(src_bE),
         .alu_controlE(alu_controlE),
-        .sa(sa),
+        .sa(saE),
 
         .div_stall(div_stall),
         .alu_outE(alu_outE),
@@ -397,14 +408,14 @@ module datapath (
     exception exception0(
         .rst(rst),
         .ext_int(ext_int),
-        .ri(riM), break(breakM), syscall(syscallM), overflow(overflowM), addrErrorSw(addrErrorSwM), addrErrorLw(addrErrorLwM), pcError(pcErrorM), eretM(eretM),
-        .cp0_status(cp0_statusW), cp0_cause(cp0_causeW), cp0_epc(cp0_epcW),
+        .ri(riM), .break(breakM), .syscall(syscallM), .overflow(overflowM), .addrErrorSw(addrErrorSwM), .addrErrorLw(addrErrorLwM), .pcError(pcErrorM), .eretM(eretM),
+        .cp0_status(cp0_statusW), .cp0_cause(cp0_causeW), .cp0_epc(cp0_epcW),
         .pcM(pcM),
         .alu_outM(alu_outM),
 
         .except_type(except_typeM),
         .flush_exception(flush_exceptionM),
-        .pc_except(pc_exceptM),
+        .pc_exception(pc_exceptM),
         .pc_trap(pc_trapM),
         .badvaddrM(badvaddrM)
     );

@@ -16,12 +16,9 @@ module hazard (
     
     output wire stallF, stallD, stallE, stallM, stallW,
 
-    output wire [1:0] forward_aE, forward_bE
+    output wire [1:0] forward_aE, forward_bE //00-> NONE, 01-> MEM, 10-> WB (LW instr)
 );
-    wire stallF, stallD, stallE, stallM, stallW;
     wire flushF, flushD, flushE, flushM;
-
-    wire [1:0] forward_aE, forward_bE; //00-> NONE, 01-> MEM, 10-> WB (LW instr)
 
     assign forward_aE = rsE != 0 && reg_write_enM && (rsE == reg_writeM) ? 2'b01 :
                         rsE != 0 && reg_write_enW && (rsE == reg_writeW) ? 2'b10 :

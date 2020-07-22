@@ -1,6 +1,7 @@
 `include "aludefines.vh"
 
 module alu (
+    input clk, rst,
     input wire [31:0] src_aE, src_bE,
     input wire [4:0] alu_controlE,
     input wire [4:0] sa,
@@ -60,7 +61,7 @@ module alu (
 
     //divide
 	wire div_sign;
-	wire vaild;
+	wire div_vaild;
 	wire ready;
 
 	assign div_sign = (alu_controlE == `ALU_SIGNED_DIV);
@@ -72,7 +73,7 @@ module alu (
 		.a(src_aE),  //divident
 		.b(src_bE),  //divisor
 		.valid(div_vaild),
-		.div_sign(div_sign),   //1 signed
+		.sign(div_sign),   //1 signed
 
 		// .ready(ready),
 		.div_stall(div_stall),
@@ -81,6 +82,7 @@ module alu (
 
     //multiply
 	wire mul_sign;
+    wire mul_valid;
 	assign mul_sign = (alu_controlE == `ALU_SIGNED_MULT);
     assign mul_valid = (alu_controlE == `ALU_SIGNED_MULT) | (alu_controlE == `ALU_UNSIGNED_MULT);
 	mul_booth2 MUL(
