@@ -1,0 +1,13 @@
++--
+    完善每个模块；
+        main_decoder:阻塞赋值与非阻塞赋值的区别；
+        大赛允许使用扇出优化吗？
+
++--
+    reg_write_en:
+            R_TYPE:
+                NON:    MTHI, MTLO, JR;
+            I_TYPE:
+                
+
+    reg_dst:
