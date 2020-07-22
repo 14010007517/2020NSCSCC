@@ -20,10 +20,10 @@ module alu (
 
     assign alu_outE = ({64{div_vaild}} & alu_out_div)
                     | ({64{mul_valid}} & alu_out_mul)
-                    | ({64{~mul_valid & ~div_vaild}} & {32'b1, {alu_out_not_mul_div}});
+                    | ({64{~mul_valid & ~div_vaild}} & {32'b0, alu_out_not_mul_div});
 
-    assign overflowE = (alu_out_not_mul_div[32] & (~src_aE[31] & ~src_bE[31])) 
-                    |  (~alu_out_not_mul_div[32] & (src_aE[31] & src_bE[31])); 
+    assign overflowE = (alu_controlE==`ALU_ADD || alu_controlE==`ALU_SUB) ? (alu_outE[32] != alu_outE[31]): 1'b0;
+    
 
     // simple
     always @(*) begin

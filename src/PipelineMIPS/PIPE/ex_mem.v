@@ -3,7 +3,7 @@ module ex_mem (
     input wire stallM,
     input wire [31:0] pcE,
     input wire [63:0] alu_outE,
-    input wire [31:0] mem_wdataE,
+    input wire [31:0] rt_valueE,
     input wire [4:0] reg_writeE,
     input wire [31:0] instrE,
     input wire branchE,
@@ -15,7 +15,7 @@ module ex_mem (
 
     output reg [31:0] pcM,
     output reg [31:0] alu_outM,
-    output reg [31:0] mem_wdataM,
+    output reg [31:0] rt_valueM,
     output reg [4:0] reg_writeM,
     output reg [31:0] instrM,
     output reg branchM,
@@ -29,7 +29,7 @@ module ex_mem (
         if(rst | flushM) begin
             pcM                     <=              0;
             alu_outM                <=              0;
-            mem_wdataM              <=              0;
+            rt_valueM               <=              0;
             reg_writeM              <=              0;
             instrM                  <=              0;
             branchM                 <=              0;
@@ -42,7 +42,7 @@ module ex_mem (
         else if(~stallM) begin
             pcM                     <=           pcE                ;
             alu_outM                <=           alu_outE[31:0]     ;
-            mem_wdataM              <=           mem_wdataE         ;
+            rt_valueM               <=           rt_valueE          ;
             reg_writeM              <=           reg_writeE         ;
             instrM                  <=           instrE             ;
             branchM                 <=           branchE            ;

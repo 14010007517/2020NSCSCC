@@ -57,7 +57,7 @@ module mycpu_top (
     );
 
     assign debug_wb_pc          = datapath.pcW;
-    assign debug_wb_rf_wen      = datapath.reg_write_enW;
+    assign debug_wb_rf_wen      = {4{datapath.reg_write_enW}};
     assign debug_wb_rf_wnum     = datapath.reg_writeW;
     assign debug_wb_rf_wdata    = datapath.resultW;
 
