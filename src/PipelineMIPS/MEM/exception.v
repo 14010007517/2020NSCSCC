@@ -44,17 +44,17 @@ module exception(
                            1'b1;
    assign badvaddrM =      (pcError) ? pcM : alu_outM;
 
-//    // 提高性能;
-//     assign pc_except =      (int) | (addrErrorLw | pcError) | (ri) | (break) | (overflow)  
-//                                                     ? 32'hbfc0_0380 
-//                             (eretM)                 ? `ZeroWord       :
-//                                                         cp0_epc         ;
+   // // 提高性能;
+   //  assign pc_except =      (int) | (addrErrorLw | pcError) | (ri) | (break) | (overflow)  
+   //                                                  ? 32'hbfc0_0380 
+   //                          (eretM)                 ? `ZeroWord       :
+   //                                                      cp0_epc         ;
 
-//     assign pc_trap =      (int) | (addrErrorLw | pcError) | (ri) | (break) | (overflow) | (eretM) 
-//                                                     ? 1'b1   :  1'b0  ;
+   //  assign pc_trap =      (int) | (addrErrorLw | pcError) | (ri) | (break) | (overflow) | (eretM) 
+   //                                                  ? 1'b1   :  1'b0  ;
 
-//     assign flush_except =   pc_trap                          ;
+   //  assign flush_except =   pc_trap                          ;
 
-//     assign badvaddrM =      (pcError) ? pcM : alu_outM       ;
+   //  assign badvaddrM =      (pcError) ? pcM : alu_outM       ;
    
 endmodule

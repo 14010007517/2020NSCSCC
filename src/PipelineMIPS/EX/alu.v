@@ -11,13 +11,19 @@ module alu (
     output wire overflowE
 );
     wire [63:0] alu_out_div, alu_out_mul;
+    wire mul_sign;
+    wire mul_valid;
+    wire div_sign;
+	wire div_vaild;
+	wire ready;
     reg [31:0] alu_out_not_mul_div;
 
     assign alu_outE = ({64{div_vaild}} & alu_out_div)
-                    ||({64{mul_valid}} & alu_out_mul)
-                    ||({64{~mul_valid & ~div_vaild}} & {32'b0, {alu_out_not_mul_div}});
+                    | ({64{mul_valid}} & alu_out_mul)
+                    | ({64{~mul_valid & ~div_vaild}} & {32'b1, {alu_out_not_mul_div}});
+
     assign overflowE = (alu_out_not_mul_div[32] & (~src_aE[31] & ~src_bE[31])) 
-                    || (~alu_out_not_mul_div[32] & (src_aE[31] & src_bE[31])); 
+                    |  (~alu_out_not_mul_div[32] & (src_aE[31] & src_bE[31])); 
 
     // simple
     always @(*) begin
@@ -49,6 +55,9 @@ module alu (
             `ALU_SRL_SA:    alu_out_not_mul_div <= src_bE >> sa;
             `ALU_SRA_SA:    alu_out_not_mul_div <= $signed(src_bE) >>> sa;
 
+            `ALU_MTHI:  alu_out_not_mul_div <= src_aE;
+            `ALU_MTLO:  alu_out_not_mul_div <= src_aE;
+
             // `ALU_UNSIGNED_MULT: alu_out_not_mul_div <= {32'b0, src_aE }* {32'b0, src_bE};
             // `ALU_SIGNED_MULT:   alu_out_not_mul_div <= $signed(src_aE) * $signed(src_bE);
 
@@ -60,9 +69,7 @@ module alu (
     end
 
     //divide
-	wire div_sign;
-	wire div_vaild;
-	wire ready;
+	
 
 	assign div_sign = (alu_controlE == `ALU_SIGNED_DIV);
 	assign div_vaild = (alu_controlE == `ALU_SIGNED_DIV || alu_controlE == `ALU_UNSIGNED_DIV);
@@ -81,8 +88,7 @@ module alu (
 	);
 
     //multiply
-	wire mul_sign;
-    wire mul_valid;
+	
 	assign mul_sign = (alu_controlE == `ALU_SIGNED_MULT);
     assign mul_valid = (alu_controlE == `ALU_SIGNED_MULT) | (alu_controlE == `ALU_UNSIGNED_MULT);
 	mul_booth2 MUL(

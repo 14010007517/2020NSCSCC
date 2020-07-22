@@ -107,7 +107,7 @@ module datapath (
     wire [31:0] cp0_epcM;
 
     wire flush_exceptionM;
-    wire [31:0] pc_exceptM;
+    wire [31:0] pc_exceptionM;
     wire pc_trapM;
     wire [31:0] badvaddrM;
     wire is_in_delayslot_iM;
@@ -122,7 +122,7 @@ module datapath (
     wire [4:0] reg_writeW;
     wire [31:0] resultW;
 
-    wire [31:0] cp0_statusW, cp0_causeW, cp0_epcW, data_oW;
+    wire [31:0] cp0_statusW, cp0_causeW, cp0_epcW, cp0_data_oW;
     wire stallW;
 
 // stall
@@ -189,7 +189,8 @@ module datapath (
     mux4 #(32) mux4_pc(pc_plus4F, pc_branchD, pc_branchM, pc_plus4E, pc_sel, pc_next_temp); //pc_plus4D等价于branch指令的PC+8
     // pc_jumpD <- jumpD & ~jump_conflictD
     // pc_jumpE <- jump_conflictE
-    assign pc_next = pc_trapM ? pc_exceptM :jumpD & ~jump_conflictD ? pc_jumpD : 
+    // 改 模块
+    assign pc_next = pc_trapM ? pc_exceptionM :jumpD & ~jump_conflictD ? pc_jumpD : 
                         jump_conflictE ? pc_jumpE : pc_next_temp;
 
     pc_reg pc_reg0(
@@ -398,8 +399,8 @@ module datapath (
         .clk(clk),
         .rst(rst),
         .we(hilo_wenE), //both write lo and hi
-
         .hilo_i(alu_outE),
+
         .hilo_o(hilo_o)
     );
 
@@ -415,7 +416,7 @@ module datapath (
 
         .except_type(except_typeM),
         .flush_exception(flush_exceptionM),
-        .pc_exception(pc_exceptM),
+        .pc_exception(pc_exceptionM),
         .pc_trap(pc_trapM),
         .badvaddrM(badvaddrM)
     );
@@ -435,14 +436,14 @@ module datapath (
         .is_in_delayslot_i(is_in_delayslot_iM),
         .badvaddr_i(badvaddrM),
 
-        .data_o(data_oW),
+        .data_o(cp0_data_oW),
         .status_o(cp0_statusW),
         .cause_o(cp0_causeW),
         .epc_o(cp0_epcW)
     );
 
     // mux4 #(32) mux2_mem_to_reg(alu_outM, data_rdataM, hilo_o,  32'd0, {hilo_to_regM, mem_to_regM}, resultM);
-    mux4 #(32) mux2_mem_to_reg(alu_outM, data_rdataM, hilo_o, data_oW, {(hilo_to_regM | cp0_to_regM), (mem_to_regM | cp0_to_regM)}, resultM);
+    mux4 #(32) mux2_mem_to_reg(alu_outM, data_rdataM, hilo_o, cp0_data_oW, {(hilo_to_regM | cp0_to_regM), (mem_to_regM | cp0_to_regM)}, resultM);
 
     //branch predict result
     assign actual_takeM = branchM & ~(|alu_outM);

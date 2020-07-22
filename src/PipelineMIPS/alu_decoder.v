@@ -53,8 +53,6 @@ module alu_decoder(
 					`EXE_SRAV:  	alu_control <= `ALU_SRA;
 
 					//hilo
-					`EXE_MFHI:  	alu_control <= `ALU_MFHI;	//3
-					`EXE_MFLO:  	alu_control <= `ALU_MFLO;
 					`EXE_MTHI:  	alu_control <= `ALU_MTHI;
 					`EXE_MTLO:  	alu_control <= `ALU_MTLO;
 					//jump

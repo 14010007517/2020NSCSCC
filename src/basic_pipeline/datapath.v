@@ -362,7 +362,7 @@ module datapath (
 //MEM
     assign mem_addrM = alu_outM;
 
-    assign mem_enM = (mem_read_enM | mem_write_enM) & mem_error_enM; //读或者写
+    assign mem_enM = (mem_read_enM | mem_write_enM) & ~mem_error_enM; //读或者写
     // assign mem_wenM = {4{mem_write_enM}};           //暂时只有sw
     assign mem_wenM = mem_byte_wenM;
 

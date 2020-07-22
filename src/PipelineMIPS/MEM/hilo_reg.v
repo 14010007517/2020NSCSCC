@@ -6,7 +6,7 @@ module hilo_reg(
                 input wire [31:0] instrM,
 
                 input wire [63:0] hilo_i,
-                output wire [63:0] hilo_o
+                output wire [31:0] hilo_o
                 );
 // 方案1
    // always @(posedge clk) begin
