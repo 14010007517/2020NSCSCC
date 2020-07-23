@@ -12,6 +12,8 @@ module ex_mem (
     input wire overflowE,
     input wire is_in_delayslot_iE,
     input wire [4:0] rdE,
+    input wire actual_takeE,
+
 
     output reg [31:0] pcM,
     output reg [31:0] alu_outM,
@@ -23,7 +25,8 @@ module ex_mem (
     output reg [31:0] pc_branchM,
     output reg overflowM,        
     output reg is_in_delayslot_iM,
-    output reg [4:0] rdM
+    output reg [4:0] rdM,
+    output reg actual_takeM
 );
     always @(posedge clk) begin
         if(rst | flushM) begin
@@ -38,6 +41,7 @@ module ex_mem (
             overflowM               <=              0;
             is_in_delayslot_iM      <=              0;
             rdM                     <=              0;
+            actual_takeM            <=              0;
         end
         else if(~stallM) begin
             pcM                     <=           pcE                ;
@@ -51,6 +55,7 @@ module ex_mem (
             overflowM               <=           overflowE          ;
             is_in_delayslot_iM      <=           is_in_delayslot_iM ;
             rdM                     <=           rdE                ;
+            actual_takeM            <=           actual_takeE       ;
         end
     end
 endmodule

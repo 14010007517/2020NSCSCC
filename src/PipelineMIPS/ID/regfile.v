@@ -1,5 +1,6 @@
 module regfile(
 	input wire clk,
+	input wire stallW,
 	input wire we3,
 	input wire[4:0] ra1,ra2,wa3,
 	input wire[31:0] wd3,
@@ -9,7 +10,7 @@ module regfile(
 	reg [31:0] rf[31:0];
 
 	always @(posedge clk) begin
-		if(we3) begin
+		if(we3 & ~stallW) begin
 			 rf[wa3] <= wd3;
 		end
 	end

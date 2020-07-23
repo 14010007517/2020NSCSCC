@@ -56,10 +56,10 @@ module mycpu_top (
         .d_cache_stall(d_cache_stall)
     );
 
-    assign debug_wb_pc          = datapath.pcW;
-    assign debug_wb_rf_wen      = {4{datapath.reg_write_enW}};
-    assign debug_wb_rf_wnum     = datapath.reg_writeW;
-    assign debug_wb_rf_wdata    = datapath.resultW;
+    assign debug_wb_pc          = datapath.pcM;
+    assign debug_wb_rf_wen      = {4{(datapath.reg_write_enM) & ~(datapath.d_cache_stall) & ~(datapath.flush_exceptionM)}};
+    assign debug_wb_rf_wnum     = datapath.reg_writeM;
+    assign debug_wb_rf_wdata    = datapath.resultM;
 
     i_cache i_cache(
         .clk(clk), .rst(~resetn),
@@ -73,6 +73,7 @@ module mycpu_top (
         .inst_sram_rdata(inst_sram_rdata)
     );
 
+    wire [31:0] data_sram_addr_temp;
     d_cache d_cache(
         .clk(clk), .rst(~resetn),
         //datapath
@@ -85,9 +86,12 @@ module mycpu_top (
         //outer
         .data_sram_en(data_sram_en),
         .data_sram_wen(data_sram_wen),
-        .data_sram_addr(data_sram_addr),
+        .data_sram_addr(data_sram_addr_temp),
         .data_sram_wdata(data_sram_wdata),
         .data_sram_rdata(data_sram_rdata),
         .data_sram_data_ok(data_sram_data_ok)
     );
+
+    assign data_sram_addr = data_sram_addr_temp[31:16] == 16'hbfaf ? {3'b0, data_sram_addr_temp[28:0]} : data_sram_addr_temp;
+
 endmodule

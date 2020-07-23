@@ -1,6 +1,11 @@
 //module:       div
 //description:  radix-2 divider
-//version:      1.0
+//version:      1.1
+
+/*
+log:
+1.1: 增加了存储输入的逻辑 (不暂停M,W阶段, 数据前推导致输入发生变化)
+*/
 
 module div_radix2(
     input               clk,
@@ -18,7 +23,7 @@ module div_radix2(
     1. 先取绝对值，计算出余数和商。再根据被除数、除数符号对结果调整
     2. 计算过程中，由于保证了remainer为正，因此最高位为0，可以用32位存储。而除数需用33位
     */
-
+    reg [31:0] a_save, b_save;
     reg [63:0] SR; //shift register
     reg [32 :0] NEG_DIVISOR;  //divisor 2's complement
     wire [31:0] REMAINER, QUOTIENT;
@@ -31,8 +36,8 @@ module div_radix2(
 
     assign divident_abs = (sign & a[31]) ? ~a + 1'b1 : a;
     //余数符号与被除数相同
-    assign remainer = (sign & a[31]) ? ~REMAINER + 1'b1 : REMAINER;
-    assign quotient = sign & (a[31] ^ b[31]) ? ~QUOTIENT + 1'b1 : QUOTIENT;
+    assign remainer = (sign & a_save[31]) ? ~REMAINER + 1'b1 : REMAINER;
+    assign quotient = sign & (a_save[31] ^ b_save[31]) ? ~QUOTIENT + 1'b1 : QUOTIENT;
     assign result = {remainer,quotient};
 
     wire CO;
@@ -54,6 +59,9 @@ module div_radix2(
         else if(!start_cnt & valid) begin
             cnt <= 1;
             start_cnt <= 1;
+            //save a,b
+            a_save <= a;
+            b_save <= b;
 
             //Register init
             SR[63:0] <= {31'b0,divident_abs,1'b0}; //left shift one bit initially

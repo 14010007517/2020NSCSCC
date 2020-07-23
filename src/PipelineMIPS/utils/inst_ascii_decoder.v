@@ -26,7 +26,7 @@
 
 module inst_ascii_decoder(
     input wire [31:0] instr,
-    output reg [39:0] ascii
+    output reg [44:0] ascii
     );
 
     always @(*)

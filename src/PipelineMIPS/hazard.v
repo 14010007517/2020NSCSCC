@@ -1,5 +1,4 @@
 module hazard (
-    input wire rst,
     input wire [31:0] instrE,//no use
     input wire [31:0] instrM,//no use
     input wire d_cache_stall,
@@ -40,13 +39,12 @@ module hazard (
     assign stallF = d_cache_stall | div_stall;
     assign stallD = d_cache_stall | div_stall;
     assign stallE = d_cache_stall | div_stall;
-    assign stallM = d_cache_stall | div_stall;
+    assign stallM = d_cache_stall;
     assign stallW = d_cache_stall;              // 不暂停,会减少jr等指令冲突;
 
-
     assign flushF = 1'b0;
-    assign flushD = flush_exceptionM | flush_pred_failedM | flush_jump_confilctE;
+    assign flushD = flush_exceptionM | flush_pred_failedM | (flush_jump_confilctE & ~d_cache_stall);        //EX: jr(冲突), MEM: lw这种情况时，flush_jump_confilctE会导致暂停在D阶段jr的延迟槽指令消失
     assign flushE = flush_exceptionM | flush_pred_failedM;
-    assign flushM = flush_exceptionM;
+    assign flushM = flush_exceptionM | div_stall;
     assign flushW = 1'b0;
 endmodule

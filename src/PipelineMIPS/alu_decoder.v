@@ -6,16 +6,15 @@
 `include "defines.vh"
 
 module alu_decoder(
-	input wire clk, rst,
 	input wire [31:0] instrD,
 	
-    output reg [4:0] alu_controlE
+    output reg [4:0] alu_controlD,
+	output reg [4:0] branch_judge_controlD
     );
 	
     wire [5:0] op_code;
 	wire [4:0] rs, rt;
 	wire [5:0] funct;
-    reg  [4:0] alu_control;
 
     assign op_code = instrD[31:26];
     assign rs = instrD[25:21];
@@ -27,79 +26,98 @@ module alu_decoder(
 			`EXE_R_TYPE: 
 				case(funct)
 					//算数和逻辑运算
-					`EXE_AND:   	alu_control <= `ALU_AND; //1
-					`EXE_OR:    	alu_control <= `ALU_OR;
-					`EXE_XOR:   	alu_control <= `ALU_XOR;
-					`EXE_NOR:   	alu_control <= `ALU_NOR;
+					`EXE_AND:   	alu_controlD <= `ALU_AND; //1
+					`EXE_OR:    	alu_controlD <= `ALU_OR;
+					`EXE_XOR:   	alu_controlD <= `ALU_XOR;
+					`EXE_NOR:   	alu_controlD <= `ALU_NOR;
 
-					`EXE_ADD:   	alu_control <= `ALU_ADD;	//4
-					`EXE_SUB:   	alu_control <= `ALU_SUB;
-					`EXE_ADDU:  	alu_control <= `ALU_ADDU;
-					`EXE_SUBU:  	alu_control <= `ALU_SUBU;
-					`EXE_SLT:   	alu_control <= `ALU_SLT;
-					`EXE_SLTU:  	alu_control <= `ALU_SLTU;
+					`EXE_ADD:   	alu_controlD <= `ALU_ADD;	//4
+					`EXE_SUB:   	alu_controlD <= `ALU_SUB;
+					`EXE_ADDU:  	alu_controlD <= `ALU_ADDU;
+					`EXE_SUBU:  	alu_controlD <= `ALU_SUBU;
+					`EXE_SLT:   	alu_controlD <= `ALU_SLT;
+					`EXE_SLTU:  	alu_controlD <= `ALU_SLTU;
 						//div and mul
-					`EXE_DIV:   	alu_control <= `ALU_SIGNED_DIV;
-					`EXE_DIVU:  	alu_control <= `ALU_UNSIGNED_DIV;
-					`EXE_MULT:  	alu_control <= `ALU_SIGNED_MULT;
-					`EXE_MULTU: 	alu_control <= `ALU_UNSIGNED_MULT;
+					`EXE_DIV:   	alu_controlD <= `ALU_SIGNED_DIV;
+					`EXE_DIVU:  	alu_controlD <= `ALU_UNSIGNED_DIV;
+					`EXE_MULT:  	alu_controlD <= `ALU_SIGNED_MULT;
+					`EXE_MULTU: 	alu_controlD <= `ALU_UNSIGNED_MULT;
 
 					//移位指令
-					`EXE_SLL:   	alu_control <= `ALU_SLL_SA;	//2
-					`EXE_SRL:   	alu_control <= `ALU_SRL_SA;
-					`EXE_SRA:   	alu_control <= `ALU_SRA_SA;
-					`EXE_SLLV:  	alu_control <= `ALU_SLL;
-					`EXE_SRLV:  	alu_control <= `ALU_SRL;
-					`EXE_SRAV:  	alu_control <= `ALU_SRA;
+					`EXE_SLL:   	alu_controlD <= `ALU_SLL_SA;	//2
+					`EXE_SRL:   	alu_controlD <= `ALU_SRL_SA;
+					`EXE_SRA:   	alu_controlD <= `ALU_SRA_SA;
+					`EXE_SLLV:  	alu_controlD <= `ALU_SLL;
+					`EXE_SRLV:  	alu_controlD <= `ALU_SRL;
+					`EXE_SRAV:  	alu_controlD <= `ALU_SRA;
 
 					//hilo
-					`EXE_MTHI:  	alu_control <= `ALU_MTHI;
-					`EXE_MTLO:  	alu_control <= `ALU_MTLO;
+					// `EXE_MTHI:  	alu_controlD <= `ALU_DONOTHING;
+					// `EXE_MTLO:  	alu_controlD <= `ALU_DONOTHING;
 					//jump
-					`EXE_JR:		alu_control <= `ALU_DONOTHING; //5
-					// `EXE_JALR:		alu_control <= `ALU_PC_PLUS8;
-					default:    	alu_control <= `ALU_ADDU;
+					// `EXE_JR:		alu_controlD <= `ALU_DONOTHING; //5
+					// `EXE_JALR:	alu_controlD <= `ALU_DONOTHING;
+					default:    	alu_controlD <= `ALU_DONOTHING;
 				endcase
 			//I type
-			`EXE_ADDI: 	alu_control <= `ALU_ADD;
-			`EXE_ADDIU: alu_control <= `ALU_ADDU;
-			`EXE_SLTI: 	alu_control <= `ALU_SLT;
-			`EXE_SLTIU: alu_control <= `ALU_SLTU;
-			`EXE_ANDI: 	alu_control <= `ALU_AND;
-			`EXE_XORI: alu_control <= `ALU_XOR;
-			`EXE_LUI: 	alu_control <= `ALU_LUI;
-			`EXE_ORI: alu_control <= `ALU_OR;
+			`EXE_ADDI: 	alu_controlD <= `ALU_ADD;
+			`EXE_ADDIU: alu_controlD <= `ALU_ADDU;
+			`EXE_SLTI: 	alu_controlD <= `ALU_SLT;
+			`EXE_SLTIU: alu_controlD <= `ALU_SLTU;
+			`EXE_ANDI: 	alu_controlD <= `ALU_AND;
+			`EXE_XORI: alu_controlD <= `ALU_XOR;
+			`EXE_LUI: 	alu_controlD <= `ALU_LUI;
+			`EXE_ORI: alu_controlD <= `ALU_OR;
 				//memory
 			`EXE_LW, `EXE_LB, `EXE_LBU, `EXE_LH, `EXE_LHU, `EXE_SW, `EXE_SB, `EXE_SH:
-						alu_control <= `ALU_ADDU;
-			`EXE_BEQ:
-                alu_control <= `ALU_XNOR;
-            `EXE_BGTZ:
-                alu_control <= `ALU_GTZ;
-            `EXE_BLEZ:   
-                alu_control <= `ALU_LEZ;
-            `EXE_BNE:
-                alu_control <= `ALU_XOR;
-            `EXE_BRANCHS:   //bltz, bltzal, bgez, bgezal
-                case(rt)
-                    `EXE_BLTZ, `EXE_BLTZAL:      
-                        alu_control <= `ALU_LTZ;
-                    `EXE_BGEZ, `EXE_BGEZAL: 
-                        alu_control <= `ALU_GEZ;
-                    default:
-                        alu_control <= `ALU_DONOTHING; 
-                endcase	
+						alu_controlD <= `ALU_ADDU;
+			// `EXE_BEQ:
+            //     alu_controlD <= `ALU_EQ;
+            // `EXE_BGTZ:
+            //     alu_controlD <= `ALU_GTZ;
+            // `EXE_BLEZ:   
+            //     alu_controlD <= `ALU_LEZ;
+            // `EXE_BNE:
+            //     alu_controlD <= `ALU_NEQ;
+            // `EXE_BRANCHS:   //bltz, bltzal, bgez, bgezal
+            //     case(rt)
+            //         `EXE_BLTZ, `EXE_BLTZAL:      
+            //             alu_controlD <= `ALU_LTZ;
+            //         `EXE_BGEZ, `EXE_BGEZAL: 
+            //             alu_controlD <= `ALU_GEZ;
+            //         default:
+            //             alu_controlD <= `ALU_DONOTHING; 
+            //     endcase	
 			//J type
-			`EXE_J:		alu_control <= `ALU_DONOTHING;
-			// `EXE_JAL:	alu_control <= `ALU_PC_PLUS8;
+			// `EXE_J:		alu_controlD <= `ALU_DONOTHING;
+			// `EXE_JAL:	alu_controlD <= `ALU_DONOTHING;
 			default:
-						alu_control <= `ALU_DONOTHING;
+						alu_controlD <= `ALU_DONOTHING;
 		endcase
 	end
 
-// ID-EX flow 
-    always@(posedge clk) begin
-        alu_controlE <= alu_control;
-    end
-
+	// branch_judge控制信号
+	always @(*) begin
+		case(op_code)
+			`EXE_BEQ:
+                branch_judge_controlD <= `ALU_EQ;
+            `EXE_BGTZ:
+                branch_judge_controlD <= `ALU_GTZ;
+            `EXE_BLEZ:   
+                branch_judge_controlD <= `ALU_LEZ;
+            `EXE_BNE:
+                branch_judge_controlD <= `ALU_NEQ;
+            `EXE_BRANCHS:   //bltz, bltzal, bgez, bgezal
+                case(rt)
+                    `EXE_BLTZ, `EXE_BLTZAL:      
+                        branch_judge_controlD <= `ALU_LTZ;
+                    `EXE_BGEZ, `EXE_BGEZAL: 
+                        branch_judge_controlD <= `ALU_GEZ;
+                    default:
+                        branch_judge_controlD <= `ALU_DONOTHING; 
+                endcase
+			default:
+						branch_judge_controlD <= `ALU_DONOTHING;
+		endcase	
+	end
 endmodule
