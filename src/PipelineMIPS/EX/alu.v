@@ -16,54 +16,56 @@ module alu (
     wire div_sign;
 	wire div_vaild;
 	wire ready;
-    reg [63:0] alu_out_not_mul_div;
+    reg [31:0] alu_out_not_mul_div;
+    reg carry_bit;
 
     assign alu_outE = ({64{div_vaild}} & alu_out_div)
                     | ({64{mul_valid}} & alu_out_mul)
-                    | ({64{~mul_valid & ~div_vaild}} & alu_out_not_mul_div );
+                    | ({64{~mul_valid & ~div_vaild}} & {32'b0, alu_out_not_mul_div} );
 
-    assign overflowE = (alu_controlE==`ALU_ADD || alu_controlE==`ALU_SUB) ? (alu_outE[32] != alu_outE[31]): 1'b0;
+    assign overflowE = (alu_controlE==`ALU_ADD || alu_controlE==`ALU_SUB) ? (carry_bit != alu_out_not_mul_div[31]): 1'b0;
 
     // simple
     always @(*) begin
+        carry_bit = 0;
         case(alu_controlE)
-            `ALU_AND:       alu_out_not_mul_div <= {32'b0, src_aE} & {32'b0, src_bE};
-            `ALU_OR:        alu_out_not_mul_div <= {32'b0, src_aE} | {32'b0, src_bE};
-            `ALU_NOR:       alu_out_not_mul_div <=~({32'b0, src_aE} | {32'b0, src_bE});
-            `ALU_XOR:       alu_out_not_mul_div <= {32'b0, src_aE} ^ {32'b0, src_bE};
-            `ALU_XNOR:      alu_out_not_mul_div <= ({32'b0, src_aE} ^ {32'b0, src_bE});
+            `ALU_AND:       alu_out_not_mul_div = src_aE & src_bE;
+            `ALU_OR:        alu_out_not_mul_div = src_aE | src_bE;
+            `ALU_NOR:       alu_out_not_mul_div =~(src_aE | src_bE);
+            `ALU_XOR:       alu_out_not_mul_div = src_aE ^ src_bE;
+            `ALU_XNOR:      alu_out_not_mul_div = (src_aE ^ src_bE);
 
-            `ALU_ADD:       alu_out_not_mul_div <= {32'b0, src_aE} + {32'b0, src_bE};
-            `ALU_ADDU:      alu_out_not_mul_div <= {32'b0, src_aE} + {32'b0, src_bE};
-            `ALU_SUB:       alu_out_not_mul_div <= {32'b0, src_aE} - {32'b0, src_bE};
-            `ALU_SUBU:      alu_out_not_mul_div <= {32'b0, src_aE} - {32'b0, src_bE};
+            `ALU_ADD:       {carry_bit, alu_out_not_mul_div} = src_aE + src_bE;
+            `ALU_ADDU:      alu_out_not_mul_div = src_aE + src_bE;
+            `ALU_SUB:       {carry_bit, alu_out_not_mul_div} = src_aE - src_bE;
+            `ALU_SUBU:      alu_out_not_mul_div = src_aE - src_bE;
 
-            `ALU_GTZ:       alu_out_not_mul_div <= ~src_aE[31] & (|src_aE);
-            `ALU_GEZ:       alu_out_not_mul_div <= ~src_aE[31];
-            `ALU_LTZ:       alu_out_not_mul_div <= src_aE[31];
-            `ALU_LEZ:       alu_out_not_mul_div <= src_aE[31] | ~(|src_aE);
+            `ALU_GTZ:       alu_out_not_mul_div = {31'b0, ~src_aE[31] & (|src_aE)};
+            `ALU_GEZ:       alu_out_not_mul_div = {31'b0, ~src_aE[31]};
+            `ALU_LTZ:       alu_out_not_mul_div = {31'b0, src_aE[31]};
+            `ALU_LEZ:       alu_out_not_mul_div = {31'b0, src_aE[31] | ~(|src_aE)};
 
-            `ALU_SLT:       alu_out_not_mul_div <= $signed({32'b0, src_aE}) < $signed({32'b0, src_bE});
-            `ALU_SLTU:      alu_out_not_mul_div <= {32'b0, src_aE} < {32'b0, src_bE};
+            `ALU_SLT:       alu_out_not_mul_div = $signed(src_aE) < $signed(src_bE);
+            `ALU_SLTU:      alu_out_not_mul_div = src_aE < src_bE;
 
-            `ALU_SLL:       alu_out_not_mul_div <= {32'b0, src_bE} << src_aE[4:0];
-            `ALU_SRL:       alu_out_not_mul_div <= {32'b0, src_bE} >> src_aE[4:0];
-            `ALU_SRA:       alu_out_not_mul_div <= $signed({32'b0, src_bE}) >>> src_aE[4:0];
+            `ALU_SLL:       alu_out_not_mul_div = src_bE << src_aE[4:0];
+            `ALU_SRL:       alu_out_not_mul_div = src_bE >> src_aE[4:0];
+            `ALU_SRA:       alu_out_not_mul_div = $signed(src_bE) >>> src_aE[4:0];
 
-            `ALU_SLL_SA:    alu_out_not_mul_div <= {32'b0, src_bE} << sa;
-            `ALU_SRL_SA:    alu_out_not_mul_div <= {32'b0, src_bE} >> sa;
-            `ALU_SRA_SA:    alu_out_not_mul_div <= $signed({32'b0, src_bE}) >>> sa;
+            `ALU_SLL_SA:    alu_out_not_mul_div = src_bE << sa;
+            `ALU_SRL_SA:    alu_out_not_mul_div = src_bE >> sa;
+            `ALU_SRA_SA:    alu_out_not_mul_div = $signed(src_bE) >>> sa;
 
-            `ALU_MTHI:  alu_out_not_mul_div <= {32'b0, src_aE};
-            `ALU_MTLO:  alu_out_not_mul_div <= {32'b0, src_aE};
+            `ALU_MTHI:  alu_out_not_mul_div = src_aE;
+            `ALU_MTLO:  alu_out_not_mul_div = src_aE;
 
-            // `ALU_UNSIGNED_MULT: alu_out_not_mul_div <= {32'b0, {32'b0, src_aE} }* {32'b0, {32'b0, src_bE}};
-            // `ALU_SIGNED_MULT:   alu_out_not_mul_div <= $signed({32'b0, src_aE}) * $signed({32'b0, src_bE});
+            // `ALU_UNSIGNED_MULT: alu_out_not_mul_div = {32'b0, src_aE }* {32'b0, src_bE};
+            // `ALU_SIGNED_MULT:   alu_out_not_mul_div = $signed(src_aE) * $signed(src_bE);
 
-            `ALU_LUI:       alu_out_not_mul_div <= {32'b0, src_bE[15:0], 16'b0};
+            `ALU_LUI:       alu_out_not_mul_div = {src_bE[15:0], 16'b0};
 
-            // `ALU_PC_PLUS8:     alu_out_not_mul_div <= {32'b0, src_aE }+ 64'd4;
-            default:    alu_out_not_mul_div <= 64'b0;
+            // `ALU_PC_PLUS8:     alu_out_not_mul_div = {32'b0, src_aE }+ 64'd4;
+            default:    alu_out_not_mul_div = 32'b0;
         endcase
     end
 

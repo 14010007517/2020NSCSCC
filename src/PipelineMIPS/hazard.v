@@ -5,6 +5,8 @@ module hazard (
     input wire d_cache_stall,
     input wire div_stall,
 
+    input wire flush_jump_confilctE, flush_pred_failedM, flush_exceptionM,
+
     input wire [4:0] rsE,
     input wire [4:0] rtE,
     input wire reg_write_enM,
@@ -15,11 +17,10 @@ module hazard (
     input wire mem_read_enM,
     
     output wire stallF, stallD, stallE, stallM, stallW,
+    output wire flushF, flushD, flushE, flushM, flushW,
 
     output wire [1:0] forward_aE, forward_bE //00-> NONE, 01-> MEM, 10-> WB (LW instr)
 );
-    wire flushF, flushD, flushE, flushM;
-
     assign forward_aE = rsE != 0 && reg_write_enM && (rsE == reg_writeM) ? 2'b01 :
                         rsE != 0 && reg_write_enW && (rsE == reg_writeW) ? 2'b10 :
                         2'b00;
@@ -41,4 +42,11 @@ module hazard (
     assign stallE = d_cache_stall | div_stall;
     assign stallM = d_cache_stall | div_stall;
     assign stallW = d_cache_stall;              // 不暂停,会减少jr等指令冲突;
+
+
+    assign flushF = 1'b0;
+    assign flushD = flush_exceptionM | flush_pred_failedM | flush_jump_confilctE;
+    assign flushE = flush_exceptionM | flush_pred_failedM;
+    assign flushM = flush_exceptionM;
+    assign flushW = 1'b0;
 endmodule

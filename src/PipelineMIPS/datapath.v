@@ -20,13 +20,11 @@ module datapath (
 //IF
     wire [31:0] pcF, pc_next, pc_plus4F;
     wire pc_reg_ceF;
-    wire [1:0] pc_sel;
+    wire [2:0] pc_sel;
     wire [31:0] instrF_temp;
     wire is_in_delayslot_iF;
-    wire stallF;
     // wire pcerrorD, pcerrorE, pcerrorM; 
 //ID
-    wire stallD;
     wire [31:0] instrD;
     wire [31:0] pcD, pc_plus4D;
     wire [4:0] rsD, rtD, rdD, saD;
@@ -37,13 +35,12 @@ module datapath (
     wire [31:0] pc_branchD;
     wire pred_takeD;
     wire branchD;
-    wire pred_failed_flushDE;
+    wire flush_pred_failedM;
     wire [31:0] pc_jumpD;
     wire jumpD;
     wire jump_conflictD;
     wire is_in_delayslot_iD;
 //EX
-    wire stallE;
     wire [31:0] pcE;
     wire [31:0] rd1E, rd2E, mem_wdataE;
     wire [4:0] rsE, rtE, rdE, saE;
@@ -66,11 +63,10 @@ module datapath (
     wire reg_write_enE;
     wire div_stall;
     wire [31:0] rt_valueE;
-
+    wire flush_jump_confilctE;
     wire is_in_delayslot_iE;
     wire overflowE;
 //MEM
-    wire stallM;
     wire [31:0] pcM;
     wire [31:0] alu_outM;
     wire [4:0] reg_writeM;
@@ -124,7 +120,6 @@ module datapath (
     wire [31:0] resultW;
 
     wire [31:0] cp0_statusW, cp0_causeW, cp0_epcW, cp0_data_oW;
-    wire stallW;
 
 // stall
 
@@ -164,13 +159,20 @@ module datapath (
         .alu_controlE(alu_controlE)
     );
 
+    wire stallF, stallD, stallE, stallM, stallW;
+    wire flushF, flushD, flushE, flushM, flushW;
     wire [1:0] forward_aE, forward_bE;
     hazard hazard0(
         .rst(rst),
-        .instrE(instrE),
-        .instrM(instrM),
+        .instrE(instrE), .instrM(instrM),
+
         .d_cache_stall(d_cache_stall),
         .div_stall(div_stall),
+
+        .flush_jump_confilctE   (flush_jump_confilctE),
+        .flush_pred_failedM     (flush_pred_failedM),
+        .flush_exceptionM       (flush_exceptionM),
+
         .rsE(rsE),
         .rtE(rtE),
         .reg_write_enM(reg_write_enM),
@@ -180,20 +182,44 @@ module datapath (
         .mem_read_enM(mem_read_enM),
 
         .stallF(stallF), .stallD(stallD), .stallE(stallE), .stallM(stallM), .stallW(stallW),
+        .flushF(flushF), .flushD(flushD), .flushE(flushE), .flushM(flushM), .flushW(flushW),
         .forward_aE(forward_aE), .forward_bE(forward_bE)
     );
 
 //IF
     assign pc_plus4F = pcF + 4;
 
-    wire [31:0] pc_next_temp;
-    mux4 #(32) mux4_pc(pc_plus4F, pc_branchD, pc_branchM, pc_plus4E, pc_sel, pc_next_temp); //pc_plus4D等价于branch指令的PC+8
-    // pc_jumpD <- jumpD & ~jump_conflictD
-    // pc_jumpE <- jump_conflictE
-    // 改 模块
-    assign pc_next = pc_trapM ? pc_exceptionM :jumpD & ~jump_conflictD ? pc_jumpD : 
-                        jump_conflictE ? pc_jumpE : pc_next_temp;
+    pc_ctrl pc_ctrl0(
+        //branch
+        .branchD(branchD),              //D阶段是branch指令
+        .branchM(branchM),              //M阶段是branch指令
+        .pred_takeD(pred_takeD),        //D阶段预测跳转
+        .succM(succM),                  //M阶段验证预测正确
+        .actual_takeM(actual_takeM),    //M阶段判断跳转
 
+        //jump + exception
+        .pc_trapM(pc_trapM),            //M阶段异常
+        .jumpD(jumpD),                  //D阶段是jump类指令
+        .jump_conflictD(jump_conflictD),//D阶段jump数据冲突
+        .jump_conflictE(jump_conflictE),//D阶段的jump冲突传到E阶段
+
+        .pc_sel(pc_sel)
+    );
+
+    mux8 #(32) mux8_pc_next(
+        .x7(32'b0),
+        .x6(pc_exceptionM),              //异常的跳转地址
+        .x5(pc_plus4E),                 //预测跳，实际不跳。将pc_next指向branch指令的PC+8（注：pc_plus4E等价于branch指令的PC+8）
+        .x4(pc_branchM),                //预测不跳，实际跳转。将pc_next指向pc_branchD传到M阶段的值
+        .x3(pc_jumpE),                  //jump冲突，在E阶段
+        .x2(pc_jumpD),                  //D阶段jump不冲突跳转的地址（rs寄存器或立即数）
+        .x1(pc_branchD),                //D阶段预测跳转的跳转地址（PC+offset）
+        .x0(pc_plus4F),                 //下一条指令的地址
+        .sel(pc_sel),
+
+        .y(pc_next)
+    );
+    
     pc_reg pc_reg0(
         .clk(clk),
         .stallF(stallF),
@@ -206,23 +232,13 @@ module datapath (
     assign inst_addrF = pcF;
     assign inst_enF = pc_reg_ceF & ~stallF;
 
-    pc_ctrl pc_ctrl0(
-        .branchD(branchD),
-        .branchM(branchM),
-        .pred_takeD(pred_takeD),
-        .succM(succM),
-        .actual_takeM(actual_takeM),
-
-        .pc_sel(pc_sel)
-    );
-
     assign instrF_temp = ({32{~(|(pcF[1:0] ^ 2'b00))}} & instrF);
     assign is_in_delayslot_iF = branchD | jumpD;
 //IF_ID
     if_id if_id0(
         .clk(clk), .rst(rst),
-        .flushD(pred_failed_flushDE | flush_exceptionM),
         .stallD(stallD),
+        .flushD(flushD),
         .pcF(pcF),
         .pc_plus4F(pc_plus4F),
         .instrF(instrF_temp),
@@ -272,25 +288,23 @@ module datapath (
     );
 
     //jump
-    wire jr, j;
-    assign jr = ~(|instrD[31:26]) & ~(|(instrD[5:1] ^ 5'b00100)); //jr, jalr
-    assign j = ~(|(instrD[31:27] ^ 5'b00001));                   //j, jal
-    assign jumpD = jr | j;
+    jump_predict jump_predict0(
+        .instrD(instrD),
+        .pc_plus4D(pc_plus4D),
+        .rd1D(rd1D),
+        .reg_write_enE(reg_write_enE), .reg_write_enM(reg_write_enM),
+        .reg_writeE(reg_writeE), .reg_writeM(reg_writeM),
 
-    assign jump_conflictD = jr &&
-                            ((reg_write_enE && rsD == reg_writeE) ||          
-                            (reg_write_enM && rsD == reg_writeM));
-    
-    wire [31:0] pc_jump_immD;
-    assign pc_jump_immD = {pc_plus4D[31:28], instrD[25:0], 2'b00};
-
-    assign pc_jumpD = j ?  pc_jump_immD : rd1D;
+        .jumpD(jumpD),                      //是jump类指令(j, jr)
+        .jump_conflictD(jump_conflictD),    //jr rs寄存器发生冲突
+        .pc_jumpD(pc_jumpD)                 //D阶段最终跳转地址
+    );
 //ID_EX
     id_ex id_ex0(
         .clk(clk),
         .rst(rst),
         .stallE(stallE),
-        .flushE(pred_failed_flushDE  | flush_exceptionM),
+        .flushE(flushE),
         .pcD(pcD),
         .rsD(rsD), .rd1D(rd1D), .rd2D(rd2D),
         .rtD(rtD), .rdD(rdD),
@@ -339,15 +353,16 @@ module datapath (
     //数据前推(bypass)
     mux4 #(32) mux4_forward_aE(rd1E, resultM, resultW, 32'b0, forward_aE, src_aE); 
     mux4 #(32) mux4_forward_bE(rd2E, resultM, resultW, immE, {alu_imm_selE|forward_bE[1], alu_imm_selE|forward_bE[0]}, src_bE);
-    assign rt_valueE = src_bE;  //数据前推后的rt寄存器的值
+    mux4 #(32) mux4_rt_valueE(rd2E, resultM, resultW, 32'b0, forward_bE, rt_valueE); //数据前推后的rt寄存器的值
     //jump
     assign pc_jumpE = src_aE;
+    assign flush_jump_confilctE = jump_conflictE;
 //EX_MEM
     ex_mem ex_mem0(
         .clk(clk),
         .rst(rst),
         .stallM(stallM),
-        .flushM(flush_exceptionM),
+        .flushM(flushM),
         .pcE(pcE),
         .alu_outE(alu_outE),
         .rt_valueE(rt_valueE),
@@ -447,7 +462,7 @@ module datapath (
     assign actual_takeM = branchM & ~(|alu_outM);
     // llgg 这里有问题；
     assign succM = ~(pred_takeM ^ actual_takeM);
-    assign pred_failed_flushDE = ~succM;
+    assign flush_pred_failedM = ~succM;
 //MEM_WB
     mem_wb mem_wb0(
         .clk(clk),

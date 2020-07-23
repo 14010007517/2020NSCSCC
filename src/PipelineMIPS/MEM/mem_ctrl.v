@@ -61,11 +61,7 @@ module mem_ctrl(
                         | ( {32{instr_sh}}  & {2{data_wdataM[15:0]} })
                         | ( {32{instr_sb}}  & {4{data_wdataM[7:0]}  });
 // 所以还是取了整个字：    
-<<<<<<< HEAD
     assign data_rdataM =  ( {32{instr_lw}}   & mem_rdataM)
-=======
-    assign data_rdata =  ( {32{instr_lw}}   & mem_rdataM)
->>>>>>> d029792344e45bfdc752a38f9d8154faf038c27d
                         | ( {32{ instr_lh   & addr_W}}   & { {16{mem_rdataM[15]}},  mem_rdataM[15:0]    })
                         | ( {32{ instr_lh   & addr_H2}}  & { {16{mem_rdataM[31]}},  mem_rdataM[31:16]   })
                         | ( {32{ instr_lhu  & addr_W}}   & {  16'b0,                mem_rdataM[15:0]    })
