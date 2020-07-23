@@ -65,6 +65,7 @@ module datapath (
     wire jump_conflictE;
     wire reg_write_enE;
     wire div_stall;
+    wire [31:0] rt_valueE;
 
     wire is_in_delayslot_iE;
     wire overflowE;
@@ -85,10 +86,9 @@ module datapath (
     wire branchM;
     wire [31:0] pc_branchM;
 
-    wire [3:0] mem_byte_wenM;
     wire [31:0] mem_ctrl_rdataM;
     wire [31:0] mem_wdataM_temp;
-    wire [31:0] data_rdataM;
+    wire [31:0] mem_ctrl_rdataM;
 
     wire hilo_wenE;
     wire [63:0] hilo_o;
@@ -115,6 +115,7 @@ module datapath (
     wire cp0_to_regM;
     wire mem_error_enM;
     wire cp0_wenM;
+    wire [31:0] rt_valueM;
 //WB
     wire [31:0] pcW;
     wire reg_write_enW;
@@ -338,8 +339,7 @@ module datapath (
     //数据前推(bypass)
     mux4 #(32) mux4_forward_aE(rd1E, resultM, resultW, 32'b0, forward_aE, src_aE); 
     mux4 #(32) mux4_forward_bE(rd2E, resultM, resultW, immE, {alu_imm_selE|forward_bE[1], alu_imm_selE|forward_bE[0]}, src_bE);
-    mux4 #(32) mux4_mem_wdata(rd2E, resultM, resultW, 32'b0, forward_bE, mem_wdataE);   //可以将上面一行拆成二级的多路选择器，但这里采用并行的方案
-
+    assign rt_valueE = src_bE;  //数据前推后的rt寄存器的值
     //jump
     assign pc_jumpE = src_aE;
 //EX_MEM
@@ -350,7 +350,7 @@ module datapath (
         .flushM(flush_exceptionM),
         .pcE(pcE),
         .alu_outE(alu_outE),
-        .mem_wdataE(mem_wdataE),
+        .rt_valueE(rt_valueE),
         .reg_writeE(reg_writeE),
         .instrE(instrE),
         .branchE(branchE),
@@ -362,33 +362,31 @@ module datapath (
 
         .pcM(pcM),
         .alu_outM(alu_outM),
-        .mem_wdataM(mem_wdataM_temp),
+        .rt_valueM(rt_valueM),
         .reg_writeM(reg_writeM),
         .instrM(instrM),
         .branchM(branchM),
         .pred_takeM(pred_takeM),
         .pc_branchM(pc_branchM),
+        .overflowM(overflowM),
         .is_in_delayslot_iM(is_in_delayslot_iM),
         .rdM(rdM)
     );
 //MEM
     assign mem_addrM = alu_outM;
-
     assign mem_enM = (mem_read_enM | mem_write_enM) & mem_error_enM; //读或者写
-    // assign mem_wenM = {4{mem_write_enM}};           //暂时只有sw
-    assign mem_wenM = mem_byte_wenM;
 
     // 是否需要控制 mem_en
-    mem_ctrr mem_ctrl0(
+    mem_ctrl mem_ctrl0(
         .instrM(instrM),
         .addr(alu_outM),
     
-        .data_wdataM(mem_wdataM_temp),
-        .mem_wdataM(mem_wdataM),
-        .mem_byte_wenM(mem_byte_wenM),
+        .data_wdataM(rt_valueM),    //原始的wdata
+        .mem_wdataM(mem_wdataM),    //新的wdata
+        .mem_wenM(mem_wenM),
 
-        .mem_rdataM(mem_rdataM),
-        .data_rdataM(data_rdataM),
+        .mem_rdataM(mem_rdataM),    
+        .data_rdataM(mem_ctrl_rdataM),
 
         .addr_error_sw(addrErrorSwM),
         .addr_error_lw(addrErrorLwM),
@@ -429,7 +427,7 @@ module datapath (
         .en(flush_exceptionM),
         .waddr_i(rdM),
         .raddr_i(rdM),
-        .data_i(mem_wdataM_temp),
+        .data_i(rt_valueM),
 
         .except_type_i(except_typeM),
         .current_inst_addr_i(pcM),
@@ -442,8 +440,8 @@ module datapath (
         .epc_o(cp0_epcW)
     );
 
-    // mux4 #(32) mux2_mem_to_reg(alu_outM, data_rdataM, hilo_o,  32'd0, {hilo_to_regM, mem_to_regM}, resultM);
-    mux4 #(32) mux2_mem_to_reg(alu_outM, data_rdataM, hilo_o, cp0_data_oW, {(hilo_to_regM | cp0_to_regM), (mem_to_regM | cp0_to_regM)}, resultM);
+    // mux4 #(32) mux2_mem_to_reg(alu_outM, mem_ctrl_rdataM, hilo_o,  32'd0, {hilo_to_regM, mem_to_regM}, resultM);
+    mux4 #(32) mux2_mem_to_reg(alu_outM, mem_ctrl_rdataM, hilo_o, cp0_data_oW, {(hilo_to_regM | cp0_to_regM), (mem_to_regM | cp0_to_regM)}, resultM);
 
     //branch predict result
     assign actual_takeM = branchM & ~(|alu_outM);
