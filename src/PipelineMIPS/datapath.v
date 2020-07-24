@@ -13,7 +13,13 @@ module datapath (
     input wire [31:0] mem_rdataM,   //读数据
     output wire [3:0] mem_wenM,     //写使能
     output wire [31:0] mem_wdataM,  //写数据
-    input wire d_cache_stall
+    input wire d_cache_stall,
+
+    //debug
+    output wire [31:0]  debug_wb_pc,      
+    output wire [3:0]   debug_wb_rf_wen,
+    output wire [4:0]   debug_wb_rf_wnum, 
+    output wire [31:0]  debug_wb_rf_wdata
 );
 
 //变量声明
@@ -127,6 +133,12 @@ module datapath (
     wire [31:0] cp0_statusW, cp0_causeW, cp0_epcW, cp0_data_oW;
 
 // stall
+
+//--------------------debug---------------------
+    assign debug_wb_pc          = datapath.pcM;
+    assign debug_wb_rf_wen      = {4{reg_write_enM & ~d_cache_stall & flush_exceptionM }};
+    assign debug_wb_rf_wnum     = datapath.reg_writeM;
+    assign debug_wb_rf_wdata    = datapath.resultM;
 
 //-------------------------------------------------------------------
 //模块实例化

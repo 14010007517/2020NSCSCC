@@ -53,13 +53,13 @@ module mycpu_top (
         .mem_rdataM(data_rdata),
         .mem_wenM(data_wen),
         .mem_wdataM(data_wdata),
-        .d_cache_stall(d_cache_stall)
-    );
+        .d_cache_stall(d_cache_stall),
 
-    assign debug_wb_pc          = datapath.pcM;
-    assign debug_wb_rf_wen      = {4{(datapath.reg_write_enM) & ~(datapath.d_cache_stall) & ~(datapath.flush_exceptionM)}};
-    assign debug_wb_rf_wnum     = datapath.reg_writeM;
-    assign debug_wb_rf_wdata    = datapath.resultM;
+        .debug_wb_pc       (debug_wb_pc       ),  
+        .debug_wb_rf_wen   (debug_wb_rf_wen   ),  
+        .debug_wb_rf_wnum  (debug_wb_rf_wnum  ),  
+        .debug_wb_rf_wdata (debug_wb_rf_wdata )  
+    );
 
     i_cache i_cache(
         .clk(clk), .rst(~resetn),
