@@ -63,7 +63,7 @@ module datapath (
     wire [31:0] pc_jumpE;
     wire jump_conflictE;
     wire reg_write_enE;
-    wire div_stall;
+    wire div_stallE;
     wire [31:0] rs_valueE, rt_valueE;
     wire flush_jump_confilctE;
     wire is_in_delayslot_iE;
@@ -172,7 +172,7 @@ module datapath (
         .instrE(instrE), .instrM(instrM),
 
         .d_cache_stall(d_cache_stall),
-        .div_stall(div_stall),
+        .div_stallE(div_stallE),
 
         .flush_jump_confilctE   (flush_jump_confilctE),
         .flush_pred_failedM     (flush_pred_failedM),
@@ -214,7 +214,7 @@ module datapath (
     mux8 #(32) mux8_pc_next(
         .x7(32'b0),
         .x6(pc_exceptionM),             //异常的跳转地址
-        .x5(pc_plus4E),                 //预测跳，实际不跳。将pc_next指向branch指令的PC+8（注：pc_plus4E等价于branch指令的PC+8）
+        .x5(pc_plus4E),                 //预测跳，实际不跳。将pc_next指向branch指令的PC+8（注：pc_plus4E等价于branch指令的PC+8） //可以保证延迟槽指令不会被flush，故plush_4E存在
         .x4(pc_branchM),                //预测不跳，实际跳转。将pc_next指向pc_branchD传到M阶段的值
         .x3(pc_jumpE),                  //jump冲突，在E阶段
         .x2(pc_jumpD),                  //D阶段jump不冲突跳转的地址（rs寄存器或立即数）
@@ -347,12 +347,13 @@ module datapath (
     alu alu0(
         .clk(clk),
         .rst(rst),
+        .flushE(flushE),
         .src_aE(src_aE), .src_bE(src_bE),
         .alu_controlE(alu_controlE),
         .sa(saE),
         .hilo(hilo_oM),
 
-        .div_stall(div_stall),
+        .div_stallE(div_stallE),
         .alu_outE(alu_outE),
         .overflowE(overflowE)
     );
@@ -368,7 +369,7 @@ module datapath (
         rd1E,                       
         resultM,
         resultW,
-        pc_plus4D,                          // 执行jalr，jal指令；写入到$ra寄存器的数据（跳转指令对应延迟槽指令的下一条指令的地址即PC+8）
+        pc_plus4D,                          // 执行jalr，jal指令；写入到$ra寄存器的数据（跳转指令对应延迟槽指令的下一条指令的地址即PC+8） //可以保证延迟槽指令不会被flush，故plush_4D存在
         {2{jumpE | branchE}} | forward_aE,  // 当exe阶段是jal或者jalr指令，或者bxxzal时，jumpE | branchE== 1；选择pc_plus4D；
 
         src_aE
@@ -431,7 +432,7 @@ module datapath (
     );
 //MEM
     assign mem_addrM = alu_outM;
-    assign mem_enM = (mem_read_enM | mem_write_enM) & mem_error_enM; //读或者写
+    assign mem_enM = (mem_read_enM | mem_write_enM) & (~addrErrorSwM | ~addrErrorLwM); //读或者写
 
     // 是否需要控制 mem_en
     mem_ctrl mem_ctrl0(
@@ -446,15 +447,14 @@ module datapath (
         .data_rdataM(mem_ctrl_rdataM),
 
         .addr_error_sw(addrErrorSwM),
-        .addr_error_lw(addrErrorLwM),
-        .mem_error_enM(mem_error_enM)
+        .addr_error_lw(addrErrorLwM)
     );
 
     hilo_reg hilo0(
         .clk(clk),
         .rst(rst),
         .instrM(instrM),    // 用于识别mfhi，mflo，决定输出；
-        .we(hilo_wenE),     // both write lo and hi
+        .we(hilo_wenE & ~flush_exceptionM),     // both write lo and hi
         .hilo_i(alu_outE),
 
         .hilo_o(hilo_oM)
@@ -481,11 +481,12 @@ module datapath (
         .clk(clk),
         .rst(rst),
         
-        .we_i(cp0_wenM),
         .en(flush_exceptionM),
+        .we_i(cp0_wenM),
         .waddr_i(rdM),
-        .raddr_i(rdM),
         .data_i(rt_valueM),
+        
+        .raddr_i(rdM),
 
         .except_type_i(except_typeM),
         .current_inst_addr_i(pcM),

@@ -11,13 +11,15 @@ module hilo_reg(
    wire [63:0] hilo_ii;
    reg [63:0] hilo;
    always @(posedge clk) begin
-      if(we)
-         hilo <= hilo_ii;
+      if(rst)
+         hilo <= 0;
+      else if(we)
+         hilo <= hilo_i;
       else
          hilo <= hilo;
    end
    
-   assign hilo_ii = ( {64{~rst & we}} & hilo_i );
+   // assign hilo_ii = ( {64{~rst & we}} & hilo_i );
 
    // 读cp0逻辑；
    wire mfhi;

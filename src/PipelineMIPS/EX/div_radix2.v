@@ -10,6 +10,7 @@ log:
 module div_radix2(
     input               clk,
     input               rst,
+    input               flush,
     input [31:0]        a,  //divident
     input [31:0]        b,  //divisor
     input               valid,
@@ -51,8 +52,8 @@ module div_radix2(
     //state machine
     reg [5:0] cnt;
     reg start_cnt;
-    always @(posedge clk, posedge rst) begin
-        if(rst) begin
+    always @(posedge clk) begin
+        if(rst | flush) begin
             cnt <= 0;
             start_cnt <= 0;
         end

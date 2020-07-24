@@ -9,13 +9,13 @@ module cp0_reg(
       input [4:0] waddr_i,
       input [4:0] raddr_i,
       input [31:0] data_i,
+      output wire [31:0] data_o,
 
       input [31:0] except_type_i,
       input [31:0] current_inst_addr_i,
       input        is_in_delayslot_i,
       input [31:0] badvaddr_i,
 
-      output wire [31:0] data_o,
       output reg [31:0] count_o,
       output reg [31:0] compare_o,
       output reg [31:0] status_o,
@@ -179,7 +179,7 @@ module cp0_reg(
    assign cause    = (~rst & ~(|( raddr_i ^ `CP0_REG_CAUSE     )));
    assign epc      = (~rst & ~(|( raddr_i ^ `CP0_REG_EPC       )));
    assign prid     = (~rst & ~(|( raddr_i ^ `CP0_REG_PRID      )));
-   assign config1   = (~rst & ~(|( raddr_i ^ `CP0_REG_CONFIG    )));
+   assign config1  = (~rst & ~(|( raddr_i ^ `CP0_REG_CONFIG    )));
    assign badvaddr = (~rst & ~(|( raddr_i ^ `CP0_REG_BADVADDR  )));
 
    assign data_o = ( {32{rst}     } & 32'd0 )

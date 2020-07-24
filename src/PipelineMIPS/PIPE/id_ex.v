@@ -71,7 +71,7 @@ module id_ex (
             branchE                 <= branchD              ;
             jump_conflictE          <= jump_conflictD       ;
             saE                     <= saD                  ;
-            is_in_delayslot_iE      <= is_in_delayslot_iE   ;
+            is_in_delayslot_iE      <= is_in_delayslot_iD   ;
             alu_controlE            <= alu_controlD         ;
             jumpE                   <= jumpD                ;
             branch_judge_controlE   <= branch_judge_controlD;

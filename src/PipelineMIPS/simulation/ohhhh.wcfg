@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="1284912666fs"></ZoomStartTime>
-      <ZoomEndTime time="1284924867fs"></ZoomEndTime>
-      <Cursor1Time time="1285210000fs"></Cursor1Time>
+      <ZoomStartTime time="284384416fs"></ZoomStartTime>
+      <ZoomEndTime time="284481117fs"></ZoomEndTime>
+      <Cursor1Time time="284465000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="250"></NameColumnWidth>
-      <ValueColumnWidth column_width="90"></ValueColumnWidth>
+      <ValueColumnWidth column_width="80"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="10" />
+   <WVObjectSize size="14" />
    <wave_markers>
       <marker time="2070050" label="" />
       <marker time="2176550" label="" />
@@ -34,6 +34,11 @@
       <marker time="355777400" label="" />
       <marker time="365630916" label="" />
       <marker time="906112350" label="" />
+      <marker time="122751019" label="" />
+      <marker time="14487764" label="" />
+      <marker time="16988838" label="" />
+      <marker time="57781816" label="" />
+      <marker time="101181316" label="" />
    </wave_markers>
    <wvobject fp_name="/tb_top/resetn" type="logic">
       <obj_property name="ElementShortName">resetn</obj_property>
@@ -519,7 +524,6 @@
    <wvobject fp_name="group222" type="group">
       <obj_property name="label">EXE</obj_property>
       <obj_property name="DisplayName">label</obj_property>
-      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="group107" type="group">
          <obj_property name="label">ALU</obj_property>
          <obj_property name="DisplayName">label</obj_property>
@@ -548,10 +552,6 @@
          <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/alu0/sa" type="array">
             <obj_property name="ElementShortName">sa[4:0]</obj_property>
             <obj_property name="ObjectShortName">sa[4:0]</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/alu0/div_stall" type="logic">
-            <obj_property name="ElementShortName">div_stall</obj_property>
-            <obj_property name="ObjectShortName">div_stall</obj_property>
          </wvobject>
          <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/alu0/alu_outE" type="array">
             <obj_property name="ElementShortName">alu_outE[63:0]</obj_property>
@@ -771,10 +771,10 @@
    <wvobject fp_name="group223" type="group">
       <obj_property name="label">MEM</obj_property>
       <obj_property name="DisplayName">label</obj_property>
-      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="group158" type="group">
          <obj_property name="label">MemCtrl</obj_property>
          <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="isExpanded"></obj_property>
          <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/rt_valueM" type="array">
             <obj_property name="ElementShortName">rt_valueM[31:0]</obj_property>
             <obj_property name="ObjectShortName">rt_valueM[31:0]</obj_property>
@@ -816,14 +816,15 @@
                <obj_property name="ElementShortName">mem_rdataM[31:0]</obj_property>
                <obj_property name="ObjectShortName">mem_rdataM[31:0]</obj_property>
             </wvobject>
+            <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/mem_ctrl0/data_rdataM" type="array">
+               <obj_property name="ElementShortName">data_rdataM[31:0]</obj_property>
+               <obj_property name="ObjectShortName">data_rdataM[31:0]</obj_property>
+            </wvobject>
          </wvobject>
          <wvobject fp_name="group318" type="group">
             <obj_property name="label">Error</obj_property>
             <obj_property name="DisplayName">label</obj_property>
-            <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/mem_ctrl0/mem_error_enM" type="logic">
-               <obj_property name="ElementShortName">mem_error_enM</obj_property>
-               <obj_property name="ObjectShortName">mem_error_enM</obj_property>
-            </wvobject>
+            <obj_property name="isExpanded"></obj_property>
             <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/mem_ctrl0/addr_error_sw" type="logic">
                <obj_property name="ElementShortName">addr_error_sw</obj_property>
                <obj_property name="ObjectShortName">addr_error_sw</obj_property>
@@ -863,18 +864,6 @@
             <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/mem_ctrl0/instr_lhu" type="logic">
                <obj_property name="ElementShortName">instr_lhu</obj_property>
                <obj_property name="ObjectShortName">instr_lhu</obj_property>
-            </wvobject>
-            <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/mem_ctrl0/addr_W" type="logic">
-               <obj_property name="ElementShortName">addr_W</obj_property>
-               <obj_property name="ObjectShortName">addr_W</obj_property>
-            </wvobject>
-            <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/mem_ctrl0/addr_H" type="logic">
-               <obj_property name="ElementShortName">addr_H</obj_property>
-               <obj_property name="ObjectShortName">addr_H</obj_property>
-            </wvobject>
-            <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/mem_ctrl0/addr_H2" type="logic">
-               <obj_property name="ElementShortName">addr_H2</obj_property>
-               <obj_property name="ObjectShortName">addr_H2</obj_property>
             </wvobject>
             <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/mem_ctrl0/addr_B1" type="logic">
                <obj_property name="ElementShortName">addr_B1</obj_property>
@@ -925,14 +914,6 @@
          <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hilo0/hilo" type="array">
             <obj_property name="ElementShortName">hilo[63:0]</obj_property>
             <obj_property name="ObjectShortName">hilo[63:0]</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hilo0/hi" type="logic">
-            <obj_property name="ElementShortName">hi</obj_property>
-            <obj_property name="ObjectShortName">hi</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hilo0/lo" type="logic">
-            <obj_property name="ElementShortName">lo</obj_property>
-            <obj_property name="ObjectShortName">lo</obj_property>
          </wvobject>
       </wvobject>
       <wvobject fp_name="group191" type="group">
@@ -1152,6 +1133,7 @@
    <wvobject fp_name="group276" type="group">
       <obj_property name="label">Hazard</obj_property>
       <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/forward_aE" type="array">
          <obj_property name="ElementShortName">forward_aE[1:0]</obj_property>
          <obj_property name="ObjectShortName">forward_aE[1:0]</obj_property>
@@ -1160,25 +1142,75 @@
          <obj_property name="ElementShortName">forward_bE[1:0]</obj_property>
          <obj_property name="ObjectShortName">forward_bE[1:0]</obj_property>
       </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/alu_imm_selE" type="logic">
-         <obj_property name="ElementShortName">alu_imm_selE</obj_property>
-         <obj_property name="ObjectShortName">alu_imm_selE</obj_property>
+      <wvobject fp_name="group605" type="group">
+         <obj_property name="label">Stall</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="isExpanded"></obj_property>
+         <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/d_cache_stall" type="logic">
+            <obj_property name="ElementShortName">d_cache_stall</obj_property>
+            <obj_property name="ObjectShortName">d_cache_stall</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/stallF" type="logic">
+            <obj_property name="ElementShortName">stallF</obj_property>
+            <obj_property name="ObjectShortName">stallF</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/stallD" type="logic">
+            <obj_property name="ElementShortName">stallD</obj_property>
+            <obj_property name="ObjectShortName">stallD</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/stallE" type="logic">
+            <obj_property name="ElementShortName">stallE</obj_property>
+            <obj_property name="ObjectShortName">stallE</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/stallM" type="logic">
+            <obj_property name="ElementShortName">stallM</obj_property>
+            <obj_property name="ObjectShortName">stallM</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/stallW" type="logic">
+            <obj_property name="ElementShortName">stallW</obj_property>
+            <obj_property name="ObjectShortName">stallW</obj_property>
+         </wvobject>
       </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/instrE" type="array">
-         <obj_property name="ElementShortName">instrE[31:0]</obj_property>
-         <obj_property name="ObjectShortName">instrE[31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/instrM" type="array">
-         <obj_property name="ElementShortName">instrM[31:0]</obj_property>
-         <obj_property name="ObjectShortName">instrM[31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/d_cache_stall" type="logic">
-         <obj_property name="ElementShortName">d_cache_stall</obj_property>
-         <obj_property name="ObjectShortName">d_cache_stall</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/div_stall" type="logic">
-         <obj_property name="ElementShortName">div_stall</obj_property>
-         <obj_property name="ObjectShortName">div_stall</obj_property>
+      <wvobject fp_name="group606" type="group">
+         <obj_property name="label">Flush</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="isExpanded"></obj_property>
+         <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/flush_exceptionM" type="logic">
+            <obj_property name="ElementShortName">flush_exceptionM</obj_property>
+            <obj_property name="ObjectShortName">flush_exceptionM</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/flush_jump_confilctE" type="logic">
+            <obj_property name="ElementShortName">flush_jump_confilctE</obj_property>
+            <obj_property name="ObjectShortName">flush_jump_confilctE</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/flush_pred_failedM" type="logic">
+            <obj_property name="ElementShortName">flush_pred_failedM</obj_property>
+            <obj_property name="ObjectShortName">flush_pred_failedM</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/flush_exceptionM" type="logic">
+            <obj_property name="ElementShortName">flush_exceptionM</obj_property>
+            <obj_property name="ObjectShortName">flush_exceptionM</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/flushF" type="logic">
+            <obj_property name="ElementShortName">flushF</obj_property>
+            <obj_property name="ObjectShortName">flushF</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/flushD" type="logic">
+            <obj_property name="ElementShortName">flushD</obj_property>
+            <obj_property name="ObjectShortName">flushD</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/flushE" type="logic">
+            <obj_property name="ElementShortName">flushE</obj_property>
+            <obj_property name="ObjectShortName">flushE</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/flushM" type="logic">
+            <obj_property name="ElementShortName">flushM</obj_property>
+            <obj_property name="ObjectShortName">flushM</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/flushW" type="logic">
+            <obj_property name="ElementShortName">flushW</obj_property>
+            <obj_property name="ObjectShortName">flushW</obj_property>
+         </wvobject>
       </wvobject>
       <wvobject fp_name="group893" type="group">
          <obj_property name="label">no use</obj_property>
@@ -1211,62 +1243,18 @@
             <obj_property name="ElementShortName">mem_read_enM</obj_property>
             <obj_property name="ObjectShortName">mem_read_enM</obj_property>
          </wvobject>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/stallF" type="logic">
-         <obj_property name="ElementShortName">stallF</obj_property>
-         <obj_property name="ObjectShortName">stallF</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/stallD" type="logic">
-         <obj_property name="ElementShortName">stallD</obj_property>
-         <obj_property name="ObjectShortName">stallD</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/stallE" type="logic">
-         <obj_property name="ElementShortName">stallE</obj_property>
-         <obj_property name="ObjectShortName">stallE</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/stallM" type="logic">
-         <obj_property name="ElementShortName">stallM</obj_property>
-         <obj_property name="ObjectShortName">stallM</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/stallW" type="logic">
-         <obj_property name="ElementShortName">stallW</obj_property>
-         <obj_property name="ObjectShortName">stallW</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/flush_exceptionM" type="logic">
-         <obj_property name="ElementShortName">flush_exceptionM</obj_property>
-         <obj_property name="ObjectShortName">flush_exceptionM</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/flush_jump_confilctE" type="logic">
-         <obj_property name="ElementShortName">flush_jump_confilctE</obj_property>
-         <obj_property name="ObjectShortName">flush_jump_confilctE</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/flush_pred_failedM" type="logic">
-         <obj_property name="ElementShortName">flush_pred_failedM</obj_property>
-         <obj_property name="ObjectShortName">flush_pred_failedM</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/flush_exceptionM" type="logic">
-         <obj_property name="ElementShortName">flush_exceptionM</obj_property>
-         <obj_property name="ObjectShortName">flush_exceptionM</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/flushF" type="logic">
-         <obj_property name="ElementShortName">flushF</obj_property>
-         <obj_property name="ObjectShortName">flushF</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/flushD" type="logic">
-         <obj_property name="ElementShortName">flushD</obj_property>
-         <obj_property name="ObjectShortName">flushD</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/flushE" type="logic">
-         <obj_property name="ElementShortName">flushE</obj_property>
-         <obj_property name="ObjectShortName">flushE</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/flushM" type="logic">
-         <obj_property name="ElementShortName">flushM</obj_property>
-         <obj_property name="ObjectShortName">flushM</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/flushW" type="logic">
-         <obj_property name="ElementShortName">flushW</obj_property>
-         <obj_property name="ObjectShortName">flushW</obj_property>
+         <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/alu_imm_selE" type="logic">
+            <obj_property name="ElementShortName">alu_imm_selE</obj_property>
+            <obj_property name="ObjectShortName">alu_imm_selE</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/instrE" type="array">
+            <obj_property name="ElementShortName">instrE[31:0]</obj_property>
+            <obj_property name="ObjectShortName">instrE[31:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/instrM" type="array">
+            <obj_property name="ElementShortName">instrM[31:0]</obj_property>
+            <obj_property name="ObjectShortName">instrM[31:0]</obj_property>
+         </wvobject>
       </wvobject>
    </wvobject>
    <wvobject fp_name="group1028" type="group">
@@ -1448,5 +1436,21 @@
          <obj_property name="ElementShortName">eretE</obj_property>
          <obj_property name="ObjectShortName">eretE</obj_property>
       </wvobject>
+   </wvobject>
+   <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/is_in_delayslot_iF" type="logic">
+      <obj_property name="ElementShortName">is_in_delayslot_iF</obj_property>
+      <obj_property name="ObjectShortName">is_in_delayslot_iF</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/is_in_delayslot_iD" type="logic">
+      <obj_property name="ElementShortName">is_in_delayslot_iD</obj_property>
+      <obj_property name="ObjectShortName">is_in_delayslot_iD</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/is_in_delayslot_iE" type="logic">
+      <obj_property name="ElementShortName">is_in_delayslot_iE</obj_property>
+      <obj_property name="ObjectShortName">is_in_delayslot_iE</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/is_in_delayslot_iM" type="logic">
+      <obj_property name="ElementShortName">is_in_delayslot_iM</obj_property>
+      <obj_property name="ObjectShortName">is_in_delayslot_iM</obj_property>
    </wvobject>
 </wave_config>

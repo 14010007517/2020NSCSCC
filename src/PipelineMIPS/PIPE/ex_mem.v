@@ -53,7 +53,7 @@ module ex_mem (
             pred_takeM              <=           pred_takeE         ;
             pc_branchM              <=           pc_branchE         ;
             overflowM               <=           overflowE          ;
-            is_in_delayslot_iM      <=           is_in_delayslot_iM ;
+            is_in_delayslot_iM      <=           is_in_delayslot_iE ;
             rdM                     <=           rdE                ;
             actual_takeM            <=           actual_takeE       ;
         end

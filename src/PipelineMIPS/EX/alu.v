@@ -1,13 +1,14 @@
 `include "aludefines.vh"
 
 module alu (
-    input clk, rst,
+    input wire clk, rst,
+    input wire flushE,
     input wire [31:0] src_aE, src_bE,
     input wire [4:0] alu_controlE,
     input wire [4:0] sa,
     input wire [63:0] hilo,
 
-    output wire div_stall,
+    output wire div_stallE,
     output wire [63:0] alu_outE,
     output wire overflowE
 );
@@ -67,13 +68,14 @@ module alu (
 	div_radix2 DIV(
 		.clk(~clk),
 		.rst(rst),
+        .flush(flushE),
 		.a(src_aE),  //divident
 		.b(src_bE),  //divisor
 		.valid(div_vaild),
 		.sign(div_sign),   //1 signed
 
 		// .ready(ready),
-		.div_stall(div_stall),
+		.div_stall(div_stallE),
 		.result(alu_out_div)
 	);
 
