@@ -11,13 +11,13 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="1064723916fs"></ZoomStartTime>
-      <ZoomEndTime time="1064823617fs"></ZoomEndTime>
-      <Cursor1Time time="1064807000fs"></Cursor1Time>
+      <ZoomStartTime time="1284912666fs"></ZoomStartTime>
+      <ZoomEndTime time="1284924867fs"></ZoomEndTime>
+      <Cursor1Time time="1285210000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="250"></NameColumnWidth>
-      <ValueColumnWidth column_width="100"></ValueColumnWidth>
+      <ValueColumnWidth column_width="90"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="10" />
    <wave_markers>
@@ -523,6 +523,7 @@
       <wvobject fp_name="group107" type="group">
          <obj_property name="label">ALU</obj_property>
          <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="isExpanded"></obj_property>
          <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/alu0/clk" type="logic">
             <obj_property name="ElementShortName">clk</obj_property>
             <obj_property name="ObjectShortName">clk</obj_property>
@@ -542,6 +543,7 @@
          <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/alu0/alu_controlE" type="array">
             <obj_property name="ElementShortName">alu_controlE[4:0]</obj_property>
             <obj_property name="ObjectShortName">alu_controlE[4:0]</obj_property>
+            <obj_property name="Radix">BINARYRADIX</obj_property>
          </wvobject>
          <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/alu0/sa" type="array">
             <obj_property name="ElementShortName">sa[4:0]</obj_property>
@@ -707,6 +709,7 @@
       <wvobject fp_name="group124" type="group">
          <obj_property name="label">ForwardAE</obj_property>
          <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="isExpanded"></obj_property>
          <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/mux4_forward_aE/x0" type="array">
             <obj_property name="ElementShortName">x0[31:0]</obj_property>
             <obj_property name="ObjectShortName">x0[31:0]</obj_property>
@@ -1149,7 +1152,6 @@
    <wvobject fp_name="group276" type="group">
       <obj_property name="label">Hazard</obj_property>
       <obj_property name="DisplayName">label</obj_property>
-      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/hazard0/forward_aE" type="array">
          <obj_property name="ElementShortName">forward_aE[1:0]</obj_property>
          <obj_property name="ObjectShortName">forward_aE[1:0]</obj_property>
@@ -1270,7 +1272,6 @@
    <wvobject fp_name="group1028" type="group">
       <obj_property name="label">MainDecoder</obj_property>
       <obj_property name="DisplayName">label</obj_property>
-      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="/tb_top/soc_lite/cpu/datapath/main_decoder0/clk" type="logic">
          <obj_property name="ElementShortName">clk</obj_property>
          <obj_property name="ObjectShortName">clk</obj_property>

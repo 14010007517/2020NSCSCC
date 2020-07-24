@@ -5,6 +5,7 @@ module alu (
     input wire [31:0] src_aE, src_bE,
     input wire [4:0] alu_controlE,
     input wire [4:0] sa,
+    input wire [63:0] hilo,
 
     output wire div_stall,
     output wire [63:0] alu_outE,
@@ -21,7 +22,9 @@ module alu (
 
     assign alu_outE = ({64{div_vaild}} & alu_out_div)
                     | ({64{mul_valid}} & alu_out_mul)
-                    | ({64{~mul_valid & ~div_vaild}} & {32'b0, alu_out_not_mul_div} );
+                    | ({64{~mul_valid & ~div_vaild}} & {32'b0, alu_out_not_mul_div})
+                    | ({64{(alu_controlE == `ALU_MTHI)}} & {src_aE, hilo[31:0]})
+                    | ({64{(alu_controlE == `ALU_MTLO)}} & {hilo[63:32], src_aE});
 
     assign overflowE = (alu_controlE==`ALU_ADD || alu_controlE==`ALU_SUB) & (carry_bit ^ alu_out_not_mul_div[31]);
 
@@ -39,8 +42,6 @@ module alu (
             `ALU_SUB:       {carry_bit, alu_out_not_mul_div} = {src_aE[31], src_aE} - {src_bE[31], src_bE};
             `ALU_SUBU:      alu_out_not_mul_div = src_aE - src_bE;
 
-            
-
             `ALU_SLT:       alu_out_not_mul_div = $signed(src_aE) < $signed(src_bE);
             `ALU_SLTU:      alu_out_not_mul_div = src_aE < src_bE;
 
@@ -52,12 +53,6 @@ module alu (
             `ALU_SRL_SA:    alu_out_not_mul_div = src_bE >> sa;
             `ALU_SRA_SA:    alu_out_not_mul_div = $signed(src_bE) >>> sa;
 
-            // `ALU_MTHI:  alu_out_not_mul_div = src_aE;
-            // `ALU_MTLO:  alu_out_not_mul_div = src_aE;
-
-            // `ALU_UNSIGNED_MULT: alu_out_not_mul_div = {32'b0, src_aE }* {32'b0, src_bE};
-            // `ALU_SIGNED_MULT:   alu_out_not_mul_div = $signed(src_aE) * $signed(src_bE);
-
             `ALU_LUI:       alu_out_not_mul_div = {src_bE[15:0], 16'b0};
             `ALU_DONOTHING: alu_out_not_mul_div = src_aE;
 
@@ -66,8 +61,6 @@ module alu (
     end
 
     //divide
-	
-
 	assign div_sign = (alu_controlE == `ALU_SIGNED_DIV);
 	assign div_vaild = (alu_controlE == `ALU_SIGNED_DIV || alu_controlE == `ALU_UNSIGNED_DIV);
 
@@ -85,7 +78,6 @@ module alu (
 	);
 
     //multiply
-	
 	assign mul_sign = (alu_controlE == `ALU_SIGNED_MULT);
     assign mul_valid = (alu_controlE == `ALU_SIGNED_MULT) | (alu_controlE == `ALU_UNSIGNED_MULT);
 	mul_booth2 MUL(

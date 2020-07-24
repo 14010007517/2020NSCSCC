@@ -92,7 +92,7 @@ module datapath (
     wire [31:0] mem_ctrl_rdataM;
 
     wire hilo_wenE;
-    wire [63:0] hilo_o;
+    wire [63:0] hilo_oM;
     wire hilo_to_regM;
     wire riM;
     wire breakM;
@@ -350,6 +350,7 @@ module datapath (
         .src_aE(src_aE), .src_bE(src_bE),
         .alu_controlE(alu_controlE),
         .sa(saE),
+        .hilo(hilo_oM),
 
         .div_stall(div_stall),
         .alu_outE(alu_outE),
@@ -452,11 +453,11 @@ module datapath (
     hilo_reg hilo0(
         .clk(clk),
         .rst(rst),
-        .instrM(instrM),
-        .we(hilo_wenE), //both write lo and hi
+        .instrM(instrM),    // 用于识别mfhi，mflo，决定输出；
+        .we(hilo_wenE),     // both write lo and hi
         .hilo_i(alu_outE),
 
-        .hilo_o(hilo_o)
+        .hilo_o(hilo_oM)
     );
 
     assign pcErrorM = |(pcM[1:0] ^ 2'b00); 
@@ -497,7 +498,7 @@ module datapath (
         .epc_o(cp0_epcW)
     );
 
-    mux4 #(32) mux4_mem_to_reg(alu_outM, mem_ctrl_rdataM, hilo_o, cp0_data_oW, {(hilo_to_regM | cp0_to_regM), (mem_to_regM | cp0_to_regM)}, resultM);
+    mux4 #(32) mux4_mem_to_reg(alu_outM, mem_ctrl_rdataM, hilo_oM, cp0_data_oW, {(hilo_to_regM | cp0_to_regM), (mem_to_regM | cp0_to_regM)}, resultM);
 
     //branch predict result
     assign succM = ~(pred_takeM ^ actual_takeM);

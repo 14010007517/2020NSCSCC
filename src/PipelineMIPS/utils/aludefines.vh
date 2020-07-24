@@ -26,8 +26,8 @@
 `define ALU_SRA_SA          5'b1_1000
 `define ALU_EQ              5'b1_1001
 `define ALU_NEQ             5'b1_1010
-                            // 5'b1_1011
-                            // 5'b1_1100
+`define ALU_MTHI            5'b1_1011
+`define ALU_MTLO            5'b1_1100
                             // 5'b1_1101
                             // 5'b1_1110
 `define ALU_DONOTHING       5'b1_1111
