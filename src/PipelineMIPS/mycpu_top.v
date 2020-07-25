@@ -133,7 +133,7 @@ module mycpu_top (
     assign data_addr = data_addr_tmp[31:16] == 16'hbfaf ? {3'b0, data_addr_tmp[28:0]} : data_addr_tmp;  //访问外设地址
 
     i_cache i_cache(
-        .clk(~clk), .rst(rst),
+        .clk(clk), .rst(rst),
 
         //datapath
         .inst_en(inst_en),

@@ -249,7 +249,7 @@ module datapath (
         .ce(pc_reg_ceF)
     );
     assign inst_addrF = pcF;
-    assign inst_enF = pc_reg_ceF & ~stallF;
+    assign inst_enF = pc_reg_ceF;
 
     assign instrF_temp = ({32{~(|(pcF[1:0] ^ 2'b00))}} & instrF);
     assign is_in_delayslot_iF = branchD | jumpD;

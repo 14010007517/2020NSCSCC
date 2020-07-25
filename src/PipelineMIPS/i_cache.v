@@ -37,7 +37,7 @@ module i_cache (
     assign read_finish = addr_rcv & (rvalid & rready & rlast);
 
     //DATAPATH
-    assign stall = read_req & ~read_finish;
+    assign stall = inst_en & ~read_finish;
     assign inst_rdata = rdata;
 
     //AXI

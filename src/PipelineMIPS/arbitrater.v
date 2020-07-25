@@ -87,17 +87,14 @@ module arbitrater (
 
     //r
     always @(posedge clk) begin
-        if(rvalid && rid==3'b000 && !rlast) begin
+        if(rvalid && rid==3'b000) begin
             r_sel <= 2'b01;
         end
-        else if(rvalid && rid==3'b001 && !rlast) begin
+        else if(rvalid && rid==3'b001) begin
             r_sel <= 2'b10;
         end
-        else if(rvalid && rlast) begin
+        else if(~rvalid) begin
             r_sel <= 2'b00;
-        end
-        else begin
-            r_sel <= rst ? 2'b00 : r_sel;
         end
     end
 
