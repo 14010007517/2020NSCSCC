@@ -1,6 +1,7 @@
 module hazard (
     input wire [31:0] instrE,//no use
     input wire [31:0] instrM,//no use
+    input wire i_cache_stall,
     input wire d_cache_stall,
     input wire div_stallE,
 
@@ -36,14 +37,14 @@ module hazard (
     //                 );
     // end
     
-    assign stallF = ~flush_exceptionM & (d_cache_stall | div_stallE);
+    assign stallF = ~flush_exceptionM & (d_cache_stall | div_stallE) | i_cache_stall;
     assign stallD = d_cache_stall | div_stallE;
     assign stallE = d_cache_stall | div_stallE;
     assign stallM = d_cache_stall;
     assign stallW = d_cache_stall;              // 不暂停,会减少jr等指令冲突;
 
     assign flushF = 1'b0;
-    assign flushD = flush_exceptionM | flush_pred_failedM | (flush_jump_confilctE & ~d_cache_stall);        //EX: jr(冲突), MEM: lw这种情况时，flush_jump_confilctE会导致暂停在D阶段jr的延迟槽指令消失
+    assign flushD = flush_exceptionM | flush_pred_failedM | (flush_jump_confilctE & ~d_cache_stall) | i_cache_stall;        //EX: jr(冲突), MEM: lw这种情况时，flush_jump_confilctE会导致暂停在D阶段jr的延迟槽指令消失
     assign flushE = flush_exceptionM | (flush_pred_failedM & ~div_stallE); //EX: div, MEM: beq, beq预测失败，要flush D和E，但由于div暂停在E，因此只需要flushD就可以了
     assign flushM = flush_exceptionM | div_stallE;
     assign flushW = 1'b0;

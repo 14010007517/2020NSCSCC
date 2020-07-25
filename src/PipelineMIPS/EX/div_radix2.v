@@ -1,10 +1,11 @@
 //module:       div
 //description:  radix-2 divider
-//version:      1.1
+//version:      1.2
 
 /*
 log:
 1.1: 增加了存储输入的逻辑 (不暂停M,W阶段, 数据前推导致输入发生变化)
+1.2: 增加了flush逻辑，用于发生异常时停止计算除法
 */
 
 module div_radix2(

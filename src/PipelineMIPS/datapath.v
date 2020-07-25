@@ -6,6 +6,7 @@ module datapath (
     output wire [31:0] inst_addrF,
     output wire inst_enF,
     input wire [31:0] instrF,  //注：instr ram时钟取反
+    input wire i_cache_stall,
 
     //data
     output wire mem_enM,                    
@@ -183,6 +184,7 @@ module datapath (
     hazard hazard0(
         .instrE(instrE), .instrM(instrM),
 
+        .i_cache_stall(i_cache_stall),
         .d_cache_stall(d_cache_stall),
         .div_stallE(div_stallE),
 
