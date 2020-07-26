@@ -82,6 +82,9 @@ module arbitrater (
     wire ar_sel;     //0-> d_cache, 1-> i_cache
     reg [1:0] r_sel;      //2'b00-> no, 2'b01-> d_cache, 2'b10-> i_cache
 
+    reg [31:0] i_rdata_r, d_rdata_r;
+
+
     //ar
     assign ar_sel = ~d_arvalid & i_arvalid ? 1'b1 : 1'b0;
 
@@ -89,27 +92,39 @@ module arbitrater (
     always @(posedge clk) begin
         if(rvalid && rid==3'b000) begin
             r_sel <= 2'b01;
+            d_rdata_r <= rdata;
         end
         else if(rvalid && rid==3'b001) begin
             r_sel <= 2'b10;
+            i_rdata_r <= rdata;
         end
         else if(~rvalid) begin
             r_sel <= 2'b00;
         end
     end
 
+    reg data_read_finish, inst_read_finish;
+    always @(posedge clk) begin
+        data_read_finish <= rst                                      ? 1'b0:
+                            rid==3'b000 && rvalid && rready && rlast 
+                            && ~data_read_finish ? 1'b1 : 1'b0;
+        inst_read_finish <= rst                                      ? 1'b0:
+                            rid==3'b001 && rvalid && rready && rlast
+                            && ~inst_read_finish ? 1'b1 : 1'b0;
+    end
+
     //I CACHE
     assign i_arready = arready & ar_sel;
 
-    assign i_rdata = rdata;
+    assign i_rdata = i_rdata_r;
     assign i_rlast = rlast;
-    assign i_rvalid = rvalid && (r_sel==2'b10) ? 1'b1 : 1'b0;
+    assign i_rvalid = rvalid && (r_sel==2'b10) && !inst_read_finish ? 1'b1 : 1'b0;
     //D CACHE
     assign d_arready = arready & ~ar_sel;
 
-    assign d_rdata = rdata;
+    assign d_rdata = d_rdata_r;
     assign d_rlast = rlast;
-    assign d_rvalid = rvalid && (r_sel==2'b01) ? 1'b1 : 1'b0;
+    assign d_rvalid = rvalid && (r_sel==2'b01) && !data_read_finish ? 1'b1 : 1'b0;
     //AXI
     //ar
     assign arid = {2'b0, ar_sel};

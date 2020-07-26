@@ -92,8 +92,8 @@ module mycpu_top (
     wire d_rready           ;
 
     wire [31:0] d_awaddr    ;
-    wire d_awlen            ;
-    wire d_awsize           ;
+    wire [7:0] d_awlen      ;
+    wire [2:0] d_awsize     ;
     wire d_awvalid          ;
     wire d_awready          ;
 
@@ -182,6 +182,7 @@ module mycpu_top (
         .awready         (d_awready),
 
         .wdata           (d_wdata ),
+        .wstrb           (d_wstrb ),
         .wlast           (d_wlast ),
         .wvalid          (d_wvalid),
         .wready          (d_wready),

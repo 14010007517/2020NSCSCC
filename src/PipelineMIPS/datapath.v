@@ -250,6 +250,7 @@ module datapath (
     );
     assign inst_addrF = pcF;
     assign inst_enF = pc_reg_ceF;
+    // assign inst_enF = pc_reg_ceF & ~stallF;
 
     assign instrF_temp = ({32{~(|(pcF[1:0] ^ 2'b00))}} & instrF);
     assign is_in_delayslot_iF = branchD | jumpD;
@@ -270,10 +271,21 @@ module datapath (
     );
 
     //use for debug
-    wire [44:0] ascii;
+    wire [44:0] ascii, ascii2;
     inst_ascii_decoder inst_ascii_decoder0(
         .instr(instrD),
         .ascii(ascii)
+    );
+
+    reg [31:0] instrD_r;
+    always @(posedge clk) begin
+        if(~stallF)
+            instrD_r <= instrF_temp;
+    end
+
+    inst_ascii_decoder inst_ascii_decoder1(
+        .instr(instrD_r),
+        .ascii(ascii2)
     );
 //ID
     assign rsD = instrD[25:21];
