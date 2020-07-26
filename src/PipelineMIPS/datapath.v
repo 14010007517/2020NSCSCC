@@ -137,7 +137,7 @@ module datapath (
 
 //--------------------debug---------------------
     assign debug_wb_pc          = datapath.pcM;
-    assign debug_wb_rf_wen      = {4{reg_write_enM & ~d_cache_stall & flush_exceptionM }};
+    assign debug_wb_rf_wen      = {4{reg_write_enM & ~stallW}};
     assign debug_wb_rf_wnum     = datapath.reg_writeM;
     assign debug_wb_rf_wdata    = datapath.resultM;
 
@@ -182,10 +182,12 @@ module datapath (
     wire flushF, flushD, flushE, flushM, flushW;
     wire [1:0] forward_aE, forward_bE;
     hazard hazard0(
+        .clk(clk), .rst(rst),
         .instrE(instrE), .instrM(instrM),
 
         .i_cache_stall(i_cache_stall),
         .d_cache_stall(d_cache_stall),
+        .pc_reg_ceF(pc_reg_ceF),
         .div_stallE(div_stallE),
 
         .flush_jump_confilctE   (flush_jump_confilctE),
@@ -198,11 +200,17 @@ module datapath (
         .reg_write_enW(reg_write_enW),
         .reg_writeM(reg_writeM),
         .reg_writeW(reg_writeW),
+
         .mem_read_enM(mem_read_enM),
+        .mem_write_enM(mem_write_enM),
+        .addrErrorLwM(addrErrorLwM),
+        .addrErrorSwM(addrErrorSwM),
 
         .stallF(stallF), .stallD(stallD), .stallE(stallE), .stallM(stallM), .stallW(stallW),
         .flushF(flushF), .flushD(flushD), .flushE(flushE), .flushM(flushM), .flushW(flushW),
-        .forward_aE(forward_aE), .forward_bE(forward_bE)
+        .forward_aE(forward_aE), .forward_bE(forward_bE),
+        .inst_enF(inst_enF),
+        .mem_enM(mem_enM)
     );
 
 //IF
@@ -248,9 +256,8 @@ module datapath (
         .pc(pcF),
         .ce(pc_reg_ceF)
     );
+
     assign inst_addrF = pcF;
-    assign inst_enF = pc_reg_ceF;
-    // assign inst_enF = pc_reg_ceF & ~stallF;
 
     assign instrF_temp = ({32{~(|(pcF[1:0] ^ 2'b00))}} & instrF);
     assign is_in_delayslot_iF = branchD | jumpD;
@@ -271,21 +278,10 @@ module datapath (
     );
 
     //use for debug
-    wire [44:0] ascii, ascii2;
+    wire [44:0] ascii;
     inst_ascii_decoder inst_ascii_decoder0(
         .instr(instrD),
         .ascii(ascii)
-    );
-
-    reg [31:0] instrD_r;
-    always @(posedge clk) begin
-        if(~stallF)
-            instrD_r <= instrF_temp;
-    end
-
-    inst_ascii_decoder inst_ascii_decoder1(
-        .instr(instrD_r),
-        .ascii(ascii2)
     );
 //ID
     assign rsD = instrD[25:21];
@@ -458,7 +454,6 @@ module datapath (
     );
 //MEM
     assign mem_addrM = alu_outM;
-    assign mem_enM = (mem_read_enM | mem_write_enM) & (~addrErrorSwM | ~addrErrorLwM); //读或者写
 
     // 是否需要控制 mem_en
     mem_ctrl mem_ctrl0(

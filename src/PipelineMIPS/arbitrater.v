@@ -79,67 +79,66 @@ module arbitrater (
     input bready
 );
 
-    wire ar_sel;     //0-> d_cache, 1-> i_cache
-    reg [1:0] r_sel;      //2'b00-> no, 2'b01-> d_cache, 2'b10-> i_cache
+    wire ar_sel;     //0-> i_cache, 1-> d_cache
+    reg [1:0] r_sel;      //2'b00-> no, 2'b01-> i_cache, 2'b10-> d_cache
 
     reg [31:0] i_rdata_r, d_rdata_r;
 
-
     //ar
-    assign ar_sel = ~d_arvalid & i_arvalid ? 1'b1 : 1'b0;
+    assign ar_sel = ~i_arvalid & d_arvalid ? 1'b1 : 1'b0;
 
     //r
     always @(posedge clk) begin
         if(rvalid && rid==3'b000) begin
             r_sel <= 2'b01;
-            d_rdata_r <= rdata;
+            i_rdata_r <= rdata;
         end
         else if(rvalid && rid==3'b001) begin
             r_sel <= 2'b10;
-            i_rdata_r <= rdata;
+            d_rdata_r <= rdata;
         end
         else if(~rvalid) begin
             r_sel <= 2'b00;
+            i_rdata_r <= rst ? 32'b0 : i_rdata_r;
+            d_rdata_r <= rst ? 32'b0 : d_rdata_r;
         end
     end
 
     reg data_read_finish, inst_read_finish;
     always @(posedge clk) begin
-        data_read_finish <= rst                                      ? 1'b0:
-                            rid==3'b000 && rvalid && rready && rlast 
-                            && ~data_read_finish ? 1'b1 : 1'b0;
         inst_read_finish <= rst                                      ? 1'b0:
-                            rid==3'b001 && rvalid && rready && rlast
-                            && ~inst_read_finish ? 1'b1 : 1'b0;
+                            rid==3'b000 && rvalid && rready && rlast ? 1'b1 : 1'b0;
+        data_read_finish <= rst                                      ? 1'b0:
+                            rid==3'b001 && rvalid && rready && rlast ? 1'b1 : 1'b0;
     end
 
     //I CACHE
-    assign i_arready = arready & ar_sel;
+    assign i_arready = arready & ~ar_sel;
 
     assign i_rdata = i_rdata_r;
-    assign i_rlast = rlast;
-    assign i_rvalid = rvalid && (r_sel==2'b10) && !inst_read_finish ? 1'b1 : 1'b0;
+    assign i_rlast = rlast && (r_sel==2'b01) && !inst_read_finish ? 1'b1 : 1'b0;
+    assign i_rvalid = rvalid && (r_sel==2'b01) && !inst_read_finish ? 1'b1 : 1'b0;
     //D CACHE
-    assign d_arready = arready & ~ar_sel;
+    assign d_arready = arready & ar_sel;
 
     assign d_rdata = d_rdata_r;
-    assign d_rlast = rlast;
-    assign d_rvalid = rvalid && (r_sel==2'b01) && !data_read_finish ? 1'b1 : 1'b0;
+    assign d_rlast = rlast && (r_sel==2'b10) && !data_read_finish ? 1'b1 : 1'b0;
+    assign d_rvalid = rvalid && (r_sel==2'b10) && !data_read_finish ? 1'b1 : 1'b0;
     //AXI
     //ar
     assign arid = {2'b0, ar_sel};
-    assign araddr = ar_sel ? i_araddr : d_araddr;
-    assign arlen = ar_sel ? i_arlen : d_arlen;
+    assign araddr = ar_sel ? d_araddr : i_araddr;
+    assign arlen = ar_sel ? d_arlen : i_arlen;
     assign arsize  = 2'b10;         //读一个字
     assign arburst = 2'b10;         //Incrementing burst
     assign arlock  = 2'd0;
     assign arcache = 4'd0;
     assign arprot  = 3'd0;
-    assign arvalid = ar_sel ? i_arvalid : d_arvalid;
+    assign arvalid = ar_sel ? d_arvalid : i_arvalid;
                         //         
     //r
-    assign rready = r_sel==2'b01 ? d_rready :
-                    r_sel==2'b10 ? i_rready :
+    assign rready = r_sel==2'b01 ? i_rready :
+                    r_sel==2'b10 ? d_rready :
                     1'b0;
                         //            
 

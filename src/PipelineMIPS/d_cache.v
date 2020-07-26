@@ -73,7 +73,7 @@ module d_cache (
     assign write_finish = waddr_rcv & wdata_rcv & (bvalid & bready);
 
     //DATAPATH
-    assign stall = (read &~read_finish) | (write & ~write_finish);
+    assign stall = (read_req &~read_finish) | (write_req & ~write_finish);
 
     assign data_rdata = rdata;
 
