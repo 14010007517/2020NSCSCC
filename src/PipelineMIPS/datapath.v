@@ -49,6 +49,7 @@ module datapath (
     wire is_in_delayslot_iD;
     wire [4:0] alu_controlD;
     wire [4:0] branch_judge_controlD;
+    wire en_stall;
 //EX
     wire [31:0] pcE;
     wire [31:0] rd1E, rd2E, mem_wdataE;
@@ -187,7 +188,6 @@ module datapath (
 
         .i_cache_stall(i_cache_stall),
         .d_cache_stall(d_cache_stall),
-        .pc_reg_ceF(pc_reg_ceF),
         .div_stallE(div_stallE),
 
         .flush_jump_confilctE   (flush_jump_confilctE),
@@ -201,16 +201,10 @@ module datapath (
         .reg_writeM(reg_writeM),
         .reg_writeW(reg_writeW),
 
-        .mem_read_enM(mem_read_enM),
-        .mem_write_enM(mem_write_enM),
-        .addrErrorLwM(addrErrorLwM),
-        .addrErrorSwM(addrErrorSwM),
-
         .stallF(stallF), .stallD(stallD), .stallE(stallE), .stallM(stallM), .stallW(stallW),
         .flushF(flushF), .flushD(flushD), .flushE(flushE), .flushM(flushM), .flushW(flushW),
-        .forward_aE(forward_aE), .forward_bE(forward_bE),
-        .inst_enF(inst_enF),
-        .mem_enM(mem_enM)
+        .en_stall(en_stall),
+        .forward_aE(forward_aE), .forward_bE(forward_bE)
     );
 
 //IF
@@ -258,6 +252,7 @@ module datapath (
     );
 
     assign inst_addrF = pcF;
+    assign inst_enF = pc_reg_ceF & ~en_stall;
 
     assign instrF_temp = ({32{~(|(pcF[1:0] ^ 2'b00))}} & instrF);
     assign is_in_delayslot_iF = branchD | jumpD;
@@ -370,6 +365,7 @@ module datapath (
         .clk(clk),
         .rst(rst),
         .flushE(flushE),
+        .en_stall(en_stall),
         .src_aE(src_aE), .src_bE(src_bE),
         .alu_controlE(alu_controlE),
         .sa(saE),
@@ -454,6 +450,7 @@ module datapath (
     );
 //MEM
     assign mem_addrM = alu_outM;
+    assign mem_enM = (mem_read_enM | mem_write_enM) & (~addrErrorSwM | ~addrErrorLwM) & ~en_stall;
 
     // 是否需要控制 mem_en
     mem_ctrl mem_ctrl0(

@@ -8,7 +8,7 @@ module hilo_reg(
                 input wire [63:0] hilo_i,
                 output wire [31:0] hilo_o
                 );
-   wire [63:0] hilo_ii;
+   // wire [63:0] hilo_ii;
    reg [63:0] hilo;
    always @(posedge clk) begin
       if(rst)

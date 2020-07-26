@@ -223,6 +223,7 @@ module mycpu_top (
         .d_awready         (d_awready),
 
         .d_wdata           (d_wdata ),
+        .d_wstrb           (d_wstrb ),
         .d_wlast           (d_wlast ),
         .d_wvalid          (d_wvalid),
         .d_wready          (d_wready),
