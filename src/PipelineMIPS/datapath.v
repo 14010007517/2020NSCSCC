@@ -26,7 +26,7 @@ module datapath (
 
 //变量声明
 //IF
-    wire [31:0] pc_plus4F;
+    reg [31:0] pc_plus4F;
     wire pc_reg_ceF;
     wire [2:0] pc_sel;
     wire [31:0] instrF_temp;
@@ -210,7 +210,10 @@ module datapath (
     );
 
 //IF
-    assign pc_plus4F = pcF + 4;
+    always @(posedge clk) begin
+        pc_plus4F = rst ? 32'hbfc0_0000 : 
+                    pcF + 4;
+    end
 
     pc_ctrl pc_ctrl0(
         //branch

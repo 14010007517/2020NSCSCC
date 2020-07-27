@@ -18,8 +18,8 @@ module pc_reg #(parameter WIDTH=32)(
 
     always @(posedge clk) begin
         if(!ce) begin
-            pc <= 32'hbfbffffc;
-            // pc <= 32'hbfc00000;
+            // pc <= 32'hbfbffffc;
+            pc <= 32'hbfc00000;
             // pc <= 32'h0000_0000;
         end
         else if(~stallF) begin

@@ -122,12 +122,15 @@ module i_cache (
 
     //ram
     wire [9:0] next_index;
+    wire [9:0] addra;
     assign next_index = pc_next[INDEX_WIDTH+OFFSET_WIDTH-1 : OFFSET_WIDTH];
+    assign addra = state==Refill ? index : next_index;
+
     i_tag_ram i_tag_ram_way0 (
         .clka(clk),    // input wire clka
         .ena(en_way0),      // input wire ena
         .wea(wen_way0),      // input wire [0 : 0] wea
-        .addra(next_index),  // input wire [9 : 0] addra
+        .addra(addra),  // input wire [9 : 0] addra
         .dina({tag, 1'b1}),    // input wire [20 : 0] dina
         .douta(tag_way0)  // output wire [20 : 0] douta
     );
@@ -136,7 +139,7 @@ module i_cache (
         .clka(clk),    // input wire clka
         .ena(en_way1),      // input wire ena
         .wea(wen_way1),      // input wire [0 : 0] wea
-        .addra(next_index),  // input wire [9 : 0] addra
+        .addra(addra),  // input wire [9 : 0] addra
         .dina({tag, 1'b1}),    // input wire [20 : 0] dina
         .douta(tag_way1)  // output wire [20 : 0] douta
     );
@@ -145,7 +148,7 @@ module i_cache (
         .clka(clk),    // input wire clka
         .ena(en_way0),      // input wire ena
         .wea(wen_way0),      // input wire [0 : 0] wea
-        .addra(next_index),  // input wire [9 : 0] addra
+        .addra(addra),  // input wire [9 : 0] addra
         .dina(rdata),    // input wire [31 : 0] dina
         .douta(data_bank0_way0)  // output wire [31 : 0] douta
     );
@@ -154,7 +157,7 @@ module i_cache (
         .clka(clk),    // input wire clka
         .ena(en_way1),      // input wire ena
         .wea(wen_way1),      // input wire [0 : 0] wea
-        .addra(next_index),  // input wire [9 : 0] addra
+        .addra(addra),  // input wire [9 : 0] addra
         .dina(rdata),    // input wire [31 : 0] dina
         .douta(data_bank0_way1)  // output wire [31 : 0] douta
     );
