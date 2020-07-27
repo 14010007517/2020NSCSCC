@@ -57,7 +57,8 @@ module mycpu_top (
 
     //datapath - cache
     wire inst_en            ;
-    wire [31:0] inst_addr   ;
+    wire [31:0] pcF         ;
+    wire [31:0] pc_next     ;
     wire [31:0] inst_rdata  ; 
     wire i_cache_stall      ;
 
@@ -111,7 +112,8 @@ module mycpu_top (
         .ext_int(ext_int),
 
         //inst
-        .inst_addrF(inst_addr),
+        .pcF(pcF),
+        .pc_next(pc_next),
         .inst_enF(inst_en),
         .instrF(inst_rdata),
         .i_cache_stall(i_cache_stall),
@@ -137,7 +139,8 @@ module mycpu_top (
 
         //datapath
         .inst_en(inst_en),
-        .inst_addr(inst_addr),
+        .pc_next(pc_next),
+        .pcF(pcF),
         .inst_rdata(inst_rdata),
         .stall(i_cache_stall),
 

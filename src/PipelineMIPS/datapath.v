@@ -3,7 +3,8 @@ module datapath (
     input wire [5:0] ext_int,
     
     //inst
-    output wire [31:0] inst_addrF,
+    output wire [31:0] pcF,
+    output wire [31:0] pc_next,
     output wire inst_enF,
     input wire [31:0] instrF,  //注：instr ram时钟取反
     input wire i_cache_stall,
@@ -25,7 +26,7 @@ module datapath (
 
 //变量声明
 //IF
-    wire [31:0] pcF, pc_next, pc_plus4F;
+    wire [31:0] pc_plus4F;
     wire pc_reg_ceF;
     wire [2:0] pc_sel;
     wire [31:0] instrF_temp;
@@ -252,7 +253,6 @@ module datapath (
         .ce(pc_reg_ceF)
     );
 
-    assign inst_addrF = pcF;
     assign inst_enF = pc_reg_ceF & ~flush_exceptionM & ~en_stall;
 
     assign instrF_temp = ({32{~(|(pcF[1:0] ^ 2'b00))}} & instrF);
