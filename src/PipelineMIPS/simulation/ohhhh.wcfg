@@ -11,9 +11,9 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="5362213333fs"></ZoomStartTime>
-      <ZoomEndTime time="5362704334fs"></ZoomEndTime>
-      <Cursor1Time time="5362622500fs"></Cursor1Time>
+      <ZoomStartTime time="1947718500fs"></ZoomStartTime>
+      <ZoomEndTime time="1947893001fs"></ZoomEndTime>
+      <Cursor1Time time="1947940500fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="265"></NameColumnWidth>
@@ -21,11 +21,9 @@
    </column_width_setting>
    <WVObjectSize size="9" />
    <wave_markers>
-      <marker time="297848167" label="" />
-      <marker time="2799725500" label="" />
-      <marker time="2800976600" label="" />
-      <marker time="1179139500" label="" />
-      <marker time="1179755500" label="" />
+      <marker time="1946554500" label="" />
+      <marker time="912543500" label="" />
+      <marker time="1947940500" label="" />
    </wave_markers>
    <wvobject fp_name="/tb_top/resetn" type="logic">
       <obj_property name="ElementShortName">resetn</obj_property>
@@ -450,7 +448,6 @@
    <wvobject fp_name="group222" type="group">
       <obj_property name="label">EXE</obj_property>
       <obj_property name="DisplayName">label</obj_property>
-      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="group107" type="group">
          <obj_property name="label">ALU</obj_property>
          <obj_property name="DisplayName">label</obj_property>
@@ -953,6 +950,7 @@
       <wvobject fp_name="group191" type="group">
          <obj_property name="label">Exception</obj_property>
          <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="isExpanded"></obj_property>
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/exception0/rst" type="logic">
             <obj_property name="ElementShortName">rst</obj_property>
             <obj_property name="ObjectShortName">rst</obj_property>
@@ -1041,6 +1039,7 @@
       <wvobject fp_name="group221" type="group">
          <obj_property name="label">CP0</obj_property>
          <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="isExpanded"></obj_property>
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/cp0/clk" type="logic">
             <obj_property name="ElementShortName">clk</obj_property>
             <obj_property name="ObjectShortName">clk</obj_property>
@@ -1121,41 +1120,45 @@
             <obj_property name="ElementShortName">badvaddr_o[31:0]</obj_property>
             <obj_property name="ObjectShortName">badvaddr_o[31:0]</obj_property>
          </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/cp0/timer_int_o" type="logic">
-            <obj_property name="ElementShortName">timer_int_o</obj_property>
-            <obj_property name="ObjectShortName">timer_int_o</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/cp0/count" type="logic">
-            <obj_property name="ElementShortName">count</obj_property>
-            <obj_property name="ObjectShortName">count</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/cp0/compare" type="logic">
-            <obj_property name="ElementShortName">compare</obj_property>
-            <obj_property name="ObjectShortName">compare</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/cp0/status" type="logic">
-            <obj_property name="ElementShortName">status</obj_property>
-            <obj_property name="ObjectShortName">status</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/cp0/cause" type="logic">
-            <obj_property name="ElementShortName">cause</obj_property>
-            <obj_property name="ObjectShortName">cause</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/cp0/epc" type="logic">
-            <obj_property name="ElementShortName">epc</obj_property>
-            <obj_property name="ObjectShortName">epc</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/cp0/prid" type="logic">
-            <obj_property name="ElementShortName">prid</obj_property>
-            <obj_property name="ObjectShortName">prid</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/cp0/config1" type="logic">
-            <obj_property name="ElementShortName">config1</obj_property>
-            <obj_property name="ObjectShortName">config1</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/cp0/badvaddr" type="logic">
-            <obj_property name="ElementShortName">badvaddr</obj_property>
-            <obj_property name="ObjectShortName">badvaddr</obj_property>
+         <wvobject fp_name="group1500" type="group">
+            <obj_property name="label">no use</obj_property>
+            <obj_property name="DisplayName">label</obj_property>
+            <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/cp0/timer_int_o" type="logic">
+               <obj_property name="ElementShortName">timer_int_o</obj_property>
+               <obj_property name="ObjectShortName">timer_int_o</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/cp0/count" type="logic">
+               <obj_property name="ElementShortName">count</obj_property>
+               <obj_property name="ObjectShortName">count</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/cp0/compare" type="logic">
+               <obj_property name="ElementShortName">compare</obj_property>
+               <obj_property name="ObjectShortName">compare</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/cp0/status" type="logic">
+               <obj_property name="ElementShortName">status</obj_property>
+               <obj_property name="ObjectShortName">status</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/cp0/cause" type="logic">
+               <obj_property name="ElementShortName">cause</obj_property>
+               <obj_property name="ObjectShortName">cause</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/cp0/epc" type="logic">
+               <obj_property name="ElementShortName">epc</obj_property>
+               <obj_property name="ObjectShortName">epc</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/cp0/prid" type="logic">
+               <obj_property name="ElementShortName">prid</obj_property>
+               <obj_property name="ObjectShortName">prid</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/cp0/config1" type="logic">
+               <obj_property name="ElementShortName">config1</obj_property>
+               <obj_property name="ObjectShortName">config1</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/cp0/badvaddr" type="logic">
+               <obj_property name="ElementShortName">badvaddr</obj_property>
+               <obj_property name="ObjectShortName">badvaddr</obj_property>
+            </wvobject>
          </wvobject>
       </wvobject>
       <wvobject fp_name="group884" type="group">
@@ -1303,6 +1306,7 @@
       <wvobject fp_name="group869" type="group">
          <obj_property name="label">Flush</obj_property>
          <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="isExpanded"></obj_property>
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hazard0/flushF" type="logic">
             <obj_property name="ElementShortName">flushF</obj_property>
             <obj_property name="ObjectShortName">flushF</obj_property>
