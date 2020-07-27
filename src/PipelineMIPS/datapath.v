@@ -100,7 +100,8 @@ module datapath (
     wire [31:0] mem_ctrl_rdataM;
 
     wire hilo_wenE;
-    wire [63:0] hilo_oM;
+    wire [31:0] hilo_oM;
+    wire [63:0] hiloM;
     wire hilo_to_regM;
     wire riM;
     wire breakM;
@@ -252,7 +253,7 @@ module datapath (
     );
 
     assign inst_addrF = pcF;
-    assign inst_enF = pc_reg_ceF & ~en_stall;
+    assign inst_enF = pc_reg_ceF & ~flush_exceptionM & ~en_stall;
 
     assign instrF_temp = ({32{~(|(pcF[1:0] ^ 2'b00))}} & instrF);
     assign is_in_delayslot_iF = branchD | jumpD;
@@ -369,7 +370,7 @@ module datapath (
         .src_aE(src_aE), .src_bE(src_bE),
         .alu_controlE(alu_controlE),
         .sa(saE),
-        .hilo(hilo_oM),
+        .hilo(hiloM),
 
         .div_stallE(div_stallE),
         .alu_outE(alu_outE),
@@ -450,7 +451,7 @@ module datapath (
     );
 //MEM
     assign mem_addrM = alu_outM;
-    assign mem_enM = (mem_read_enM | mem_write_enM) & (~addrErrorSwM | ~addrErrorLwM) & ~en_stall;
+    assign mem_enM = (mem_read_enM | mem_write_enM) & (~addrErrorSwM & ~addrErrorLwM) & ~en_stall;
 
     // 是否需要控制 mem_en
     mem_ctrl mem_ctrl0(
@@ -472,10 +473,11 @@ module datapath (
         .clk(clk),
         .rst(rst),
         .instrM(instrM),    // 用于识别mfhi，mflo，决定输出；
-        .we(hilo_wenE & ~flush_exceptionM),     // both write lo and hi
+        .we(hilo_wenE & ~flush_exceptionM & ~stallM),     // both write lo and hi
         .hilo_i(alu_outE),
 
-        .hilo_o(hilo_oM)
+        .hilo_o(hilo_oM),   //传给resultM多选
+        .hilo(hiloM)        //传给alu进行拼接
     );
 
     assign pcErrorM = |(pcM[1:0] ^ 2'b00); 
@@ -500,7 +502,7 @@ module datapath (
         .rst(rst),
         
         .en(flush_exceptionM),
-        .we_i(cp0_wenM),
+        .we_i(cp0_wenM & ~stallW),
         .waddr_i(rdM),
         .data_i(rt_valueM),
         

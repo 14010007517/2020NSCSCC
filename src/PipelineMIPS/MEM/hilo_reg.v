@@ -6,10 +6,10 @@ module hilo_reg(
                 input wire [31:0] instrM,
 
                 input wire [63:0] hilo_i,
-                output wire [31:0] hilo_o
+                output wire [31:0] hilo_o,
+                output reg [63:0] hilo
                 );
    // wire [63:0] hilo_ii;
-   reg [63:0] hilo;
    always @(posedge clk) begin
       if(rst)
          hilo <= 0;

@@ -11,19 +11,21 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="28716810583fs"></ZoomStartTime>
-      <ZoomEndTime time="28717149584fs"></ZoomEndTime>
-      <Cursor1Time time="28717208500fs"></Cursor1Time>
+      <ZoomStartTime time="5362213333fs"></ZoomStartTime>
+      <ZoomEndTime time="5362704334fs"></ZoomEndTime>
+      <Cursor1Time time="5362622500fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="265"></NameColumnWidth>
-      <ValueColumnWidth column_width="105"></ValueColumnWidth>
+      <ValueColumnWidth column_width="78"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="9" />
    <wave_markers>
       <marker time="297848167" label="" />
       <marker time="2799725500" label="" />
       <marker time="2800976600" label="" />
+      <marker time="1179139500" label="" />
+      <marker time="1179755500" label="" />
    </wave_markers>
    <wvobject fp_name="/tb_top/resetn" type="logic">
       <obj_property name="ElementShortName">resetn</obj_property>
@@ -84,6 +86,7 @@
    <wvobject fp_name="group55" type="group">
       <obj_property name="label">IF</obj_property>
       <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/clk" type="logic">
          <obj_property name="ElementShortName">clk</obj_property>
          <obj_property name="ObjectShortName">clk</obj_property>
@@ -447,9 +450,11 @@
    <wvobject fp_name="group222" type="group">
       <obj_property name="label">EXE</obj_property>
       <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="group107" type="group">
          <obj_property name="label">ALU</obj_property>
          <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="isExpanded"></obj_property>
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/alu0/clk" type="logic">
             <obj_property name="ElementShortName">clk</obj_property>
             <obj_property name="ObjectShortName">clk</obj_property>
@@ -541,6 +546,12 @@
          <wvobject fp_name="group971" type="group">
             <obj_property name="label">no use</obj_property>
             <obj_property name="DisplayName">label</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/clk" type="logic">
+            <obj_property name="DisplayName">label</obj_property>
+            <obj_property name="ElementShortName">clk</obj_property>
+            <obj_property name="ObjectShortName">clk</obj_property>
+            <obj_property name="label">data_path_clk</obj_property>
          </wvobject>
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/alu0/DIV/clk" type="logic">
             <obj_property name="ElementShortName">clk</obj_property>
@@ -674,7 +685,6 @@
       <wvobject fp_name="group124" type="group">
          <obj_property name="label">ForwardAE</obj_property>
          <obj_property name="DisplayName">label</obj_property>
-         <obj_property name="isExpanded"></obj_property>
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/mux4_forward_aE/x0" type="array">
             <obj_property name="ElementShortName">x0[31:0]</obj_property>
             <obj_property name="ObjectShortName">x0[31:0]</obj_property>
@@ -736,11 +746,55 @@
             <obj_property name="ObjectShortName">WIDTH[31:0]</obj_property>
          </wvobject>
       </wvobject>
+      <wvobject fp_name="group1499" type="group">
+         <obj_property name="label">Hilo</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="isExpanded"></obj_property>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hilo0/clk" type="logic">
+            <obj_property name="ElementShortName">clk</obj_property>
+            <obj_property name="ObjectShortName">clk</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hilo0/rst" type="logic">
+            <obj_property name="ElementShortName">rst</obj_property>
+            <obj_property name="ObjectShortName">rst</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hilo0/we" type="logic">
+            <obj_property name="ElementShortName">we</obj_property>
+            <obj_property name="ObjectShortName">we</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hilo0/instrM" type="array">
+            <obj_property name="ElementShortName">instrM[31:0]</obj_property>
+            <obj_property name="ObjectShortName">instrM[31:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hilo0/hilo_i" type="array">
+            <obj_property name="DisplayName">label</obj_property>
+            <obj_property name="ElementShortName">hilo_i[63:0]</obj_property>
+            <obj_property name="ObjectShortName">hilo_i[63:0]</obj_property>
+            <obj_property name="label">hilo_iE[63:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hilo0/hilo" type="array">
+            <obj_property name="ElementShortName">hilo[63:0]</obj_property>
+            <obj_property name="ObjectShortName">hilo[63:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hilo0/mfhi" type="logic">
+            <obj_property name="ElementShortName">mfhi</obj_property>
+            <obj_property name="ObjectShortName">mfhi</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hilo0/mflo" type="logic">
+            <obj_property name="ElementShortName">mflo</obj_property>
+            <obj_property name="ObjectShortName">mflo</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hilo0/hilo_o" type="array">
+            <obj_property name="DisplayName">label</obj_property>
+            <obj_property name="ElementShortName">hilo_o[31:0]</obj_property>
+            <obj_property name="ObjectShortName">hilo_o[31:0]</obj_property>
+            <obj_property name="label">hilo_oM[31:0]</obj_property>
+         </wvobject>
+      </wvobject>
    </wvobject>
    <wvobject fp_name="group223" type="group">
       <obj_property name="label">MEM</obj_property>
       <obj_property name="DisplayName">label</obj_property>
-      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="group158" type="group">
          <obj_property name="label">MemCtrl</obj_property>
          <obj_property name="DisplayName">label</obj_property>
@@ -882,10 +936,6 @@
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hilo0/hilo_o" type="array">
             <obj_property name="ElementShortName">hilo_o[31:0]</obj_property>
             <obj_property name="ObjectShortName">hilo_o[31:0]</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hilo0/hilo_ii" type="array">
-            <obj_property name="ElementShortName">hilo_ii[63:0]</obj_property>
-            <obj_property name="ObjectShortName">hilo_ii[63:0]</obj_property>
          </wvobject>
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hilo0/hilo" type="array">
             <obj_property name="ElementShortName">hilo[63:0]</obj_property>
@@ -1144,6 +1194,7 @@
    <wvobject fp_name="group276" type="group">
       <obj_property name="label">Hazard</obj_property>
       <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="group893" type="group">
          <obj_property name="label">no use</obj_property>
          <obj_property name="DisplayName">label</obj_property>
@@ -1179,14 +1230,15 @@
             <obj_property name="ElementShortName">reg_writeW[4:0]</obj_property>
             <obj_property name="ObjectShortName">reg_writeW[4:0]</obj_property>
          </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hazard0/mem_read_enM" type="logic">
-            <obj_property name="ElementShortName">mem_read_enM</obj_property>
-            <obj_property name="ObjectShortName">mem_read_enM</obj_property>
-         </wvobject>
       </wvobject>
       <wvobject fp_name="group868" type="group">
          <obj_property name="label">Stall</obj_property>
          <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="isExpanded"></obj_property>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hazard0/pipe_stall" type="logic">
+            <obj_property name="ElementShortName">pipe_stall</obj_property>
+            <obj_property name="ObjectShortName">pipe_stall</obj_property>
+         </wvobject>
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hazard0/stallF" type="logic">
             <obj_property name="ElementShortName">stallF</obj_property>
             <obj_property name="ObjectShortName">stallF</obj_property>
@@ -1207,6 +1259,10 @@
             <obj_property name="ElementShortName">stallW</obj_property>
             <obj_property name="ObjectShortName">stallW</obj_property>
          </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hazard0/en_stall" type="logic">
+            <obj_property name="ElementShortName">en_stall</obj_property>
+            <obj_property name="ObjectShortName">en_stall</obj_property>
+         </wvobject>
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hazard0/i_cache_stall" type="logic">
             <obj_property name="ElementShortName">i_cache_stall</obj_property>
             <obj_property name="ObjectShortName">i_cache_stall</obj_property>
@@ -1219,17 +1275,17 @@
             <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
             <obj_property name="UseCustomSignalColor">true</obj_property>
          </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hazard0/cache_stall" type="logic">
-            <obj_property name="ElementShortName">cache_stall</obj_property>
-            <obj_property name="ObjectShortName">cache_stall</obj_property>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hazard0/div_stallE" type="logic">
+            <obj_property name="ElementShortName">div_stallE</obj_property>
+            <obj_property name="ObjectShortName">div_stallE</obj_property>
          </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hazard0/cache_stall_r" type="logic">
-            <obj_property name="ElementShortName">cache_stall_r</obj_property>
-            <obj_property name="ObjectShortName">cache_stall_r</obj_property>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hazard0/longest_stall" type="logic">
+            <obj_property name="ElementShortName">longest_stall</obj_property>
+            <obj_property name="ObjectShortName">longest_stall</obj_property>
          </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hazard0/stall" type="logic">
-            <obj_property name="ElementShortName">stall</obj_property>
-            <obj_property name="ObjectShortName">stall</obj_property>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hazard0/longest_stall_r" type="logic">
+            <obj_property name="ElementShortName">longest_stall_r</obj_property>
+            <obj_property name="ObjectShortName">longest_stall_r</obj_property>
          </wvobject>
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/i_cache/inst_en" type="logic">
             <obj_property name="ElementShortName">inst_en</obj_property>
@@ -1243,15 +1299,10 @@
             <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
             <obj_property name="UseCustomSignalColor">true</obj_property>
          </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hazard0/div_stallE" type="logic">
-            <obj_property name="ElementShortName">div_stallE</obj_property>
-            <obj_property name="ObjectShortName">div_stallE</obj_property>
-         </wvobject>
       </wvobject>
       <wvobject fp_name="group869" type="group">
          <obj_property name="label">Flush</obj_property>
          <obj_property name="DisplayName">label</obj_property>
-         <obj_property name="isExpanded"></obj_property>
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hazard0/flushF" type="logic">
             <obj_property name="ElementShortName">flushF</obj_property>
             <obj_property name="ObjectShortName">flushF</obj_property>

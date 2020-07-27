@@ -26,7 +26,7 @@ module alu (
                     | ({64{mul_valid}} & alu_out_mul)
                     | ({64{~mul_valid & ~div_vaild}} & {32'b0, alu_out_not_mul_div})
                     | ({64{(alu_controlE == `ALU_MTHI)}} & {src_aE, hilo[31:0]})
-                    | ({64{(alu_controlE == `ALU_MTLO)}} & {hilo[63:32], src_aE});
+                    | ({64{(alu_controlE == `ALU_MTLO)}} & {hilo[31:0], src_aE});
 
     assign overflowE = (alu_controlE==`ALU_ADD || alu_controlE==`ALU_SUB) & (carry_bit ^ alu_out_not_mul_div[31]);
 
