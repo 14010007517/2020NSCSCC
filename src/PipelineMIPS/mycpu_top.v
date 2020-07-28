@@ -61,6 +61,8 @@ module mycpu_top (
     wire [31:0] pc_next     ;
     wire [31:0] inst_rdata  ; 
     wire i_cache_stall      ;
+    wire i_cache_hit        ;
+    wire stallF             ;
 
     wire data_en            ;
     wire [31:0] data_addr   ;
@@ -117,6 +119,8 @@ module mycpu_top (
         .inst_enF(inst_en),
         .instrF(inst_rdata),
         .i_cache_stall(i_cache_stall),
+        .i_cache_hit(i_cache_hit),
+        .stallF(stallF),
 
         //data
         .mem_enM(data_en),              
@@ -143,6 +147,8 @@ module mycpu_top (
         .pcF(pcF),
         .inst_rdata(inst_rdata),
         .stall(i_cache_stall),
+        .hit(i_cache_hit),
+        .stallF(stallF),
 
         //arbitrater
         .araddr          (i_araddr ),

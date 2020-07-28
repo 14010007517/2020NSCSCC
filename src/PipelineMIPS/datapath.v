@@ -8,6 +8,8 @@ module datapath (
     output wire inst_enF,
     input wire [31:0] instrF,  //注：instr ram时钟取反
     input wire i_cache_stall,
+    input wire i_cache_hit,
+    output wire stallF,
 
     //data
     output wire mem_enM,                    
@@ -26,7 +28,7 @@ module datapath (
 
 //变量声明
 //IF
-    reg [31:0] pc_plus4F;
+    wire [31:0] pc_plus4F;
     wire pc_reg_ceF;
     wire [2:0] pc_sel;
     wire [31:0] instrF_temp;
@@ -189,6 +191,7 @@ module datapath (
         .instrE(instrE), .instrM(instrM),
 
         .i_cache_stall(i_cache_stall),
+        .i_cache_hit(i_cache_hit),
         .d_cache_stall(d_cache_stall),
         .div_stallE(div_stallE),
 
@@ -210,10 +213,7 @@ module datapath (
     );
 
 //IF
-    always @(posedge clk) begin
-        pc_plus4F = rst ? 32'hbfc0_0000 : 
-                    pcF + 4;
-    end
+    assign pc_plus4F = pcF + 4;
 
     pc_ctrl pc_ctrl0(
         //branch

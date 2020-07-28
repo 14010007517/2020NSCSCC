@@ -3,6 +3,7 @@ module hazard (
     input wire [31:0] instrE,//no use
     input wire [31:0] instrM,//no use
     input wire i_cache_stall,
+    input wire i_cache_hit,
     input wire d_cache_stall,
     input wire div_stallE,
 
@@ -49,7 +50,7 @@ module hazard (
 
     assign en_stall = (longest_stall | longest_stall_r);
     
-    assign pipe_stall = ~en_stall | longest_stall;
+    assign pipe_stall = (~en_stall | longest_stall) & ~i_cache_hit;
 
     assign stallF = ~flush_exceptionM & pipe_stall;
     assign stallD = pipe_stall;

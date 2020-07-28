@@ -6,6 +6,8 @@ module i_cache (
     input wire [31:0] pcF,
     output wire [31:0] inst_rdata,
     output wire stall,
+    output wire hit,
+    input wire stallF,
 
     //arbitrater
     output wire [31:0] araddr,
@@ -69,16 +71,17 @@ module i_cache (
 
     //FSM
     reg [1:0] state;
-    parameter IDLE = 2'b00, LoadMemory = 2'b01, Refill = 2'b11;
+    parameter IDLE = 2'b00, LoadMemory = 2'b01, Refill = 2'b11, HitJudge = 2'b10;
     always @(posedge clk) begin
         if(rst) begin
             state <= IDLE;
         end
         else begin
             case(state)
-                IDLE        : state <= inst_en & miss ? LoadMemory : state;
+                IDLE        : state <= HitJudge;
+                HitJudge    : state <= inst_en & miss ? LoadMemory : IDLE;
                 LoadMemory  : state <= read_finish ? Refill : state;
-                Refill      : state <= IDLE;
+                Refill      : state <= IDLE;        //Refill（写cache）只需一个周期
             endcase
         end
     end
@@ -94,7 +97,7 @@ module i_cache (
 
     //DATAPATH
     // assign stall = read_req & ~read_finish;
-    assign stall = |state;
+    assign stall = state[0];    //IDLE, HitJudge
     assign inst_rdata = hit ? (sel ? data_bank0_way1 : data_bank0_way0) :
                         rdata;
 
@@ -119,12 +122,18 @@ module i_cache (
     assign arvalid = read_req & ~addr_rcv;
     assign rready = addr_rcv;
 
-
     //ram
     wire [9:0] next_index;
     wire [9:0] addra;
+
+    reg before_start_clk;  //标识rst结束后的第一个上升沿之前
+    always @(posedge clk) begin
+        before_start_clk <= rst ? 1'b1 : 1'b0;
+    end
+
     assign next_index = pc_next[INDEX_WIDTH+OFFSET_WIDTH-1 : OFFSET_WIDTH];
-    assign addra = state==Refill ? index : next_index;
+    assign addra = before_start_clk ? index :
+                   state==IDLE      ? next_index : index;
 
     i_tag_ram i_tag_ram_way0 (
         .clka(clk),    // input wire clka
