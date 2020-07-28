@@ -11,9 +11,9 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="1931000fs"></ZoomStartTime>
-      <ZoomEndTime time="2456001fs"></ZoomEndTime>
-      <Cursor1Time time="2087500fs"></Cursor1Time>
+      <ZoomStartTime time="8965715550fs"></ZoomStartTime>
+      <ZoomEndTime time="8965820551fs"></ZoomEndTime>
+      <Cursor1Time time="8965742500fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="265"></NameColumnWidth>
@@ -24,11 +24,13 @@
       <marker time="1946554500" label="" />
       <marker time="912543500" label="" />
       <marker time="1947940500" label="" />
-      <marker time="2458500" label="" />
-      <marker time="2447600" label="" />
       <marker time="2711500" label="" />
-      <marker time="2722500" label="" />
       <marker time="6946500" label="" />
+      <marker time="324542500" label="" />
+      <marker time="2447600" label="" />
+      <marker time="2722500" label="" />
+      <marker time="1254214500" label="" />
+      <marker time="2458500" label="" />
    </wave_markers>
    <wvobject fp_name="/tb_top/resetn" type="logic">
       <obj_property name="ElementShortName">resetn</obj_property>
@@ -1299,6 +1301,10 @@
             <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
             <obj_property name="UseCustomSignalColor">true</obj_property>
          </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hazard0/d_cache_hit" type="logic">
+            <obj_property name="ElementShortName">d_cache_hit</obj_property>
+            <obj_property name="ObjectShortName">d_cache_hit</obj_property>
+         </wvobject>
       </wvobject>
       <wvobject fp_name="group869" type="group">
          <obj_property name="label">Flush</obj_property>
@@ -1523,6 +1529,12 @@
                <obj_property name="ElementShortName">index[9:0]</obj_property>
                <obj_property name="ObjectShortName">index[9:0]</obj_property>
                <obj_property name="CustomSignalColor">#FFA500</obj_property>
+               <obj_property name="UseCustomSignalColor">true</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_top/soc_lite/u_cpu/i_cache/addra" type="array">
+               <obj_property name="ElementShortName">addra[9:0]</obj_property>
+               <obj_property name="ObjectShortName">addra[9:0]</obj_property>
+               <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
                <obj_property name="UseCustomSignalColor">true</obj_property>
             </wvobject>
             <wvobject fp_name="/tb_top/soc_lite/u_cpu/i_cache/tag_way0" type="array">

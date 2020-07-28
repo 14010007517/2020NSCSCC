@@ -71,6 +71,7 @@ module mycpu_top (
     wire [3:0] data_wen     ;
     wire [31:0] data_wdata  ;
     wire d_cache_stall      ;
+    wire d_cache_hit        ;
 
     //i_cache - arbitrater
     wire [31:0] i_araddr    ;
@@ -120,6 +121,7 @@ module mycpu_top (
         .instrF(inst_rdata),
         .i_cache_stall(i_cache_stall),
         .i_cache_hit(i_cache_hit),
+        .d_cache_hit(d_cache_hit),
         .stallF(stallF),
 
         //data
@@ -172,6 +174,7 @@ module mycpu_top (
         .data_wen(data_wen),
         .data_wdata(data_wdata),
         .stall(d_cache_stall),
+        .hit(d_cache_hit),
         
         //arbitrater
         .araddr          (d_araddr ),

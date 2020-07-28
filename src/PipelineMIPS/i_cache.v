@@ -62,6 +62,23 @@ module i_cache (
     wire [19:0] ram_tag0, ram_tag1;
     assign ram_tag0 = tag_way0[20:1];
     assign ram_tag1 = tag_way1[20:1];
+
+    //计数
+    reg [31:0] total_instr, hit_num;
+    always @(posedge clk) begin
+        if(rst) begin
+            total_instr <= 32'b0;
+            hit_num <= 32'b0;
+        end
+        else begin
+            if(state==LoadMemory) begin
+                total_instr <= total_instr + 1;
+            end
+            if(state==HitJudge && hit) begin
+                hit_num <= hit_num + 1;
+            end
+        end
+    end
     //-------------debug-------------
 
     assign sel = (tag_way1[20:1] == tag) ? 1'b1 : 1'b0;
@@ -89,15 +106,16 @@ module i_cache (
     //refill cache
     wire evict_way;
     assign evict_way = LRU_bit[index];
-    assign en_way0 = (state == IDLE && ~stallF) || (state == HitJudge && hit ) || wen_way0;
-    assign en_way1 = (state == IDLE && ~stallF) || (state == HitJudge && hit ) || wen_way1;
+    assign en_way0 = (state == IDLE && ~stallF) || (state == HitJudge && ~stallF) || wen_way0;
+    assign en_way1 = (state == IDLE && ~stallF) || (state == HitJudge && ~stallF) || wen_way1;
 
     assign wen_way0 = (state == Refill) && ~evict_way;
     assign wen_way1 = (state == Refill) && evict_way;
 
     //DATAPATH
     // assign stall = read_req & ~read_finish;
-    assign stall = state[0];    //IDLE, HitJudge
+    // assign stall = state[0] | (state==HitJudge && miss);
+    assign stall = state[0];    //Load Refill stall
     assign inst_rdata = hit ? (sel ? data_bank0_way1 : data_bank0_way0) :
                         rdata;
 
@@ -133,7 +151,7 @@ module i_cache (
 
     assign next_index = pc_next[INDEX_WIDTH+OFFSET_WIDTH-1 : OFFSET_WIDTH];
     assign addra = before_start_clk ? index :
-                   state==IDLE      ? next_index : index;
+                   state==IDLE || (state==HitJudge && hit) ? next_index : index;
 
     i_tag_ram i_tag_ram_way0 (
         .clka(clk),    // input wire clka

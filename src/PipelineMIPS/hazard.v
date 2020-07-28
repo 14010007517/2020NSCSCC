@@ -5,6 +5,9 @@ module hazard (
     input wire i_cache_stall,
     input wire i_cache_hit,
     input wire d_cache_stall,
+    input wire d_cache_hit,
+    input wire mem_read_enM,
+    input wire mem_write_enM,
     input wire div_stallE,
 
     input wire flush_jump_confilctE, flush_pred_failedM, flush_exceptionM,
@@ -54,7 +57,12 @@ module hazard (
     always @(posedge clk) begin
         before_start_clk <= rst ? 1'b1 : 1'b0;
     end
-    assign pipe_stall = ~before_start_clk & (~en_stall | longest_stall) & ~i_cache_hit;
+    assign pipe_stall = ~before_start_clk & 
+                        (~en_stall | longest_stall) & 
+                        ~(  //当i_cache命中 或者有load/store指令且d_cache命中
+                            i_cache_hit & 
+                            (~(mem_read_enM|mem_write_enM) | d_cache_hit)
+                        );
 
     assign stallF = ~flush_exceptionM & pipe_stall;
     assign stallD = pipe_stall;

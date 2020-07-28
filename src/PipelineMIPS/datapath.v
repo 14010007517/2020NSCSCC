@@ -18,6 +18,7 @@ module datapath (
     output wire [3:0] mem_wenM,     //写使能
     output wire [31:0] mem_wdataM,  //写数据
     input wire d_cache_stall,
+    input wire d_cache_hit,
 
     //debug
     output wire [31:0]  debug_wb_pc,      
@@ -193,6 +194,9 @@ module datapath (
         .i_cache_stall(i_cache_stall),
         .i_cache_hit(i_cache_hit),
         .d_cache_stall(d_cache_stall),
+        .d_cache_hit(d_cache_hit),
+        .mem_read_enM(mem_read_enM),
+        .mem_write_enM(mem_write_enM),
         .div_stallE(div_stallE),
 
         .flush_jump_confilctE   (flush_jump_confilctE),

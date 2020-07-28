@@ -7,6 +7,7 @@ module d_cache (
     input wire [3:0] data_wen,
     input wire [31:0] data_wdata,
     output wire stall,
+    output wire hit,
 
     //arbitrater
     output wire [31:0] araddr,
@@ -34,7 +35,7 @@ module d_cache (
 
     input wire bvalid,
     output wire bready    
-);
+); 
     reg read_req;       //一次读事务
     reg write_req;      //一次写事务
     reg raddr_rcv;      //读事务地址握手成功
@@ -46,6 +47,31 @@ module d_cache (
     wire read, write;
     assign read = data_en & ~(|data_wen);
     assign write = data_en & |data_wen;
+
+
+
+    //FSM
+    reg [1:0] state;
+    parameter IDLE = 2'b00, LoadMemory = 2'b01, WriteMemory = 2'b11;
+    always @(posedge clk) begin
+        if(rst) begin
+            state <= IDLE;
+        end
+        else begin
+            case(state)
+                IDLE        : state <= read  ? LoadMemory  :
+                                       write ? WriteMemory : IDLE;
+                LoadMemory  : state <= read_finish ? IDLE : state;
+                WriteMemory  : state <= write_finish ? IDLE : state;
+            endcase
+        end
+    end
+
+    assign hit = 1'b0;    
+    //DATAPATH
+    assign stall = (read_req &~read_finish) | (write_req & ~write_finish);
+    assign data_rdata = rdata;
+    
 
     always @(posedge clk) begin
         read_req <= (rst)            ? 1'b0 :
@@ -71,11 +97,6 @@ module d_cache (
 
     assign read_finish = raddr_rcv & (rvalid & rready & rlast);
     assign write_finish = waddr_rcv & wdata_rcv & (bvalid & bready);
-
-    //DATAPATH
-    assign stall = (read_req &~read_finish) | (write_req & ~write_finish);
-
-    assign data_rdata = rdata;
 
     //AXI
     //read
