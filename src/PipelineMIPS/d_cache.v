@@ -150,14 +150,13 @@ module d_cache (
     assign arvalid = read_req & ~raddr_rcv;
     assign rready = raddr_rcv;
     //write
-    assign awaddr = data_addr;
+    assign awaddr = {~evict_way ? tag_way0[TAG_WIDTH : 1] : tag_way1[TAG_WIDTH : 1], index};
     assign awlen = 8'b0;
-    assign awsize = data_wen==4'b1111 ? 4'b10 :
-                    data_wen==4'b0011 || data_wen==4'b1100 ? 4'b01 : 4'b00;
+    assign awsize = 4'b10;
     assign awvalid = write_req & ~waddr_rcv;
 
-    assign wdata = data_wdata;
-    assign wstrb = data_wen;
+    assign wdata = ~evict_way ? data_bank0_way0 : data_bank0_way1;
+    assign wstrb = 4'b1111;
     assign wlast = 1'b1;
     assign wvalid = write_req & ~wdata_rcv;
     assign bready = waddr_rcv & wdata_rcv;
