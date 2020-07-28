@@ -19,6 +19,8 @@ module datapath (
     output wire [31:0] mem_wdataM,  //写数据
     input wire d_cache_stall,
     input wire d_cache_hit,
+    output wire mem_addrE,
+    output wire mem_write_enE,
 
     //debug
     output wire [31:0]  debug_wb_pc,      
@@ -162,6 +164,8 @@ module datapath (
         .alu_imm_selE(alu_imm_selE),
         .reg_write_enE(reg_write_enE),
         .hilo_wenE(hilo_wenE),
+        .mem_read_enE(mem_read_enE),
+        .mem_write_enE(mem_write_enE),
         //MEM
         .mem_read_enM(mem_read_enM),
         .mem_write_enM(mem_write_enM),

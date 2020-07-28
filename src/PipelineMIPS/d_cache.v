@@ -8,6 +8,9 @@ module d_cache (
     input wire [31:0] data_wdata,
     output wire stall,
     output wire hit,
+    input wire mem_addrE,
+    input wire mem_read_enE,
+    input wire mem_write_enE,
 
     //arbitrater
     output wire [31:0] araddr,
@@ -36,6 +39,41 @@ module d_cache (
     input wire bvalid,
     output wire bready    
 ); 
+
+//变量声明
+    //cache configure
+    parameter TAG_WIDTH = 20, INDEX_WIDTH = 10, OFFSET_WIDTH = 2;
+    
+    wire [TAG_WIDTH-1    : 0] tag;
+    wire [INDEX_WIDTH-1  : 0] index, indexE;
+    wire [OFFSET_WIDTH-1 : 0] offset;
+
+    assign tag      = data_addr[31                         : INDEX_WIDTH+OFFSET_WIDTH ];
+    assign index    = data_addr[INDEX_WIDTH+OFFSET_WIDTH-1 : OFFSET_WIDTH             ];    
+    assign indexE   = mem_addrE[INDEX_WIDTH+OFFSET_WIDTH-1 : OFFSET_WIDTH             ];
+    assign offset   = data_addr[OFFSET_WIDTH-1             : 0                        ];
+
+    //read
+    wire read, write;
+    assign read = data_en & ~(|data_wen);
+    assign write = data_en & |data_wen;
+
+    //cache ram
+    wire [TAG_WIDTH:0] tag_way0, tag_way1;
+    wire [31:0] data_bank0_way0, data_bank0_way1;
+
+    //ram read
+    wire enb_tag_ram;
+    wire enb_data_bank;
+    wire enb_data_way0, enb_data_way1;
+    wire [INDEX_WIDTH-1:0] addrb;
+
+    //ram write
+    wire ena_way0, ena_way1
+    wire wena_way0, wena_way1;  //当read miss | write时写; 当write hit时，可以只写data_bank
+    wire [INDEX_WIDTH-1:0] addra;
+
+    //axi req
     reg read_req;       //一次读事务
     reg write_req;      //一次写事务
     reg raddr_rcv;      //读事务地址握手成功
@@ -44,42 +82,49 @@ module d_cache (
     wire read_finish;   //读事务结束
     wire write_finish;  //写事务结束
 
-    wire read, write;
-    assign read = data_en & ~(|data_wen);
-    assign write = data_en & |data_wen;
+    //hit & miss
+    wire hit, miss, sel;
+    assign sel = (tag_way1[TAG_WIDTH:1] == tag) ? 1'b1 : 1'b0;
+    assign hit = tag_way0[0] && (tag_way0[TAG_WIDTH:1] == tag) ||
+                 tag_way1[0] && (tag_way1[TAG_WIDTH:1] == tag);
+    
+    //evict_way
+    wire evict_way;
+    assign evict_way = LRU_bit[index];
 
+    //dirty
+    wire dirty;
+    assign dirty = evict_way ? dirty_bits_way1[index] : dirty_bits_way0[index];
 
-
-    //FSM
-    reg [1:0] state;
-    parameter IDLE = 2'b00, LoadMemory = 2'b01, WriteMemory = 2'b11;
+//FSM
+    reg [2:0] state;
+    parameter IDLE = 3'b000, MissHandle=3'b001 , HitJudge = 3'b011, ReadFinish=3'b010, WriteFinish=3'b110;
     always @(posedge clk) begin
         if(rst) begin
             state <= IDLE;
         end
         else begin
             case(state)
-                IDLE        : state <= read  ? LoadMemory  :
-                                       write ? WriteMemory : IDLE;
-                LoadMemory  : state <= read_finish ? IDLE : state;
-                WriteMemory  : state <= write_finish ? IDLE : state;
+                IDLE        : state <= HitJudge;
+                HitJudge    : miss ? MissHandle : IDLE;
+                MissHandle : ~read_req & ~write_req ? IDLE : state;
             endcase
         end
     end
 
-    assign hit = 1'b0;    
-    //DATAPATH
-    assign stall = (read_req &~read_finish) | (write_req & ~write_finish);
-    assign data_rdata = rdata;
-    
+//DATAPATH
+    assign stall = state==MissHandle || (state==HitJudge && miss);
+    assign data_rdata = hit ? (sel ? data_bank0_way1 : data_bank0_way0) :
+                        rdata;
 
+//AXI
     always @(posedge clk) begin
         read_req <= (rst)            ? 1'b0 :
-                    read & ~read_req ? 1'b1 :
+                    (state == HitJudge) && miss && !read_req ? 1'b1 :
                     read_finish      ? 1'b0 : read_req;
         
         write_req <= (rst)              ? 1'b0 :
-                     write & ~write_req ? 1'b1 :
+                     (state == HitJudge) && miss && dirty && !write_req ? 1'b1 :
                      write_finish       ? 1'b0 : write_req;
     end
     
@@ -98,7 +143,7 @@ module d_cache (
     assign read_finish = raddr_rcv & (rvalid & rready & rlast);
     assign write_finish = waddr_rcv & wdata_rcv & (bvalid & bready);
 
-    //AXI
+    //AXI signal
     //read
     assign araddr = data_addr;
     assign arlen = 8'b0;
@@ -116,4 +161,104 @@ module d_cache (
     assign wlast = 1'b1;
     assign wvalid = write_req & ~wdata_rcv;
     assign bready = waddr_rcv & wdata_rcv;
+
+//LRU
+    reg [(1<<INDEX_WIDTH)-1:0] LRU_bit;
+    always @(posedge clk) begin
+        if(rst) begin
+            LRU_bit <= 0;
+        end
+        //更新LRU
+        else if(hit) begin
+            LRU_bit[index] = ~sel;  //0-> 下次替换way0, 1-> 下次替换way1。下次替换未命中的一路
+        end
+    end
+
+//dirty bit
+    reg [(1<<INDEX_WIDTH)-1:0] dirty_bits_way0, dirty_bits_way1;
+    always @(posedge clk) begin
+        if(rst) begin
+            dirty_bits_way0 <= 0;
+            dirty_bits_way1 <= 0;
+        end
+        else begin
+            if(read_finish) begin
+                if(~evict_way) begin
+                    dirty_bits_way0[index] <= 1'b0;
+                end
+                else begin
+                    dirty_bits_way1[index] <= 1'b0;
+                end
+            end
+        end
+    end
+
+//cache ram
+    //read
+    assign enb_tag_ram = (mem_read_enE || mem_write_enE) && state==IDLE;
+    assign enb_data_bank = mem_read_enE && state==IDLE;                     //sw时，不用读取data
+
+    assign addrb = indexE;  //read: 读tag ram和data ram; write: 读tag ram
+
+    //write
+    wire [TAG_WIDTH:0] tag_ram_dina;
+    wire [31:0] data_bank0_dina;
+
+    assign wena_way0 = read_finish & ~evict_way;    //lw
+    assign wena_way1 = read_finish & evict_way;
+
+    assign addra = index;
+    assign tag_ram_dina = {tag, 1'b1};
+    assign data_bank0_dina = rdata;
+
+    assign ena_way0 = wena_way0;
+    assign ena_way1 = wena_way1;
+
+    d_tag_ram tag_ram_way0 (
+        .clka(clk),    // input wire clka
+        .ena(),      // input wire ena
+        .wea(),      // input wire [0 : 0] wea
+        .addra(addra),  // input wire [9 : 0] addra
+        .dina(),    // input wire [20 : 0] dina
+        .clkb(clk),    // input wire clkb
+        .enb(enb_tag_ram),      // input wire enb
+        .addrb(addrb),  // input wire [9 : 0] addrb
+        .doutb(tag_way0)  // output wire [20 : 0] doutb
+    );
+
+    d_tag_ram tag_ram_way1 (
+        .clka(clk),    // input wire clka
+        .ena(),      // input wire ena
+        .wea(),      // input wire [0 : 0] wea
+        .addra(addra),  // input wire [9 : 0] addra
+        .dina(),    // input wire [20 : 0] dina
+        .clkb(clk),    // input wire clkb
+        .enb(enb_tag_ram),      // input wire enb
+        .addrb(addrb),  // input wire [9 : 0] addrb
+        .doutb(tag_way1)  // output wire [20 : 0] doutb
+    );
+
+    d_data_bank data_bank0_way0 (
+        .clka(clk),    // input wire clka
+        .ena(),      // input wire ena
+        .wea(),      // input wire [3 : 0] wea
+        .addra(addra),  // input wire [9 : 0] addra
+        .dina(),    // input wire [31 : 0] dina
+        .clkb(clk),    // input wire clkb
+        .enb(enb_data_bank),      // input wire enb
+        .addrb(addrb),  // input wire [9 : 0] addrb
+        .doutb(data_bank0_way0)  // output wire [31 : 0] doutb
+    );
+
+    d_data_bank data_bank0_way1 (
+        .clka(clk),    // input wire clka
+        .ena(),      // input wire ena
+        .wea(),      // input wire [3 : 0] wea
+        .addra(addra),  // input wire [9 : 0] addra
+        .dina(),    // input wire [31 : 0] dina
+        .clkb(clk),    // input wire clkb
+        .enb(enb_data_bank),      // input wire enb
+        .addrb(addrb),  // input wire [9 : 0] addrb
+        .doutb(data_bank0_way1)  // output wire [31 : 0] doutb
+    );
 endmodule

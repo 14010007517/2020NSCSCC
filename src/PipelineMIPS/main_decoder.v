@@ -13,6 +13,8 @@ module main_decoder(
     output reg alu_imm_selE,        //alu srcb选择 0->rd2E, 1->immE
     output reg reg_write_enE,
 	output reg hilo_wenE,
+	output reg mem_read_enE,
+	output reg mem_write_enE,
 	//MEM
 	output reg mem_read_enM, mem_write_enM,
 	output reg reg_write_enM,		//写寄存器堆使能
@@ -37,7 +39,7 @@ module main_decoder(
 
     wire [1:0] reg_dstD;
     wire alu_imm_selD, reg_write_enD, mem_to_regD, mem_read_enD, mem_write_enD;
-    reg mem_to_regE, mem_read_enE, mem_write_enE;
+    reg mem_to_regE;
 
 	reg [3:0] regfile_ctrl;
 	reg [2:0] mem_ctrl;
