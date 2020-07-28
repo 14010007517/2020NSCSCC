@@ -11,9 +11,9 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="8965715550fs"></ZoomStartTime>
-      <ZoomEndTime time="8965820551fs"></ZoomEndTime>
-      <Cursor1Time time="8965742500fs"></Cursor1Time>
+      <ZoomStartTime time="34701363000fs"></ZoomStartTime>
+      <ZoomEndTime time="34701468001fs"></ZoomEndTime>
+      <Cursor1Time time="34701450500fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="265"></NameColumnWidth>
@@ -31,6 +31,7 @@
       <marker time="2722500" label="" />
       <marker time="1254214500" label="" />
       <marker time="2458500" label="" />
+      <marker time="34701386500" label="" />
    </wave_markers>
    <wvobject fp_name="/tb_top/resetn" type="logic">
       <obj_property name="ElementShortName">resetn</obj_property>
@@ -441,6 +442,23 @@
                <obj_property name="ElementShortName">rd1D[31:0]</obj_property>
                <obj_property name="ObjectShortName">rd1D[31:0]</obj_property>
             </wvobject>
+         </wvobject>
+      </wvobject>
+      <wvobject fp_name="group546" type="group">
+         <obj_property name="label">ImmExt</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="isExpanded"></obj_property>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/imm_ext0/imm" type="array">
+            <obj_property name="ElementShortName">imm[15:0]</obj_property>
+            <obj_property name="ObjectShortName">imm[15:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/imm_ext0/sign_ext" type="logic">
+            <obj_property name="ElementShortName">sign_ext</obj_property>
+            <obj_property name="ObjectShortName">sign_ext</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/imm_ext0/imm_ext" type="array">
+            <obj_property name="ElementShortName">imm_ext[31:0]</obj_property>
+            <obj_property name="ObjectShortName">imm_ext[31:0]</obj_property>
          </wvobject>
       </wvobject>
    </wvobject>
@@ -1309,6 +1327,7 @@
       <wvobject fp_name="group869" type="group">
          <obj_property name="label">Flush</obj_property>
          <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="isExpanded"></obj_property>
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hazard0/flushF" type="logic">
             <obj_property name="ElementShortName">flushF</obj_property>
             <obj_property name="ObjectShortName">flushF</obj_property>
@@ -1393,6 +1412,7 @@
             <wvobject fp_name="group636" type="group">
                <obj_property name="label">arbitrater</obj_property>
                <obj_property name="DisplayName">label</obj_property>
+               <obj_property name="isExpanded"></obj_property>
                <wvobject fp_name="/tb_top/soc_lite/u_cpu/i_cache/araddr" type="array">
                   <obj_property name="ElementShortName">araddr[31:0]</obj_property>
                   <obj_property name="ObjectShortName">araddr[31:0]</obj_property>
@@ -1490,6 +1510,10 @@
             <wvobject fp_name="/tb_top/soc_lite/u_cpu/i_cache/inst_en" type="logic">
                <obj_property name="ElementShortName">inst_en</obj_property>
                <obj_property name="ObjectShortName">inst_en</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_top/soc_lite/u_cpu/i_cache/araddr" type="array">
+               <obj_property name="ElementShortName">araddr[31:0]</obj_property>
+               <obj_property name="ObjectShortName">araddr[31:0]</obj_property>
             </wvobject>
             <wvobject fp_name="/tb_top/soc_lite/u_cpu/i_cache/inst_rdata" type="array">
                <obj_property name="ElementShortName">inst_rdata[31:0]</obj_property>
