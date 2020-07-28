@@ -151,7 +151,7 @@ module i_cache (
 
     assign next_index = pc_next[INDEX_WIDTH+OFFSET_WIDTH-1 : OFFSET_WIDTH];
     assign addra = before_start_clk ? index :
-                   state==IDLE || (state==HitJudge && hit) ? next_index : index;
+                   state==IDLE || (state==HitJudge && ~stallF) ? next_index : index;    //hit 或因flush而保持stallF
 
     i_tag_ram i_tag_ram_way0 (
         .clka(clk),    // input wire clka

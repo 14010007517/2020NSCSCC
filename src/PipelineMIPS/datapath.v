@@ -143,7 +143,7 @@ module datapath (
 
 //--------------------debug---------------------
     assign debug_wb_pc          = datapath.pcM;
-    assign debug_wb_rf_wen      = {4{reg_write_enM & ~stallW}};
+    assign debug_wb_rf_wen      = {4{reg_write_enM & ~stallW & ~flush_exceptionM}};
     assign debug_wb_rf_wnum     = datapath.reg_writeM;
     assign debug_wb_rf_wdata    = datapath.resultM;
 
