@@ -50,7 +50,11 @@ module hazard (
 
     assign en_stall = (longest_stall | longest_stall_r);
     
-    assign pipe_stall = (~en_stall | longest_stall) & ~i_cache_hit;
+    reg before_start_clk;  //标识rst结束后的第一个上升沿之前
+    always @(posedge clk) begin
+        before_start_clk <= rst ? 1'b1 : 1'b0;
+    end
+    assign pipe_stall = ~before_start_clk & (~en_stall | longest_stall) & ~i_cache_hit;
 
     assign stallF = ~flush_exceptionM & pipe_stall;
     assign stallD = pipe_stall;

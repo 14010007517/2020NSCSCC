@@ -78,8 +78,8 @@ module i_cache (
         end
         else begin
             case(state)
-                IDLE        : state <= HitJudge;
-                HitJudge    : state <= inst_en & miss ? LoadMemory : IDLE;
+                IDLE        : state <= stallF ? IDLE : HitJudge;
+                HitJudge    : state <= inst_en & miss ? LoadMemory : HitJudge;
                 LoadMemory  : state <= read_finish ? Refill : state;
                 Refill      : state <= IDLE;        //Refill（写cache）只需一个周期
             endcase
@@ -89,8 +89,8 @@ module i_cache (
     //refill cache
     wire evict_way;
     assign evict_way = LRU_bit[index];
-    assign en_way0 = state == IDLE || wen_way0;
-    assign en_way1 = state == IDLE || wen_way1;
+    assign en_way0 = (state == IDLE && ~stallF) || (state == HitJudge && hit ) || wen_way0;
+    assign en_way1 = (state == IDLE && ~stallF) || (state == HitJudge && hit ) || wen_way1;
 
     assign wen_way0 = (state == Refill) && ~evict_way;
     assign wen_way1 = (state == Refill) && evict_way;
