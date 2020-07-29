@@ -19,45 +19,51 @@ module i_cache (
     input wire rlast,
     input wire rvalid,
     output wire rready
-); 
+);
+
+//变量声明
     //cache configure
     parameter TAG_WIDTH = 20, INDEX_WIDTH = 10, OFFSET_WIDTH = 2;
     
     wire [TAG_WIDTH-1    : 0] tag;
-    wire [INDEX_WIDTH-1  : 0] index;
+    wire [INDEX_WIDTH-1  : 0] index, index_next;
     wire [OFFSET_WIDTH-1 : 0] offset;
 
-    assign tag      = pcF[31                         : INDEX_WIDTH+OFFSET_WIDTH ];
-    assign index    = pcF[INDEX_WIDTH+OFFSET_WIDTH-1 : OFFSET_WIDTH             ];
-    assign offset   = pcF[OFFSET_WIDTH-1             : 0                        ];
+    assign tag        = pcF     [31                         : INDEX_WIDTH+OFFSET_WIDTH ];
+    assign index      = pcF     [INDEX_WIDTH+OFFSET_WIDTH-1 : OFFSET_WIDTH             ];
+    assign index_next = pc_next [INDEX_WIDTH+OFFSET_WIDTH-1 : OFFSET_WIDTH             ];
+    assign offset     = pcF     [OFFSET_WIDTH-1             : 0                        ];
 
     //cache ram
-    wire [20:0] tag_way0, tag_way1;
+    //read
+    wire enb;       //读使能，作用在tag_ram和data_bank，way0和way1上
+    wire [INDEX_WIDTH-1:0] addrb;     //读地址，除了rst后的开始阶段特殊，其余都采用index_next
+    wire [TAG_WIDTH:0] tag_way0, tag_way1;
     wire [31:0] data_bank0_way0, data_bank0_way1;
 
-    wire en_way0, en_way1;
-    wire wen_way0, wen_way1;
+    //write
+    wire wena_way0, wena_way1;          //写使能，作用在tag_ram和data_bank上，way0, way1需区分
+    wire ena_way0, ena_way1;
+    wire [INDEX_WIDTH-1:0] addra;       //写地址，为index
+    wire [TAG_WIDTH:0] tag_ram_dina;    //写数据
+    wire [31:0] data_bank0_dina;        //写数据
+
     //hit & miss
     wire hit, miss, sel;
+    assign sel = (tag_way1[TAG_WIDTH:1] == tag) ? 1'b1 : 1'b0;
+    assign hit = tag_way0[0] && (tag_way0[TAG_WIDTH:1] == tag) ||
+                 tag_way1[0] && (tag_way1[TAG_WIDTH:1] == tag);
+    assign miss = ~hit;
+
+    //evict
+    wire evict_way;
+    assign evict_way = LRU_bit[index];
 
     //load memory axi
     reg read_req;       //一次读事务
     reg addr_rcv;       //地址握手成功
     wire read_finish;   //读事务结束
 
-    //LRU
-    reg [(1<<INDEX_WIDTH)-1:0] LRU_bit;
-    always @(posedge clk) begin
-        if(rst) begin
-            LRU_bit <= 0;
-        end
-        //更新LRU
-        else if(hit) begin
-            LRU_bit[index] = ~sel;  //0-> 下次替换way0, 1-> 下次替换way1。下次替换未命中的一路
-        end
-    end
-
-    //hit & miss
     //-------------debug-------------
     wire [19:0] ram_tag0, ram_tag1;
     assign ram_tag0 = tag_way0[20:1];
@@ -81,45 +87,28 @@ module i_cache (
     end
     //-------------debug-------------
 
-    assign sel = (tag_way1[20:1] == tag) ? 1'b1 : 1'b0;
-    assign hit = tag_way0[0] && (tag_way0[20:1] == tag) ||
-                 tag_way1[0] && (tag_way1[20:1] == tag);
-    assign miss = ~hit;
-
-    //FSM
+//FSM
     reg [1:0] state;
-    parameter IDLE = 2'b00, LoadMemory = 2'b01, Refill = 2'b11, HitJudge = 2'b10;
+    parameter IDLE = 2'b00, HitJudge = 2'b01, LoadMemory = 2'b11;
     always @(posedge clk) begin
         if(rst) begin
             state <= IDLE;
         end
         else begin
             case(state)
-                IDLE        : state <= stallF ? IDLE : HitJudge;
+                IDLE        : state <= HitJudge;
                 HitJudge    : state <= inst_en & miss ? LoadMemory : HitJudge;
-                LoadMemory  : state <= read_finish ? Refill : state;
-                Refill      : state <= IDLE;        //Refill（写cache）只需一个周期
+                LoadMemory  : state <= read_finish ? IDLE : state;
             endcase
         end
     end
 
-    //refill cache
-    wire evict_way;
-    assign evict_way = LRU_bit[index];
-    assign en_way0 = (state == IDLE && ~stallF) || (state == HitJudge && ~stallF) || wen_way0;
-    assign en_way1 = (state == IDLE && ~stallF) || (state == HitJudge && ~stallF) || wen_way1;
-
-    assign wen_way0 = (state == Refill) && ~evict_way;
-    assign wen_way1 = (state == Refill) && evict_way;
-
-    //DATAPATH
-    // assign stall = read_req & ~read_finish;
-    // assign stall = state[0] | (state==HitJudge && miss);
-    assign stall = state[0];    //Load Refill stall
+//DATAPATH
+    assign stall = state==IDLE || (state==HitJudge && hit);
     assign inst_rdata = hit ? (sel ? data_bank0_way1 : data_bank0_way0) :
                         rdata;
 
-    //load memory axi
+//AXI
     always @(posedge clk) begin
         read_req <= (rst)               ? 1'b0 :
                     inst_en & miss & ~read_req ? 1'b1 :
@@ -134,59 +123,103 @@ module i_cache (
 
     assign read_finish = addr_rcv & (rvalid & rready & rlast);
 
-    //AXI
+    //AXI signal
     assign araddr = pcF;
     assign arlen = 8'b0;
     assign arvalid = read_req & ~addr_rcv;
     assign rready = addr_rcv;
 
-    //ram
-    wire [9:0] next_index;
-    wire [9:0] addra;
+//LRU
+    reg [(1<<INDEX_WIDTH)-1:0] LRU_bit;
+    always @(posedge clk) begin
+        if(rst) begin
+            LRU_bit <= 0;
+        end
+        //更新LRU
+        else begin
+            if(hit) 
+                LRU_bit[index] = ~sel;  //0-> 下次替换way0, 1-> 下次替换way1。下次替换未命中的一路
+            else
+                LRU_bit[index] = ~evict_way;
+        end
+    end
+
+//cache ram
+    //read
+    wire enb;       //读使能，作用在tag_ram和data_bank，way0和way1上
+    wire [INDEX_WIDTH-1:0] addrb;     //读地址，除了rst后的开始阶段特殊，其余都采用index_next
+
+    assign enb = (state == IDLE);
 
     reg before_start_clk;  //标识rst结束后的第一个上升沿之前
     always @(posedge clk) begin
         before_start_clk <= rst ? 1'b1 : 1'b0;
     end
+    assign addrb = before_start_clk ? index : index_next;
 
-    assign next_index = pc_next[INDEX_WIDTH+OFFSET_WIDTH-1 : OFFSET_WIDTH];
-    assign addra = before_start_clk ? index :
-                   state==IDLE || (state==HitJudge && ~stallF) ? next_index : index;    //hit 或因flush而保持stallF
+    //write
+    wire wena_way0, wena_way1;          //写使能，作用在tag_ram和data_bank上，way0, way1需区分
+    wire ena_way0, ena_way1;
+    wire [INDEX_WIDTH-1:0] addra;       //写地址，为index
+    wire [TAG_WIDTH:0] tag_ram_dina;    //写数据
+    wire [31:0] data_bank0_dina;        //写数据
 
-    i_tag_ram i_tag_ram_way0 (
+    assign wena_way0 = read_finish && ~evict_way;
+    assign wena_way1 = read_finish && evict_way;
+
+    assign ena_way0 = wena_way0;
+    assign ena_way1 = wena_way1;
+
+    assign addra = index;
+    assign tag_ram_dina = {tag, 1'b1};
+    assign data_bank0_dina = rdata;
+
+    d_tag_ram i_tag_ram_way0 (
         .clka(clk),    // input wire clka
-        .ena(en_way0),      // input wire ena
-        .wea(wen_way0),      // input wire [0 : 0] wea
+        .ena(ena_way0),      // input wire ena
+        .wea(wena_way0),      // input wire [0 : 0] wea
         .addra(addra),  // input wire [9 : 0] addra
-        .dina({tag, 1'b1}),    // input wire [20 : 0] dina
-        .douta(tag_way0)  // output wire [20 : 0] douta
+        .dina(tag_ram_dina),    // input wire [20 : 0] dina
+        .clkb(clk),    // input wire clkb
+        .enb(enb),      // input wire enb
+        .addrb(addrb),  // input wire [9 : 0] addrb
+        .doutb(tag_way0)  // output wire [20 : 0] doutb
     );
 
-    i_tag_ram i_tag_ram_way1 (
+    d_tag_ram i_tag_ram_way1 (
         .clka(clk),    // input wire clka
-        .ena(en_way1),      // input wire ena
-        .wea(wen_way1),      // input wire [0 : 0] wea
+        .ena(ena_way1),      // input wire ena
+        .wea(wena_way1),      // input wire [0 : 0] wea
         .addra(addra),  // input wire [9 : 0] addra
-        .dina({tag, 1'b1}),    // input wire [20 : 0] dina
-        .douta(tag_way1)  // output wire [20 : 0] douta
+        .dina(tag_ram_dina),    // input wire [20 : 0] dina
+        .clkb(clk),    // input wire clkb
+        .enb(enb),      // input wire enb
+        .addrb(addrb),  // input wire [9 : 0] addrb
+        .doutb(tag_way1)  // output wire [20 : 0] doutb
     );
 
-    data_bank i_data_bank0_way0 (
+    d_data_bank i_data_bank0_way0 (
         .clka(clk),    // input wire clka
-        .ena(en_way0),      // input wire ena
-        .wea(wen_way0),      // input wire [0 : 0] wea
+        .ena(ena_way0),      // input wire ena
+        .wea(wena_way0),      // input wire [3 : 0] wea
         .addra(addra),  // input wire [9 : 0] addra
-        .dina(rdata),    // input wire [31 : 0] dina
-        .douta(data_bank0_way0)  // output wire [31 : 0] douta
+        .dina(data_bank0_dina),    // input wire [31 : 0] dina
+        .clkb(clk),    // input wire clkb
+        .enb(enb),      // input wire enb
+        .addrb(addrb),  // input wire [9 : 0] addrb
+        .doutb(data_bank0_way0)  // output wire [31 : 0] doutb
     );
 
-    data_bank i_data_bank0_way1 (
+    d_data_bank i_data_bank0_way1 (
         .clka(clk),    // input wire clka
-        .ena(en_way1),      // input wire ena
-        .wea(wen_way1),      // input wire [0 : 0] wea
+        .ena(ena_way1),      // input wire ena
+        .wea(wena_way1),      // input wire [3 : 0] wea
         .addra(addra),  // input wire [9 : 0] addra
-        .dina(rdata),    // input wire [31 : 0] dina
-        .douta(data_bank0_way1)  // output wire [31 : 0] douta
+        .dina(data_bank0_dina),    // input wire [31 : 0] dina
+        .clkb(clk),    // input wire clkb
+        .enb(enb),      // input wire enb
+        .addrb(addrb),  // input wire [9 : 0] addrb
+        .doutb(data_bank0_way1)  // output wire [31 : 0] doutb
     );
 
 endmodule
