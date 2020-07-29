@@ -134,6 +134,9 @@ module mycpu_top (
         .mem_wenM(data_wen),
         .mem_wdataM(data_wdata),
         .d_cache_stall(d_cache_stall),
+        .mem_addrE(mem_addrE),
+        .mem_read_enE(mem_read_enE),
+        .mem_write_enE(mem_write_enE),
 
         .debug_wb_pc       (debug_wb_pc       ),  
         .debug_wb_rf_wen   (debug_wb_rf_wen   ),  

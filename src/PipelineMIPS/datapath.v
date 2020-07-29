@@ -19,7 +19,8 @@ module datapath (
     output wire [31:0] mem_wdataM,  //写数据
     input wire d_cache_stall,
     input wire d_cache_hit,
-    output wire mem_addrE,
+    output wire [31:0] mem_addrE,
+    output wire mem_read_enE,
     output wire mem_write_enE,
 
     //debug
@@ -387,6 +388,8 @@ module datapath (
         .alu_outE(alu_outE),
         .overflowE(overflowE)
     );
+
+    assign mem_addrE = alu_outE[31:0];
 
     //mux write reg
     mux4 #(5) mux4_reg_dst(rdE, rtE, 5'd31, 5'b0, reg_dstE, reg_writeE);
