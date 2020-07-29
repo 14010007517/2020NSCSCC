@@ -152,7 +152,7 @@ module i_cache (
     wire enb;       //读使能，作用在tag_ram和data_bank，way0和way1上
     wire [INDEX_WIDTH-1:0] addrb;     //读地址，除了rst后的开始阶段特殊，其余都采用index_next
 
-    assign enb = (state == IDLE) && ~stallF;
+    assign enb = ((state == IDLE) || (state==HitJudge) && hit ) && ~stallF;
 
     reg before_start_clk;  //标识rst结束后的第一个上升沿之前
     always @(posedge clk) begin
@@ -204,7 +204,7 @@ module i_cache (
     d_data_bank i_data_bank0_way0 (
         .clka(clk),    // input wire clka
         .ena(ena_way0),      // input wire ena
-        .wea(wena_way0),      // input wire [3 : 0] wea
+        .wea({4{wena_way0}}),      // input wire [3 : 0] wea
         .addra(addra),  // input wire [9 : 0] addra
         .dina(data_bank0_dina),    // input wire [31 : 0] dina
         .clkb(clk),    // input wire clkb
@@ -216,7 +216,7 @@ module i_cache (
     d_data_bank i_data_bank0_way1 (
         .clka(clk),    // input wire clka
         .ena(ena_way1),      // input wire ena
-        .wea(wena_way1),      // input wire [3 : 0] wea
+        .wea({4{wena_way1}}),      // input wire [3 : 0] wea
         .addra(addra),  // input wire [9 : 0] addra
         .dina(data_bank0_dina),    // input wire [31 : 0] dina
         .clkb(clk),    // input wire clkb

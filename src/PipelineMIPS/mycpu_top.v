@@ -55,6 +55,9 @@ module mycpu_top (
     assign clk = aclk;
     assign rst = ~aresetn;
 
+    //d_tlb - d_cache
+    wire no_cache           ;
+
     //datapath - cache
     wire inst_en            ;
     wire [31:0] pcF         ;
@@ -73,6 +76,7 @@ module mycpu_top (
     wire d_cache_stall      ;
     wire d_cache_hit        ;
     wire [31:0] mem_addrE   ;
+    wire [31:0] mem_addrE_tmp;
     wire mem_read_enE       ;
     wire mem_write_enE      ;
 
@@ -134,7 +138,7 @@ module mycpu_top (
         .mem_wenM(data_wen),
         .mem_wdataM(data_wdata),
         .d_cache_stall(d_cache_stall),
-        .mem_addrE(mem_addrE),
+        .mem_addrE(mem_addrE_tmp),
         .mem_read_enE(mem_read_enE),
         .mem_write_enE(mem_write_enE),
 
@@ -143,8 +147,16 @@ module mycpu_top (
         .debug_wb_rf_wnum  (debug_wb_rf_wnum  ),  
         .debug_wb_rf_wdata (debug_wb_rf_wdata )  
     );
+
     //简易的MMU
-    assign data_addr = data_addr_tmp[31:16] == 16'hbfaf ? {3'b0, data_addr_tmp[28:0]} : data_addr_tmp;  //访问外设地址
+    d_tlb d_tlb0(
+        .data_vaddr(data_addr_tmp),
+        .data_vaddr2(mem_addrE_tmp),
+
+        .data_paddr(data_addr),
+        .data_paddr2(mem_addrE),
+        .no_cache(no_cache)
+    );
 
     i_cache i_cache(
         .clk(clk), .rst(rst),
@@ -172,6 +184,9 @@ module mycpu_top (
 
     d_cache d_cache(
         .clk(clk), .rst(rst),
+
+        //TLB
+        .no_cache(no_cache),
 
         //datapath
         .data_en(data_en),
