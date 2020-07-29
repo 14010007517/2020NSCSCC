@@ -184,6 +184,7 @@ module mycpu_top (
         .mem_addrE(mem_addrE),
         .mem_read_enE(mem_read_enE),
         .mem_write_enE(mem_write_enE),
+        .stallF(stallF),
         
         //arbitrater
         .araddr          (d_araddr ),

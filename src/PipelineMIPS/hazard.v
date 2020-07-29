@@ -63,7 +63,7 @@ module hazard (
                             i_cache_hit & 
                             (~(mem_read_enM|mem_write_enM) | d_cache_hit)
                         );
-
+    
     assign stallF = ~flush_exceptionM & pipe_stall;
     assign stallD = pipe_stall;
     assign stallE = pipe_stall;

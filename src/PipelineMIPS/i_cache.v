@@ -96,7 +96,7 @@ module i_cache (
         end
         else begin
             case(state)
-                IDLE        : state <= HitJudge;
+                IDLE        : state <= ~stallF ? HitJudge : IDLE;
                 HitJudge    : state <= inst_en & miss ? LoadMemory : HitJudge;
                 LoadMemory  : state <= read_finish ? IDLE : state;
             endcase
@@ -104,14 +104,14 @@ module i_cache (
     end
 
 //DATAPATH
-    assign stall = state==IDLE || (state==HitJudge && hit);
+    assign stall = ~(state==IDLE || (state==HitJudge && hit));
     assign inst_rdata = hit ? (sel ? data_bank0_way1 : data_bank0_way0) :
                         rdata;
 
 //AXI
     always @(posedge clk) begin
         read_req <= (rst)               ? 1'b0 :
-                    inst_en & miss & ~read_req ? 1'b1 :
+                    inst_en & (state == HitJudge) & miss & ~read_req ? 1'b1 :
                     read_finish         ? 1'b0 : read_req;
     end
     
@@ -130,6 +130,9 @@ module i_cache (
     assign rready = addr_rcv;
 
 //LRU
+    wire write_LRU_en;
+    assign write_LRU_en = hit | read_finish;
+    
     reg [(1<<INDEX_WIDTH)-1:0] LRU_bit;
     always @(posedge clk) begin
         if(rst) begin
@@ -139,7 +142,7 @@ module i_cache (
         else begin
             if(hit) 
                 LRU_bit[index] = ~sel;  //0-> 下次替换way0, 1-> 下次替换way1。下次替换未命中的一路
-            else
+            else if(read_finish)
                 LRU_bit[index] = ~evict_way;
         end
     end
@@ -149,7 +152,7 @@ module i_cache (
     wire enb;       //读使能，作用在tag_ram和data_bank，way0和way1上
     wire [INDEX_WIDTH-1:0] addrb;     //读地址，除了rst后的开始阶段特殊，其余都采用index_next
 
-    assign enb = (state == IDLE);
+    assign enb = (state == IDLE) && ~stallF;
 
     reg before_start_clk;  //标识rst结束后的第一个上升沿之前
     always @(posedge clk) begin

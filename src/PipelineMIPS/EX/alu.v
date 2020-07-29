@@ -72,7 +72,7 @@ module alu (
         .flush(flushE),
 		.a(src_aE),  //divident
 		.b(src_bE),  //divisor
-		.valid(div_vaild & ~en_stall ),
+		.valid(div_vaild ),
 		.sign(div_sign),   //1 signed
 
 		// .ready(ready),

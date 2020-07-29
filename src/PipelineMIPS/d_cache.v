@@ -11,6 +11,7 @@ module d_cache (
     input wire [31:0] mem_addrE,
     input wire mem_read_enE,
     input wire mem_write_enE,
+    input wire stallF,
 
     //arbitrater
     output wire [31:0] araddr,
@@ -82,11 +83,15 @@ module d_cache (
     wire read_finish;   //读事务结束
     wire write_finish;  //写事务结束
 
+    //valid
+    wire valid_way0, valid_way1;
+    assign valid_way0 = tag_way0[0];
+    assign valid_way1 = tag_way1[0];
     //hit & miss
     wire miss, sel;
     assign sel = (tag_way1[TAG_WIDTH:1] == tag) ? 1'b1 : 1'b0;
-    assign hit = tag_way0[0] && (tag_way0[TAG_WIDTH:1] == tag) ||
-                 tag_way1[0] && (tag_way1[TAG_WIDTH:1] == tag);
+    assign hit = valid_way0 && (tag_way0[TAG_WIDTH:1] == tag) ||
+                 valid_way1 && (tag_way1[TAG_WIDTH:1] == tag);
     assign miss = ~hit;
     
     //evict_way
@@ -95,7 +100,8 @@ module d_cache (
 
     //dirty
     wire dirty;
-    assign dirty = evict_way ? dirty_bits_way1[index] : dirty_bits_way0[index];
+    assign dirty = evict_way ? valid_way1 & dirty_bits_way1[index] :
+                               valid_way0 & dirty_bits_way0[index];
 
     //-------------------debug-----------------
     wire [19:0] ram_tag0, ram_tag1;
@@ -104,15 +110,17 @@ module d_cache (
     //-------------------debug-----------------
 //FSM
     reg [2:0] state;
-    parameter IDLE = 3'b000, MissHandle=3'b001 , HitJudge = 3'b011, ReadFinish=3'b010, WriteFinish=3'b110;
+    parameter IDLE = 3'b000, HitJudge = 3'b001, MissHandle=3'b011, ReadFinish=3'b010, WriteFinish=3'b110;
     always @(posedge clk) begin
         if(rst) begin
             state <= IDLE;
         end
         else begin
             case(state)
-                IDLE        : state <= (mem_read_enE || mem_write_enE) ? HitJudge : IDLE;
-                HitJudge    : state <= miss ? MissHandle : IDLE;
+                IDLE        : state <= (mem_read_enE | mem_write_enE) & ~stallF ? HitJudge : IDLE;
+                HitJudge    : state <= data_en & miss               ? MissHandle :
+                                       mem_read_enE | mem_write_enE ? HitJudge :
+                                       IDLE;
                 MissHandle  : state <= ~read_req & ~write_req ? IDLE : state;
             endcase
         end
@@ -126,11 +134,11 @@ module d_cache (
 //AXI
     always @(posedge clk) begin
         read_req <= (rst)            ? 1'b0 : 
-                    (state == HitJudge) && miss && !read_req ? 1'b1 :
+                    data_en && (state == HitJudge) && miss && !read_req ? 1'b1 :
                     read_finish      ? 1'b0 : read_req;
         
         write_req <= (rst)              ? 1'b0 :
-                     (state == HitJudge) && miss && dirty && !write_req ? 1'b1 :
+                     data_en && (state == HitJudge) && miss && dirty && !write_req ? 1'b1 :
                      write_finish       ? 1'b0 : write_req;
     end
     
@@ -168,6 +176,8 @@ module d_cache (
     assign bready = waddr_rcv & wdata_rcv;
 
 //LRU
+    wire write_LRU_en;
+    assign write_LRU_en = hit & ~stallF;
     reg [(1<<INDEX_WIDTH)-1:0] LRU_bit;
     always @(posedge clk) begin
         if(rst) begin
@@ -175,12 +185,21 @@ module d_cache (
         end
         //更新LRU
         else begin
-            if(hit) 
+            if(write_LRU_en) 
                 LRU_bit[index] = ~sel;  //0-> 下次替换way0, 1-> 下次替换way1。下次替换未命中的一路
         end
     end
 
 //dirty bit
+    wire write_dirty_bit_en;
+    wire write_way_sel;
+    wire write_dirty_bit;   //dirty被修改成什么
+
+    assign write_dirty_bit_en =  read & read_finish | write & hit & ~stallF |
+                                (state==MissHandle) & read_finish;
+    assign write_way_sel = write & hit ? sel : evict_way;
+    assign write_dirty_bit = read ? 1'b0 : 1'b1;
+
     reg [(1<<INDEX_WIDTH)-1:0] dirty_bits_way0, dirty_bits_way1;
     always @(posedge clk) begin
         if(rst) begin
@@ -188,32 +207,7 @@ module d_cache (
             dirty_bits_way1 <= 0;
         end
         else begin
-            // if(read & miss & read_finish) begin
-            //     if(~evict_way) begin
-            //         dirty_bits_way0[index] <= 1'b0;
-            //     end
-            //     else begin
-            //         dirty_bits_way1[index] <= 1'b0;
-            //     end
-            // end
-            // else if(write) begin
-            //     if(hit) begin
-            //         if(~sel) begin
-            //             dirty_bits_way0[index] <= 1'b1;
-            //         else begin
-            //             dirty_bits_way1[index] <= 1'b1;
-            //         end
-            //     end
-            //     else if(read_finish) begin
-            //         if(~evict_way) begin
-            //             dirty_bits_way0[index] <= 1'b1;
-            //         end
-            //         else begin
-            //             dirty_bits_way1[index] <= 1'b1;
-            //         end
-            //     end
-            // end
-            if(read & read_finish | write & hit | write & miss | read_finish) begin
+            if(write_dirty_bit_en) begin
                 if(~write_way_sel) begin
                     dirty_bits_way0[index] <= write_dirty_bit;
                 end
@@ -223,16 +217,10 @@ module d_cache (
             end
         end
     end
-    wire write_way_sel;
-    assign write_way_sel = write & hit ? sel : evict_way;
-
-    wire write_dirty_bit;   //dirty被修改成什么
-    assign write_dirty_bit = read ? 1'b0 : 1'b1;
-
 //cache ram
     //read
-    assign enb_tag_ram = (mem_read_enE || mem_write_enE) && state==IDLE;
-    assign enb_data_bank = mem_read_enE && state==IDLE;                     //sw时，不用读取data
+    assign enb_tag_ram = (mem_read_enE || mem_write_enE) && (state==IDLE || state==HitJudge && hit) && ~stallF; 
+    assign enb_data_bank = mem_read_enE && (state==IDLE || state==HitJudge && hit) && ~stallF;                  //sw时，不用读取data
 
     assign addrb = indexE;  //read: 读tag ram和data ram; write: 读tag ram
 
@@ -241,10 +229,10 @@ module d_cache (
     wire [31:0] data_bank0_dina;
 
     assign wena_way0 = read & miss & read_finish & ~evict_way |     //lw
-                       write & hit & ~sel |                         //sw hit
+                       write & hit & ~sel & ~|(state^HitJudge) |                         //sw hit
                        write & miss & read_finish & ~evict_way;     //sw miss       
     assign wena_way1 = read & miss & read_finish & evict_way |
-                       write & hit & sel |
+                       write & hit & sel & ~|(state^HitJudge) |
                        write & miss & read_finish & evict_way;
 
     assign addra = index;
@@ -252,8 +240,10 @@ module d_cache (
     assign data_bank0_dina = write ? data_wdata         //sw且有多个bank时，需要根据offset与bank编号从rdata, data_wdata中选择
                                 : rdata;
 
-    assign wena_data_bank0_way0 = data_wen & {4{wena_way0}};
-    assign wena_data_bank0_way1 = data_wen & {4{wena_way1}};
+    assign wena_data_bank0_way0 = write ? data_wen & {4{wena_way0}}:
+                                          4'b1111 & {4{wena_way0}};
+    assign wena_data_bank0_way1 = write ? data_wen & {4{wena_way1}}:
+                                          4'b1111 & {4{wena_way1}};
 
     assign ena_way0 = wena_way0;
     assign ena_way1 = wena_way1;

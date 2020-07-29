@@ -265,7 +265,7 @@ module datapath (
         .ce(pc_reg_ceF)
     );
 
-    assign inst_enF = pc_reg_ceF & ~flush_exceptionM & ~en_stall;
+    assign inst_enF = pc_reg_ceF & ~flush_exceptionM;
 
     assign instrF_temp = ({32{~(|(pcF[1:0] ^ 2'b00))}} & instrF);
     assign is_in_delayslot_iF = branchD | jumpD;
@@ -465,7 +465,7 @@ module datapath (
     );
 //MEM
     assign mem_addrM = alu_outM;
-    assign mem_enM = (mem_read_enM | mem_write_enM) & (~addrErrorSwM & ~addrErrorLwM) & ~en_stall;
+    assign mem_enM = (mem_read_enM | mem_write_enM) & (~addrErrorSwM & ~addrErrorLwM);
 
     // 是否需要控制 mem_en
     mem_ctrl mem_ctrl0(
