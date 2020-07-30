@@ -175,7 +175,7 @@ module d_cache (
     assign rready = raddr_rcv;
     //write
     wire [31:0] dirty_write_addr;
-    assign dirty_write_addr = ~evict_way ? {tag_way0[TAG_WIDTH : 1], index} : {tag_way1[TAG_WIDTH : 1], index};
+    assign dirty_write_addr = ~evict_way ? {tag_way0[TAG_WIDTH : 1], index, 2'b00} : {tag_way1[TAG_WIDTH : 1], index, 2'b00};
 
     assign awaddr = ~no_cache ? dirty_write_addr : data_addr;
     assign awlen = 8'b0;

@@ -64,11 +64,11 @@ module hazard (
                             (~(mem_read_enM|mem_write_enM) | d_cache_hit)
                         );
     
-    assign stallF = ~flush_exceptionM & pipe_stall;
-    assign stallD = pipe_stall;
-    assign stallE = pipe_stall;
-    assign stallM = pipe_stall;
-    assign stallW = pipe_stall;              // 不暂停,会减少jr等指令冲突; (现在划去这句话)
+    assign stallF = ~flush_exceptionM & longest_stall;
+    assign stallD = longest_stall;
+    assign stallE = longest_stall;
+    assign stallM = longest_stall;
+    assign stallW = longest_stall;              // 不暂停,会减少jr等指令冲突; (现在划去这句话)
 
     assign flushF = 1'b0;
 

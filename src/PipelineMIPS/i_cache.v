@@ -152,7 +152,7 @@ module i_cache (
     wire enb;       //读使能，作用在tag_ram和data_bank，way0和way1上
     wire [INDEX_WIDTH-1:0] addrb;     //读地址，除了rst后的开始阶段特殊，其余都采用index_next
 
-    assign enb = ((state == IDLE) || (state==HitJudge) && hit ) && ~stallF;
+    assign enb = ~stallF;
 
     reg before_start_clk;  //标识rst结束后的第一个上升沿之前
     always @(posedge clk) begin
