@@ -7,8 +7,10 @@ module alu (
     input wire [4:0] alu_controlE,
     input wire [4:0] sa,
     input wire [63:0] hilo,
+    input wire stallD,
+    input wire is_divD,
 
-    output wire div_stallE,
+    output reg div_stallE,
     output wire [63:0] alu_outE,
     output wire overflowE
 );
@@ -65,17 +67,26 @@ module alu (
 	assign div_sign = (alu_controlE == `ALU_SIGNED_DIV);
 	assign div_vaild = (alu_controlE == `ALU_SIGNED_DIV || alu_controlE == `ALU_UNSIGNED_DIV);
 
+    reg vaild;
+    wire ready;
+    always @(posedge clk) begin
+        div_stallE <= rst  ? 1'b0 :
+                      is_divD & ~stallD & ~flushE ? 1'b1 :
+                      ready | flushE ? 1'b0 : div_stallE;
+        vaild <= rst ? 1'b0 :
+                     is_divD & ~stallD & ~flushE ? 1'b1 : 1'b0;
+    end
+
 	div_radix2 DIV(
-		.clk(~clk),
+		.clk(clk),
 		.rst(rst),
         .flush(flushE),
 		.a(src_aE),  //divident
 		.b(src_bE),  //divisor
-		.valid(div_vaild ),
+		.valid(vaild ),
 		.sign(div_sign),   //1 signed
 
-		// .ready(ready),
-		.div_stall(div_stallE),
+		.ready(ready),
 		.result(alu_out_div)
 	);
 

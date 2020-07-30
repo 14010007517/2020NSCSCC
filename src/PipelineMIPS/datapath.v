@@ -56,6 +56,7 @@ module datapath (
     wire is_in_delayslot_iD;
     wire [4:0] alu_controlD;
     wire [4:0] branch_judge_controlD;
+    wire is_divD;
 //EX
     wire [31:0] pcE;
     wire [31:0] rd1E, rd2E, mem_wdataE;
@@ -159,6 +160,7 @@ module datapath (
         .flushE(flushE), .flushM(flushM), .flushW(flushW),
         //ID
         .sign_extD(sign_extD),
+        .is_divD(is_divD),
         //EX
         .reg_dstE(reg_dstE),
         .alu_imm_selE(alu_imm_selE),
@@ -380,6 +382,8 @@ module datapath (
         .alu_controlE(alu_controlE),
         .sa(saE),
         .hilo(hiloM),
+        .stallD(stallD),
+        .is_divD(is_divD),
 
         .div_stallE(div_stallE),
         .alu_outE(alu_outE),

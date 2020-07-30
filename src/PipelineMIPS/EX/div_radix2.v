@@ -17,8 +17,7 @@ module div_radix2(
     input               valid,
     input               sign,   //1:signed
 
-    // output reg          ready,
-    output wire         div_stall,
+    output reg          ready,
     output [63:0]       result
     );
     /*
@@ -57,6 +56,7 @@ module div_radix2(
         if(rst | flush) begin
             cnt <= 0;
             start_cnt <= 0;
+            ready <= 0;
         end
         else if(!start_cnt & valid) begin
             cnt <= 1;
@@ -77,6 +77,9 @@ module div_radix2(
                 //Output result
                 SR[63:32] <= mux_result[31:0];
                 SR[0] <= CO;
+
+                //ready
+                ready <= 1'b1;
             end
             else begin
                 cnt <= cnt + 1;
@@ -84,7 +87,12 @@ module div_radix2(
                 SR[63:0] <= {mux_result[30:0],SR[31:1],CO,1'b0}; //wsl: write and shift left
             end
         end
+        else begin
+            ready <= 1'b0;
+        end
     end
+
+
     
     assign div_stall = |cnt; //只有当cnt=0时不暂停
 endmodule
