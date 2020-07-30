@@ -73,7 +73,7 @@ module main_decoder(
 	assign syscallD = ~(|(op_code ^ `EXE_R_TYPE)) & ~(|(funct ^ `EXE_SYSCALL));
 	assign eretD = ~(|(instrD ^ {`EXE_ERET_MFTC, `EXE_ERET}));
 
-	assign is_divD = ~(|op_code) & ~(|(funct ^ 5'b01101));	//opcode==0, funct==01101x
+	assign is_divD = ~(|op_code) & ~(|(funct[5:1] ^ 5'b01101));	//opcode==0, funct==01101x
 
 	always @(*) begin
 		riD = 1'b0;
