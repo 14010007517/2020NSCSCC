@@ -70,7 +70,7 @@ module inst_ascii_decoder(
                         `EXE_JALR: ascii<= "JALR";
                         
                         `EXE_SYSCALL: ascii<= "SYSC";
-                        `EXE_BREAK: ascii<= "BRE";
+                        `EXE_BREAK: ascii<= "BREAK";
                         default: ascii<="N-R";
                     endcase
                 end

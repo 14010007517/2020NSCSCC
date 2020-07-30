@@ -7,7 +7,6 @@ module alu (
     input wire [4:0] alu_controlE,
     input wire [4:0] sa,
     input wire [63:0] hilo,
-    input wire en_stall,
 
     output wire div_stallE,
     output wire [63:0] alu_outE,
@@ -67,7 +66,7 @@ module alu (
 	assign div_vaild = (alu_controlE == `ALU_SIGNED_DIV || alu_controlE == `ALU_UNSIGNED_DIV);
 
 	div_radix2 DIV(
-		.clk(clk),
+		.clk(~clk),
 		.rst(rst),
         .flush(flushE),
 		.a(src_aE),  //divident

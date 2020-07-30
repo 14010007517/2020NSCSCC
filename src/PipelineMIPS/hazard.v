@@ -21,8 +21,6 @@ module hazard (
     
     output wire stallF, stallD, stallE, stallM, stallW,
     output wire flushF, flushD, flushE, flushM, flushW,
-    output wire en_stall,
-
     output wire [1:0] forward_aE, forward_bE //00-> NONE, 01-> MEM, 10-> WB (LW instr)
 );
     assign forward_aE = rsE != 0 && reg_write_enM && (rsE == reg_writeM) ? 2'b01 :
@@ -41,43 +39,29 @@ module hazard (
     //                 );
     // end
     wire longest_stall;
-    reg longest_stall_r;
-    wire pipe_stall;
     
     assign longest_stall = i_cache_stall | d_cache_stall | div_stallE; //longest of lw, sw, 取指 and div_stall;
     // assign cache_stall = i_cache_stall | d_cache_stall; //longest of lw, sw, 取指 and div_stall;
-
-    always @(posedge clk) begin
-        longest_stall_r <= rst ? 1'b0: longest_stall;
-    end
-
-    assign en_stall = (longest_stall | longest_stall_r);
     
     reg before_start_clk;  //标识rst结束后的第一个上升沿之前
     always @(posedge clk) begin
         before_start_clk <= rst ? 1'b1 : 1'b0;
     end
-    assign pipe_stall = ~before_start_clk & 
-                        (~en_stall | longest_stall) & 
-                        ~(  //当i_cache命中 或者有load/store指令且d_cache命中
-                            i_cache_hit & 
-                            (~(mem_read_enM|mem_write_enM) | d_cache_hit)
-                        );
     
     assign stallF = ~flush_exceptionM & longest_stall;
     assign stallD = longest_stall;
     assign stallE = longest_stall;
     assign stallM = longest_stall;
-    assign stallW = longest_stall;              // 不暂停,会减少jr等指令冲突; (现在划去这句话)
+    assign stallW = i_cache_stall | d_cache_stall;              // 不暂停,会减少jr等指令冲突; (现在划去这句话)
 
     assign flushF = 1'b0;
 
     /* 当flush一个阶段时，如果其后面的阶段被暂停，则不能flush
     */
     //EX: jr(冲突), MEM: lw这种情况时，flush_jump_confilctE会导致暂停在D阶段jr的延迟槽指令消失
-    assign flushD = flush_exceptionM | (flush_pred_failedM & ~pipe_stall) | (flush_jump_confilctE & ~pipe_stall);       
+    assign flushD = flush_exceptionM | (flush_pred_failedM & ~longest_stall) | (flush_jump_confilctE & ~longest_stall);       
     //EX: div, MEM: beq, beq预测失败，要flush D和E，但由于div暂停在E，因此只需要flushD就可以了
-    assign flushE = flush_exceptionM | (flush_pred_failedM & ~div_stallE & ~pipe_stall);                                      
-    assign flushM = flush_exceptionM | (div_stallE & ~pipe_stall) ;
+    assign flushE = flush_exceptionM | (flush_pred_failedM & ~longest_stall);                                      
+    assign flushM = flush_exceptionM | (div_stallE & ~i_cache_stall & ~d_cache_stall) ;
     assign flushW = 1'b0;
 endmodule
