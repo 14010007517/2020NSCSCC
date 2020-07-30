@@ -110,6 +110,8 @@ module d_cache (
     wire [19:0] ram_tag0, ram_tag1;
     assign ram_tag0 = tag_way0[20:1];
     assign ram_tag1 = tag_way1[20:1];
+
+    
     //-------------------debug-----------------
 //FSM
     reg [2:0] state;
@@ -172,8 +174,10 @@ module d_cache (
     assign arvalid = read_req & ~raddr_rcv;
     assign rready = raddr_rcv;
     //write
-    assign awaddr = ~no_cache ? {~evict_way ? tag_way0[TAG_WIDTH : 1] : tag_way1[TAG_WIDTH : 1], index} :
-                                data_addr;
+    wire [31:0] dirty_write_addr;
+    assign dirty_write_addr = ~evict_way ? {tag_way0[TAG_WIDTH : 1], index} : {tag_way1[TAG_WIDTH : 1], index};
+
+    assign awaddr = ~no_cache ? dirty_write_addr : data_addr;
     assign awlen = 8'b0;
     assign awsize = ~no_cache ? 4'b10 :
                                 data_wen==4'b1111 ? 4'b10:
@@ -234,7 +238,7 @@ module d_cache (
 //cache ram
     //read
     assign enb_tag_ram = (mem_read_enE || mem_write_enE) && (state==IDLE || state==HitJudge && hit) && ~stallF; 
-    assign enb_data_bank = mem_read_enE && (state==IDLE || state==HitJudge && hit) && ~stallF;                  //sw时，不用读取data
+    assign enb_data_bank = (mem_read_enE || mem_write_enE) && (state==IDLE || state==HitJudge && hit) && ~stallF; //#sw时，不用读取data# 改：sw遇到miss和dirty, wdata为读取的数据
 
     assign addrb = indexE;  //read: 读tag ram和data ram; write: 读tag ram
 
