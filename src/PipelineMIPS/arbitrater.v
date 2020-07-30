@@ -37,46 +37,46 @@ module arbitrater (
     output wire d_bvalid,
     input wire d_bready,
     //Outer
-    input wire[3:0] arid,
-    input wire[31:0] araddr,
-    input wire[7:0] arlen,
-    input wire[2:0] arsize,
-    input wire[1:0] arburst,
-    input wire[1:0] arlock,
-    input wire[3:0] arcache,
-    input wire[2:0] arprot,
-    input wire arvalid,
-    output wire arready,
+    output wire[3:0] arid,
+    output wire[31:0] araddr,
+    output wire[7:0] arlen,
+    output wire[2:0] arsize,
+    output wire[1:0] arburst,
+    output wire[1:0] arlock,
+    output wire[3:0] arcache,
+    output wire[2:0] arprot,
+    output wire arvalid,
+    input wire arready,
                 
-    output wire[3:0] rid,
-    output wire[31:0] rdata,
-    output wire[1:0] rresp,
-    output wire rlast,
-    output wire rvalid,
-    input wire rready,
+    input wire[3:0] rid,
+    input wire[31:0] rdata,
+    input wire[1:0] rresp,
+    input wire rlast,
+    input wire rvalid,
+    output wire rready,
                
-    input wire[3:0] awid,
-    input wire[31:0] awaddr,
-    input wire[7:0] awlen,
-    input wire[2:0] awsize,
-    input wire[1:0] awburst,
-    input wire[1:0] awlock,
-    input wire[3:0] awcache,
-    input wire[2:0] awprot,
-    input wire awvalid,
-    output wire awready,
+    output wire[3:0] awid,
+    output wire[31:0] awaddr,
+    output wire[7:0] awlen,
+    output wire[2:0] awsize,
+    output wire[1:0] awburst,
+    output wire[1:0] awlock,
+    output wire[3:0] awcache,
+    output wire[2:0] awprot,
+    output wire awvalid,
+    input wire awready,
     
-    input wire[3:0] wid,
-    input wire[31:0] wdata,
-    input wire[3:0] wstrb,
-    input wire wlast,
-    input wire wvalid,
-    output wire wready,
+    output wire[3:0] wid,
+    output wire[31:0] wdata,
+    output wire[3:0] wstrb,
+    output wire wlast,
+    output wire wvalid,
+    input wire wready,
     
-    output wire[3:0] bid,
-    output wire[1:0] bresp,
-    output bvalid,
-    input bready
+    input wire[3:0] bid,
+    input wire[1:0] bresp,
+    input bvalid,
+    output bready
 );
 
     wire ar_sel;     //0-> i_cache, 1-> d_cache
@@ -89,11 +89,11 @@ module arbitrater (
 
     //r
     always @(posedge clk) begin
-        if(rvalid && rid==3'b000) begin
+        if(rvalid && rid==4'b0000) begin
             r_sel <= 2'b01;
             i_rdata_r <= rdata;
         end
-        else if(rvalid && rid==3'b001) begin
+        else if(rvalid && rid==4'b0001) begin
             r_sel <= 2'b10;
             d_rdata_r <= rdata;
         end
@@ -107,9 +107,9 @@ module arbitrater (
     reg data_read_finish, inst_read_finish;
     always @(posedge clk) begin
         inst_read_finish <= rst                                      ? 1'b0:
-                            rid==3'b000 && rvalid && rready && rlast ? 1'b1 : 1'b0;
+                            rid==4'b0000 && rvalid && rready && rlast ? 1'b1 : 1'b0;
         data_read_finish <= rst                                      ? 1'b0:
-                            rid==3'b001 && rvalid && rready && rlast ? 1'b1 : 1'b0;
+                            rid==4'b0001 && rvalid && rready && rlast ? 1'b1 : 1'b0;
     end
 
     //I CACHE
@@ -126,7 +126,7 @@ module arbitrater (
     assign d_rvalid = rvalid && (r_sel==2'b10) && !data_read_finish ? 1'b1 : 1'b0;
     //AXI
     //ar
-    assign arid = {2'b0, ar_sel};
+    assign arid = {3'b0, ar_sel};
     assign araddr = ar_sel ? d_araddr : i_araddr;
     assign arlen = ar_sel ? d_arlen : i_arlen;
     assign arsize  = 2'b10;         //读一个字
