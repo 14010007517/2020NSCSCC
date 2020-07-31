@@ -30,23 +30,9 @@ module hazard (
                         reg_write_enW && (rtE == reg_writeW) ? 2'b10 :
                         2'b00;
     
-    // reg stall_lw;  //add, lw 数据冲突无法仅靠数据前推解决（MEM阶段无法从内存取得数据），需要先暂停形成一个气泡，再前推
-                      //更新1：通过mem_stall来暂停（相当于将MEM分为了两个阶段），故可以在MEM阶段前推
-    // always @(*) begin
-    //     stall_lw =  rst ? 1'b0 : mem_read_enM && (
-    //                     (reg_write_enM && (rsE == reg_writeM)) ||
-    //                     (reg_write_enM && (rtE == reg_writeM))
-    //                 );
-    // end
     wire longest_stall;
     
     assign longest_stall = i_cache_stall | d_cache_stall | div_stallE; //longest of lw, sw, 取指 and div_stall;
-    // assign cache_stall = i_cache_stall | d_cache_stall; //longest of lw, sw, 取指 and div_stall;
-    
-    reg before_start_clk;  //标识rst结束后的第一个上升沿之前
-    always @(posedge clk) begin
-        before_start_clk <= rst ? 1'b1 : 1'b0;
-    end
     
     assign stallF = ~flush_exceptionM & longest_stall;
     assign stallD = longest_stall;
