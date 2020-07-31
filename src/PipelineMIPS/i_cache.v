@@ -23,18 +23,18 @@ module i_cache (
 
 //变量声明
     //cache configure
-    parameter TAG_WIDTH = 20, INDEX_WIDTH = 7, OFFSET_WIDTH = 5;
+    parameter TAG_WIDTH = 20, INDEX_WIDTH = 7, OFFSET_WIDTH = 5;    //[WARNING]: OFFSET_WIDTH不能为2
     localparam BLOCK_NUM= 1<<(OFFSET_WIDTH-2);
     // parameter TAG_WIDTH = 20, INDEX_WIDTH = 10, OFFSET_WIDTH = 2;
     
     wire [TAG_WIDTH-1    : 0] tag;
     wire [INDEX_WIDTH-1  : 0] index, index_next;
-    wire [OFFSET_WIDTH-1 : 0] offset;
+    wire [OFFSET_WIDTH-3 : 0] offset;   //字偏移
 
     assign tag        = pcF     [31                         : INDEX_WIDTH+OFFSET_WIDTH ];
     assign index      = pcF     [INDEX_WIDTH+OFFSET_WIDTH-1 : OFFSET_WIDTH             ];
     assign index_next = pc_next [INDEX_WIDTH+OFFSET_WIDTH-1 : OFFSET_WIDTH             ];
-    assign offset     = pcF     [OFFSET_WIDTH-1             : 0                        ];
+    assign offset     = pcF     [OFFSET_WIDTH-1             : 2                        ];
 
     //cache ram
     //read
@@ -106,9 +106,10 @@ module i_cache (
     end
 
 //DATAPATH
+    reg [31:0] saved_rdata;
     assign stall = ~(state==IDLE || (state==HitJudge && hit) || (state==LoadMemory) && read_finish);
     assign inst_rdata = hit ? (sel ? block_sel_way0 : block_sel_way1) :
-                        rdata;
+                        saved_rdata;
 
 //AXI
     always @(posedge clk) begin
@@ -127,6 +128,11 @@ module i_cache (
     always @(posedge clk) begin
         cnt <= rst       ? 1'b0 :
                data_back ? cnt + 1 : cnt;
+    end
+
+    always @(posedge clk) begin
+        if(cnt==offset)
+            saved_rdata <= rdata;
     end
 
     assign data_back = addr_rcv & (rvalid & rready);
@@ -179,8 +185,10 @@ module i_cache (
         //解码器
     decoder3x8 decoder0(cnt, wena_data_bank_mask);
     
-    assign wena_data_bank_way0 = wena_data_bank_mask & {BLOCK_NUM{~evict_way}};
-    assign wena_data_bank_way1 = wena_data_bank_mask & {BLOCK_NUM{evict_way}};
+    assign wena_data_bank_way0 = wena_data_bank_mask & {BLOCK_NUM{data_back & ~evict_way}};
+    assign wena_data_bank_way1 = wena_data_bank_mask & {BLOCK_NUM{data_back & evict_way}};
+
+    assign data_bank_dina = rdata;
 
     d_tag_ram i_tag_ram_way0 (
         .clka(clk),    // input wire clka
