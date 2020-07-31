@@ -209,8 +209,8 @@ module i_cache (
     genvar i;
     generate
         //way 0
-        for(i = 0; i< BLOCK_NUM; i=i+1) begin: data_bank
-            d_data_bank i_data_bank_way0 (
+        for(i = 0; i< BLOCK_NUM; i=i+1) begin: i_data_bank_way0
+            d_data_bank data_bank (
                 .clka(clk),    // input wire clka
                 .ena(wena_data_bank_way0[i]),      // input wire ena
                 .wea({4{wena_data_bank_way0[i]}}),      // input wire [3 : 0] wea
@@ -223,8 +223,8 @@ module i_cache (
             );
         end
         //way 1
-        for(i = 0; i< BLOCK_NUM; i=i+1) begin: data_bank2
-            d_data_bank i_data_bank_way1 (
+        for(i = 0; i< BLOCK_NUM; i=i+1) begin: i_data_bank_way1
+            d_data_bank data_bank (
                 .clka(clk),    // input wire clka
                 .ena(wena_data_bank_way1[i]),      // input wire ena
                 .wea({4{wena_data_bank_way1[i]}}),      // input wire [3 : 0] wea
