@@ -289,7 +289,7 @@ module d_cache (
     assign wena_tag_ram_way0 = read_finish & ~evict_way & ~no_cache;
     assign wena_tag_ram_way1 = read_finish & evict_way & ~no_cache;
 
-    assign tag_ram_dina = read ? {tag, 1'b0} : {tag, 1'b1};
+    assign tag_ram_dina = {tag, 1'b1};
     
     
     // assign wena_way0 = read & miss & read_finish & ~evict_way |     //lw
