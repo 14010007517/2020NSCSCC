@@ -133,8 +133,8 @@ module i_cache (
     end
 
     always @(posedge clk) begin
-        if(cnt==offset)
-            saved_rdata <= rdata;
+        saved_rdata <= rst                     ? 32'b0 :
+                       data_back & cnt==offset ? rdata : saved_rdata;
     end
 
     assign data_back = addr_rcv & (rvalid & rready);

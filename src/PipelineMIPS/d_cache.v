@@ -127,6 +127,13 @@ module d_cache (
     assign ram_tag0 = tag_way0[20:1];
     assign ram_tag1 = tag_way1[20:1];
 
+    wire cache_lw, cache_sw;
+    assign cache_lw = ~no_cache & read;
+    assign cache_sw = ~no_cache & write;
+
+    wire miss_dirty;
+    assign miss_dirty = data_en & miss & dirty & ~no_cache;
+
     //-------------------debug-----------------
 //FSM
     reg [2:0] state;
@@ -187,38 +194,46 @@ module d_cache (
                 data_back                   ? cnt + 1 : cnt;
     end
 
+    //写事务burst传输，计数当前传递的bank的编号
+    reg [OFFSET_WIDTH-3:0] wcnt; 
     always @(posedge clk) begin
-        if(cnt==offset || no_cache & read_finish)
+        wcnt <= rst | no_cache | write_finish ? 1'b0 :
+                data_go                       ? wcnt + 1 : wcnt;
+    end
+
+    always @(posedge clk) begin
+        if(data_back & cnt==offset | no_cache & read_finish)
             saved_rdata <= rdata;
     end
 
     assign data_back = raddr_rcv & (rvalid & rready);
+    assign data_go   = waddr_rcv & (wvalid & wready); 
     assign read_finish = raddr_rcv & (rvalid & rready & rlast);
     assign write_finish = waddr_rcv & wdata_rcv & (bvalid & bready);
 
     //AXI signal
     //read
-    assign araddr = data_addr;
+    assign araddr = ~no_cache ? {tag, index}<<OFFSET_WIDTH: data_addr; //将offset清0
     assign arlen = ~no_cache ? 8'd7 : 8'd0;
     assign arvalid = read_req & ~raddr_rcv;
     assign rready = raddr_rcv;
     //write
     wire [31:0] dirty_write_addr;
-    assign dirty_write_addr = ~evict_way ? {tag_way0[TAG_WIDTH : 1], index, 2'b00} : {tag_way1[TAG_WIDTH : 1], index, 2'b00};
+    assign dirty_write_addr = ~evict_way ? {tag_way0[TAG_WIDTH : 1], index}<<OFFSET_WIDTH : {tag_way1[TAG_WIDTH : 1], index}<<OFFSET_WIDTH;
 
     assign awaddr = ~no_cache ? dirty_write_addr : data_addr;
-    assign awlen = 8'd0;
+    assign awlen = ~no_cache ? 8'd7 : 8'd0;
     assign awsize = ~no_cache ? 4'b10 :
                                 data_wen==4'b1111 ? 4'b10:
                                 data_wen==4'b1100 || data_wen==4'b0011 ? 4'b01: 4'b00;
     assign awvalid = write_req & ~waddr_rcv;
 
-    assign wdata = ~no_cache ? (~evict_way ? block_sel_way0[0] : block_sel_way1[0]) :   //##
+    assign wdata = ~no_cache ? (~evict_way ? block_way0[wcnt] : block_way1[wcnt]) :   //##
                                 data_wdata;
     assign wstrb = ~no_cache ? 4'b1111 : data_wen;
-    assign wlast = 1'b1;
-    assign wvalid = write_req & ~wdata_rcv;
-    assign bready = waddr_rcv & wdata_rcv;
+    assign wlast = wcnt==awlen;
+    assign wvalid = waddr_rcv & ~wdata_rcv;
+    assign bready = waddr_rcv;
 
 //LRU
     wire write_LRU_en;
@@ -274,7 +289,7 @@ module d_cache (
     assign wena_tag_ram_way0 = read_finish & ~evict_way & ~no_cache;
     assign wena_tag_ram_way1 = read_finish & evict_way & ~no_cache;
 
-    assign tag_ram_dina = {tag, 1'b1};
+    assign tag_ram_dina = read ? {tag, 1'b0} : {tag, 1'b1};
     
     
     // assign wena_way0 = read & miss & read_finish & ~evict_way |     //lw
@@ -289,12 +304,12 @@ module d_cache (
     genvar j;
     generate
         for(j = 0; j< BLOCK_NUM; j=j+1) begin: wena_data_bank
-            mux2 mux2_way0(data_wen, {4{wena_data_bank_mask[j] & data_back & ~evict_way & ~no_cache}}, write & hit & (j==offset), wena_data_bank_way0[j]);
-            mux2 mux2_way1(data_wen, {4{wena_data_bank_mask[j] & data_back & evict_way & ~no_cache}}, write & hit & (j==offset), wena_data_bank_way1[j]);
+            mux2 mux2_way0({4{wena_data_bank_mask[j] & data_back & ~evict_way & ~no_cache}}, data_wen, write & hit & (j==offset) & ~sel, wena_data_bank_way0[j]);
+            mux2 mux2_way1({4{wena_data_bank_mask[j] & data_back & evict_way & ~no_cache}}, data_wen, write & hit & (j==offset) & sel, wena_data_bank_way1[j]);
         end
     endgenerate
             //写数据
-    assign data_bank_dina = write && (cnt == offset) ? data_wdata : rdata; 
+    assign data_bank_dina = (write & hit) | (write & (cnt == offset)) ? data_wdata : rdata; 
 
     d_tag_ram d_tag_ram_way0 (
         .clka(clk),    // input wire clka
@@ -327,8 +342,8 @@ module d_cache (
         for(i = 0; i< BLOCK_NUM; i=i+1) begin: d_data_bank
             d_data_bank data_bank_way0 (
                 .clka(clk),    // input wire clka
-                .ena(|wena_data_bank_way1[i]),      // input wire ena
-                .wea(wena_data_bank_way1[i]),      // input wire [3 : 0] wea
+                .ena(|wena_data_bank_way0[i]),      // input wire ena
+                .wea(wena_data_bank_way0[i]),      // input wire [3 : 0] wea
                 .addra(addra),  // input wire [9 : 0] addra
                 .dina(data_bank_dina),    // input wire [31 : 0] dina
 
