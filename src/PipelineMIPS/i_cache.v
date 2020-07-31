@@ -6,7 +6,6 @@ module i_cache (
     input wire [31:0] pcF,
     output wire [31:0] inst_rdata,
     output wire stall,
-    output wire hit,
     input wire stallF,
 
     //arbitrater
@@ -43,6 +42,7 @@ module i_cache (
 
     wire [TAG_WIDTH:0] tag_way0, tag_way1;      //读出的tag值
     wire [31:0] block_way0[BLOCK_NUM-1:0], block_way1[BLOCK_NUM-1:0];   //读出的cache line的block
+    
     wire [31:0] block_sel_way0, block_sel_way1; //根据offset选中的字
     assign block_sel_way0 = block_way0[offset];
     assign block_sel_way1 = block_way1[offset];
@@ -56,6 +56,9 @@ module i_cache (
     wire [BLOCK_NUM-1:0] wena_data_bank_way0;     //每个data_bank的写使能
     wire [BLOCK_NUM-1:0] wena_data_bank_way1;     //每个data_bank的写使能
     wire [31:0] data_bank_dina;             //data_bank的写数据（共用一个数据，通过改变使能以达到不同bank写不同数据的效果）
+
+    //LRU 
+    reg [(1<<INDEX_WIDTH)-1:0] LRU_bit;
     
     //valid
     wire valid_way0, valid_way1;
@@ -72,7 +75,7 @@ module i_cache (
     wire evict_way;
     assign evict_way = LRU_bit[index];
 
-    //load memory axi
+    //AXI req
     reg read_req;       //一次读事务
     reg addr_rcv;       //地址握手成功
     wire data_back;     //一次数据握手成功
@@ -124,10 +127,10 @@ module i_cache (
                     read_finish      ? 1'b0 : addr_rcv;
     end
 
-    reg [2:0] cnt;  //burst传输，计数当前传递的bank的编号
+    reg [OFFSET_WIDTH-3:0] cnt;  //burst传输，计数当前传递的bank的编号
     always @(posedge clk) begin
-        cnt <= rst       ? 1'b0 :
-               data_back ? cnt + 1 : cnt;
+        cnt <= rst |read_finish ? 1'b0 :
+               data_back        ? cnt + 1 : cnt;
     end
 
     always @(posedge clk) begin
@@ -148,7 +151,6 @@ module i_cache (
     wire write_LRU_en;
     assign write_LRU_en = hit | read_finish;
     
-    reg [(1<<INDEX_WIDTH)-1:0] LRU_bit;
     always @(posedge clk) begin
         if(rst) begin
             LRU_bit <= 0;
@@ -175,8 +177,8 @@ module i_cache (
     //write
     assign addra = index;
         //tag ram
-    assign wena_tag_ram_way0 = read_finish && ~evict_way;
-    assign wena_tag_ram_way1 = read_finish && evict_way;
+    assign wena_tag_ram_way0 = read_finish & ~evict_way;
+    assign wena_tag_ram_way1 = read_finish & evict_way;
 
     assign tag_ram_dina = {tag, 1'b1};
 
@@ -216,9 +218,8 @@ module i_cache (
 
     genvar i;
     generate
-        //way 0
-        for(i = 0; i< BLOCK_NUM; i=i+1) begin: i_data_bank_way0
-            d_data_bank data_bank (
+        for(i = 0; i< BLOCK_NUM; i=i+1) begin: i_data_bank
+            d_data_bank data_bank_way0 (
                 .clka(clk),    // input wire clka
                 .ena(wena_data_bank_way0[i]),      // input wire ena
                 .wea({4{wena_data_bank_way0[i]}}),      // input wire [3 : 0] wea
@@ -229,10 +230,7 @@ module i_cache (
                 .addrb(addrb),  // input wire [9 : 0] addrb
                 .doutb(block_way0[i])  // output wire [31 : 0] doutb
             );
-        end
-        //way 1
-        for(i = 0; i< BLOCK_NUM; i=i+1) begin: i_data_bank_way1
-            d_data_bank data_bank (
+            d_data_bank data_bank_way1 (
                 .clka(clk),    // input wire clka
                 .ena(wena_data_bank_way1[i]),      // input wire ena
                 .wea({4{wena_data_bank_way1[i]}}),      // input wire [3 : 0] wea

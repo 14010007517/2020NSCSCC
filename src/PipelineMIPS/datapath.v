@@ -8,7 +8,6 @@ module datapath (
     output wire inst_enF,
     input wire [31:0] instrF,  //注：instr ram时钟取反
     input wire i_cache_stall,
-    input wire i_cache_hit,
     output wire stallF,
 
     //data
@@ -18,7 +17,6 @@ module datapath (
     output wire [3:0] mem_wenM,     //写使能
     output wire [31:0] mem_wdataM,  //写数据
     input wire d_cache_stall,
-    input wire d_cache_hit,
     output wire [31:0] mem_addrE,
     output wire mem_read_enE,
     output wire mem_write_enE,
@@ -198,9 +196,7 @@ module datapath (
         .instrE(instrE), .instrM(instrM),
 
         .i_cache_stall(i_cache_stall),
-        .i_cache_hit(i_cache_hit),
         .d_cache_stall(d_cache_stall),
-        .d_cache_hit(d_cache_hit),
         .mem_read_enM(mem_read_enM),
         .mem_write_enM(mem_write_enM),
         .div_stallE(div_stallE),

@@ -64,7 +64,6 @@ module mycpu_top (
     wire [31:0] pc_next     ;
     wire [31:0] inst_rdata  ; 
     wire i_cache_stall      ;
-    wire i_cache_hit        ;
     wire stallF             ;
 
     wire data_en            ;
@@ -74,7 +73,6 @@ module mycpu_top (
     wire [3:0] data_wen     ;
     wire [31:0] data_wdata  ;
     wire d_cache_stall      ;
-    wire d_cache_hit        ;
     wire [31:0] mem_addrE   ;
     wire [31:0] mem_addrE_tmp;
     wire mem_read_enE       ;
@@ -127,8 +125,6 @@ module mycpu_top (
         .inst_enF(inst_en),
         .instrF(inst_rdata),
         .i_cache_stall(i_cache_stall),
-        .i_cache_hit(i_cache_hit),
-        .d_cache_hit(d_cache_hit),
         .stallF(stallF),
 
         //data
@@ -167,7 +163,6 @@ module mycpu_top (
         .pcF(pcF),
         .inst_rdata(inst_rdata),
         .stall(i_cache_stall),
-        .hit(i_cache_hit),
         .stallF(stallF),
 
         //arbitrater
@@ -195,7 +190,6 @@ module mycpu_top (
         .data_wen(data_wen),
         .data_wdata(data_wdata),
         .stall(d_cache_stall),
-        .hit(d_cache_hit),
         .mem_addrE(mem_addrE),
         .mem_read_enE(mem_read_enE),
         .mem_write_enE(mem_write_enE),

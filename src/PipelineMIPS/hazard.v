@@ -3,9 +3,7 @@ module hazard (
     input wire [31:0] instrE,//no use
     input wire [31:0] instrM,//no use
     input wire i_cache_stall,
-    input wire i_cache_hit,
     input wire d_cache_stall,
-    input wire d_cache_hit,
     input wire mem_read_enM,
     input wire mem_write_enM,
     input wire div_stallE,
