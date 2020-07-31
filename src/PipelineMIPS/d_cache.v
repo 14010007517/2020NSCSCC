@@ -214,7 +214,7 @@ module d_cache (
     //AXI signal
     //read
     assign araddr = ~no_cache ? {tag, index}<<OFFSET_WIDTH: data_addr; //将offset清0
-    assign arlen = ~no_cache ? 8'd7 : 8'd0;
+    assign arlen = ~no_cache ? BLOCK_NUM-1 : 8'd0;
     assign arvalid = read_req & ~raddr_rcv;
     assign rready = raddr_rcv;
     //write
@@ -222,7 +222,7 @@ module d_cache (
     assign dirty_write_addr = ~evict_way ? {tag_way0[TAG_WIDTH : 1], index}<<OFFSET_WIDTH : {tag_way1[TAG_WIDTH : 1], index}<<OFFSET_WIDTH;
 
     assign awaddr = ~no_cache ? dirty_write_addr : data_addr;
-    assign awlen = ~no_cache ? 8'd7 : 8'd0;
+    assign awlen = ~no_cache ? BLOCK_NUM-1 : 8'd0;
     assign awsize = ~no_cache ? 4'b10 :
                                 data_wen==4'b1111 ? 4'b10:
                                 data_wen==4'b1100 || data_wen==4'b0011 ? 4'b01: 4'b00;

@@ -142,7 +142,7 @@ module i_cache (
 
     //AXI signal
     assign araddr = {tag, index}<<OFFSET_WIDTH; //将offset清0
-    assign arlen = 8'd7;
+    assign arlen = BLOCK_NUM-1;
     assign arvalid = read_req & ~addr_rcv;
     assign rready = addr_rcv;
 
