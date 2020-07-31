@@ -108,7 +108,7 @@ module i_cache (
 //DATAPATH
     reg [31:0] saved_rdata;
     assign stall = ~(state==IDLE || (state==HitJudge && hit) || (state==LoadMemory) && read_finish);
-    assign inst_rdata = hit ? (sel ? block_sel_way0 : block_sel_way1) :
+    assign inst_rdata = hit ? (~sel ? block_sel_way0 : block_sel_way1) :
                         saved_rdata;
 
 //AXI
@@ -139,7 +139,7 @@ module i_cache (
     assign read_finish = addr_rcv & (rvalid & rready & rlast);
 
     //AXI signal
-    assign araddr = pcF;
+    assign araddr = {tag, index}<<OFFSET_WIDTH; //将offset清0
     assign arlen = 8'd7;
     assign arvalid = read_req & ~addr_rcv;
     assign rready = addr_rcv;

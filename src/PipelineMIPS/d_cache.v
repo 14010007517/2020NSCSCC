@@ -135,9 +135,14 @@ module d_cache (
     end
 
 //DATAPATH
+    reg [31:0] rdata_save;
+    always @(posedge clk) begin
+        rdata_save = read_finish ? rdata : rdata_save;
+    end
+    
     assign stall = ~(state==IDLE || state==HitJudge && hit);
-    assign data_rdata = ~no_cache ? (hit ? (sel ? data_bank0_way1 : data_bank0_way0) : rdata) :
-                                    rdata;
+    assign data_rdata = ~no_cache ? (hit ? (sel ? data_bank0_way1 : data_bank0_way0) : rdata_save) :
+                                    rdata_save;
 
 //AXI
     always @(posedge clk) begin
@@ -256,7 +261,7 @@ module d_cache (
     assign addra = index;
     assign tag_ram_dina = {tag, 1'b1};
     assign data_bank0_dina = write ? data_wdata         //sw且有多个bank时，需要根据offset与bank编号从rdata, data_wdata中选择
-                                : rdata;
+                                : rdata_save;
 
     assign wena_data_bank0_way0 = write ? data_wen & {4{wena_way0}}:
                                           4'b1111 & {4{wena_way0}};
