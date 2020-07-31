@@ -102,15 +102,14 @@ module i_cache (
             case(state)
                 IDLE        : state <= ~stallF ? HitJudge : IDLE;
                 HitJudge    : state <= inst_en & miss ? LoadMemory : HitJudge;
-                LoadMemory  : state <= read_finish & ~stallF ? HitJudge: 
-                                       read_finish & stallF ? IDLE : state;
+                LoadMemory  : state <= read_finish ? IDLE : state;
             endcase
         end
     end
 
 //DATAPATH
     reg [31:0] saved_rdata;
-    assign stall = ~(state==IDLE || (state==HitJudge && hit) || (state==LoadMemory) && read_finish);
+    assign stall = ~(state==IDLE || (state==HitJudge && hit));
     assign inst_rdata = hit ? (~sel ? block_sel_way0 : block_sel_way1) :
                         saved_rdata;
 
