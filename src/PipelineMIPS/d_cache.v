@@ -328,10 +328,10 @@ module d_cache (
         else begin
             if(write_dirty_bit_en) begin
                 case(write_way_sel)
-                    2'b00: dirty_bits_way[0][tt] <= write_dirty_bit;
-                    2'b01: dirty_bits_way[1][tt] <= write_dirty_bit;
-                    2'b10: dirty_bits_way[2][tt] <= write_dirty_bit;
-                    2'b11: dirty_bits_way[3][tt] <= write_dirty_bit;
+                    2'b00: dirty_bits_way[0][index] <= write_dirty_bit;
+                    2'b01: dirty_bits_way[1][index] <= write_dirty_bit;
+                    2'b10: dirty_bits_way[2][index] <= write_dirty_bit;
+                    2'b11: dirty_bits_way[3][index] <= write_dirty_bit;
                 endcase
             end
         end
