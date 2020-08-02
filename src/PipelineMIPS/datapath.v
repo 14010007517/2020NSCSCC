@@ -312,8 +312,13 @@ module datapath (
     );
 
     branch_predict branch_predict0(
+        .clk(clk), .rst(rst),
         .instrD(instrD),
         .immD(immD),
+        .pcD(pcD),
+        .pcM(pcM),
+        .branchM(branchM),
+        .actual_takeM(actual_takeM),
 
         .branchD(branchD),
         .pred_takeD(pred_takeD)
