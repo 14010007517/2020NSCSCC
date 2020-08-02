@@ -123,10 +123,6 @@ module d_cache (
     wire write_finish;  //写事务结束
 
     //-------------------debug-----------------
-    wire [19:0] ram_tag0, ram_tag1;
-    assign ram_tag0 = tag_way0[20:1];
-    assign ram_tag1 = tag_way1[20:1];
-
     wire cache_lw, cache_sw;
     assign cache_lw = ~no_cache & read;
     assign cache_sw = ~no_cache & write;
@@ -158,10 +154,19 @@ module d_cache (
 
 //DATAPATH
     reg [31:0] saved_rdata;
-    assign stall = ~(state==IDLE || state==HitJudge && hit);
-    assign data_rdata = ~no_cache ? (hit ? (~sel ? block_sel_way0 : block_sel_way1) : saved_rdata) :
-                                    saved_rdata;
+    wire collisionE;
+    reg collisionM;
+    reg [31:0] data_wdata_r;
 
+    assign collisionE = mem_read_enE & write & hit & (mem_addrE == data_addr);
+    always@(posedge clk) begin
+        data_wdata_r <= rst ? 0 : data_wdata;
+        collisionM <= rst ? 0 : collisionE;
+    end
+
+    assign stall = ~(state==IDLE || state==HitJudge && hit);
+    assign data_rdata = hit & ~no_cache & ~collisionM ? (~sel ? block_sel_way0 : block_sel_way1):
+                        collisionM     ? data_wdata_r: saved_rdata;
 //AXI
     always @(posedge clk) begin
         read_req <= (rst)            ? 1'b0 : 
@@ -202,8 +207,8 @@ module d_cache (
     end
 
     always @(posedge clk) begin
-        if(data_back & cnt==offset | no_cache & read_finish)
-            saved_rdata <= rdata;
+        saved_rdata <= rst ? 32'b0 :
+                      ( data_back & (cnt==offset)) | (no_cache & read_finish) ? rdata : saved_rdata;
     end
 
     assign data_back = raddr_rcv & (rvalid & rready);
@@ -245,7 +250,7 @@ module d_cache (
         //更新LRU
         else begin
             if(write_LRU_en)
-                LRU_bit[index] = ~sel;  //0-> 下次替换way0, 1-> 下次替换way1。下次替换未命中的一路
+                LRU_bit[index] <= ~sel;  //0-> 下次替换way0, 1-> 下次替换way1。下次替换未命中的一路
         end
     end
 

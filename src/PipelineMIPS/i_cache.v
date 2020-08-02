@@ -83,9 +83,6 @@ module i_cache (
 
 
     //-------------debug-------------
-    wire [19:0] ram_tag0, ram_tag1;
-    assign ram_tag0 = tag_way0[20:1];
-    assign ram_tag1 = tag_way1[20:1];
 
     //计数
 
@@ -162,7 +159,6 @@ module i_cache (
                 LRU_bit[index] = ~evict_way;
         end
     end
-
 //cache ram
     //read
     assign enb = ~stallF;
