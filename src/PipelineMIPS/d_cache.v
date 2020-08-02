@@ -89,7 +89,7 @@ module d_cache (
     wire [31:0] data_bank_dina;
 
     //LRU & dirty bit
-    reg [LOG2_WAY_NUM-1:0] LRU_bit[CACHE_LINE_NUM-1:0];
+    reg [WAY_NUM-1:0] LRU_bit[CACHE_LINE_NUM-1:0];  //4路采用3bit作为伪LRU算法
     reg [CACHE_LINE_NUM-1:0] dirty_bits_way[WAY_NUM-1:0];
 
 
@@ -119,7 +119,7 @@ module d_cache (
     wire [LOG2_WAY_NUM-1:0] evict_way;
     wire [WAY_NUM-1:0] evict_mask;
 
-    assign evict_way = LRU_bit[index];
+    assign evict_way = {LRU_bit[0], ~LRU_bit[0] ? LRU_bit[1] : LRU_bit[2]};
     decoder2x4 decoder1(evict_way, evict_mask);
 
     //dirty
@@ -282,6 +282,11 @@ module d_cache (
     assign bready = waddr_rcv;
 
 //LRU
+    wire write_LRU_en;
+    wire [LOG2_WAY_NUM-1:0] LRU_visit;  //记录最近访问了哪路，用于更新LRU 
+
+    assign write_LRU_en = ~no_cache & hit & ~stallF | ~no_cache & read_finish;
+    assign LRU_visit = hit ? sel : evict_way;
     integer tt;
     always @(posedge clk) begin
         if(rst) begin
@@ -291,10 +296,11 @@ module d_cache (
         end
         //更新LRU
         else begin
-            if(~no_cache & hit & ~stallF)  
-                LRU_bit[index] <= ~sel;
-            else if(~no_cache & read_finish)
-                LRU_bit[index] <= ~evict_way;
+            if(write_LRU_en) begin
+                LRU_bit[index][0] <= ~LRU_visit[1];
+                LRU_bit[index][1] <= ~LRU_visit[1] ? ~LRU_visit[0] : LRU_bit[index][1];
+                LRU_bit[index][2] <=  LRU_visit[1] ? ~LRU_visit[0] : LRU_bit[index][2];
+            end
         end
     end
 

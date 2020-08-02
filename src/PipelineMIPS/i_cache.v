@@ -63,7 +63,7 @@ module i_cache (
     wire [31:0] data_bank_dina;             //data_bank的写数据（共用一个数据，通过改变使能以达到不同bank写不同数据的效果）
 
     //LRU 
-    reg [LOG2_WAY_NUM-1:0] LRU_bit[CACHE_LINE_NUM-1:0];  //改变WAY_NUM需同时改变
+    reg [WAY_NUM-1:0] LRU_bit[CACHE_LINE_NUM-1:0];  //4路采用3bit作为伪LRU算法
     
     //valid
     wire [WAY_NUM-1:0]valid_way;
@@ -91,7 +91,7 @@ module i_cache (
     wire [LOG2_WAY_NUM-1:0] evict_way;   //改变WAY_NUM需同时改变
     wire [WAY_NUM-1:0] evict_mask;
 
-    assign evict_way = LRU_bit[index];
+    assign evict_way = {LRU_bit[0], ~LRU_bit[0] ? LRU_bit[1] : LRU_bit[2]};
     decoder2x4 decoder1(evict_way, evict_mask);
 
     //AXI req
@@ -162,7 +162,10 @@ module i_cache (
 
 //LRU
     wire write_LRU_en;
+    wire [LOG2_WAY_NUM-1:0] LRU_visit;  //记录最近访问了哪路，用于更新LRU 
+
     assign write_LRU_en = hit | read_finish;
+    assign LRU_visit = hit ? sel : evict_way;
     
     integer tt;
     always @(posedge clk) begin
@@ -173,10 +176,11 @@ module i_cache (
         end
         //更新LRU
         else begin
-            if(hit)  
-                LRU_bit[index] = ~sel;  //0-> 下次替换way0, 1-> 下次替换way1。下次替换未命中的一路
-            else if(read_finish)
-                LRU_bit[index] = ~evict_way;
+            if(write_LRU_en) begin
+                LRU_bit[index][0] <= ~LRU_visit[1];
+                LRU_bit[index][1] <= ~LRU_visit[1] ? ~LRU_visit[0] : LRU_bit[index][1];
+                LRU_bit[index][2] <=  LRU_visit[1] ? ~LRU_visit[0] : LRU_bit[index][2];
+            end
         end
     end
 //cache ram
