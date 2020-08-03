@@ -112,8 +112,8 @@ module d_cache (
 
     encoder4x2 encoder0(sel_mask, sel);
 
-    assign hit = |sel_mask;
-    assign miss = ~hit;
+    assign hit = data_en & (|sel_mask);
+    assign miss = data_en & ~hit;
     
     //evict_way
     wire [LOG2_WAY_NUM-1:0] evict_way;

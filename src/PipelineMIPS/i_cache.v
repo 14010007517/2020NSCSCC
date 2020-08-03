@@ -84,8 +84,8 @@ module i_cache (
 
     encoder4x2 encoder0(sel_mask, sel);
 
-    assign hit = |sel_mask;
-    assign miss = ~hit;
+    assign hit = inst_en & (|sel_mask);
+    assign miss = inst_en & ~hit;
 
     //evict
     wire [LOG2_WAY_NUM-1:0] evict_way;   //改变WAY_NUM需同时改变
