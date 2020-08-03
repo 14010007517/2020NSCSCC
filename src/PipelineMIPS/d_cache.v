@@ -89,7 +89,7 @@ module d_cache (
     wire [31:0] data_bank_dina;
 
     //LRU & dirty bit
-    reg [WAY_NUM-1:0] LRU_bit[CACHE_LINE_NUM-1:0];  //4路采用3bit作为伪LRU算法
+    reg [WAY_NUM-2:0] LRU_bit[CACHE_LINE_NUM-1:0];  //4路采用3bit作为伪LRU算法
     reg [CACHE_LINE_NUM-1:0] dirty_bits_way[WAY_NUM-1:0];
 
 
@@ -119,7 +119,7 @@ module d_cache (
     wire [LOG2_WAY_NUM-1:0] evict_way;
     wire [WAY_NUM-1:0] evict_mask;
 
-    assign evict_way = {LRU_bit[0], ~LRU_bit[0] ? LRU_bit[1] : LRU_bit[2]};
+    assign evict_way = {LRU_bit[index][0], ~LRU_bit[index][0] ? LRU_bit[index][1] : LRU_bit[index][2]};
     decoder2x4 decoder1(evict_way, evict_mask);
 
     //dirty

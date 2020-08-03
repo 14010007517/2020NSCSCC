@@ -63,7 +63,7 @@ module i_cache (
     wire [31:0] data_bank_dina;             //data_bank的写数据（共用一个数据，通过改变使能以达到不同bank写不同数据的效果）
 
     //LRU 
-    reg [WAY_NUM-1:0] LRU_bit[CACHE_LINE_NUM-1:0];  //4路采用3bit作为伪LRU算法
+    reg [WAY_NUM-2:0] LRU_bit[CACHE_LINE_NUM-1:0];  //4路采用3bit作为伪LRU算法
     
     //valid
     wire [WAY_NUM-1:0]valid_way;
@@ -91,7 +91,7 @@ module i_cache (
     wire [LOG2_WAY_NUM-1:0] evict_way;   //改变WAY_NUM需同时改变
     wire [WAY_NUM-1:0] evict_mask;
 
-    assign evict_way = {LRU_bit[0], ~LRU_bit[0] ? LRU_bit[1] : LRU_bit[2]};
+    assign evict_way = {LRU_bit[index][0], ~LRU_bit[index][0] ? LRU_bit[index][1] : LRU_bit[index][2]};
     decoder2x4 decoder1(evict_way, evict_mask);
 
     //AXI req
