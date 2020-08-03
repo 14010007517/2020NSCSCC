@@ -1,169 +1,188 @@
 `timescale 1ns / 1ps
 
 `include "defines.vh"
+
+//cp0 status
+`define IE_BIT 0              //
+`define EXL_BIT 1
+`define BEV_BIT 22
+`define IM7_IM0_BITS  15:8
+//cp0 cause
+`define BD_BIT 31             //延迟槽
+`define TI_BIT 30             //计时器中断指示
+`define IP1_IP0_BITS 9:8      //软件中断位
+`define EXC_CODE_BITS 6:2     //异常编码
+
 module cp0_reg(
-      input clk,rst,
+      input wire clk,rst,
       
-      input we_i,
-      input en,
-      input [4:0] waddr_i,
-      input [4:0] raddr_i,
-      input [31:0] data_i,
-      output wire [31:0] data_o,
+      input wire en,                      //异常
 
-      input [31:0] except_type_i,
-      input [31:0] current_inst_addr_i,
-      input        is_in_delayslot_i,
-      input [31:0] badvaddr_i,
+      input wire we_i,                    //mtc0
+      input wire [4:0] waddr_i,           //写cp0地址
+      input wire [31:0] data_i,           //写cp0数据
 
-      output reg [31:0] count_o,
-      output reg [31:0] compare_o,
+      input wire [4:0] raddr_i,           //读cp0地址
+      output wire [31:0] data_o,          //读cp0数据（组合逻辑读）
+
+      input [31:0] except_type_i,         //异常类型
+      input [31:0] current_inst_addr_i,   //异常指令的pc
+      input        is_in_delayslot_i,     //
+      input [31:0] badvaddr_i,            //最近一次导致发生地址错例外的虚地址(load/store, pc未对齐地址)
+
+      //cp0寄存器
       output reg [31:0] status_o,
       output reg [31:0] cause_o,
       output reg [31:0] epc_o,
-      output reg [31:0] config_o,
-      output reg [31:0] prid_o,
-      output reg [31:0] badvaddr_o,
+
       output reg        timer_int_o
    );
-   //write
+   //cp0寄存器
+   reg [31:0] config_o;
+   reg [31:0] prid_o;
+   reg [31:0] badvaddr_o;
+   reg [31:0] compare_o;
+
+   reg [32:0] count_inner;                //每个时钟加1
+   assign count_o = count_inner[32:1];    //右移1位，相当于每两个时钟加1
+
    always @(posedge clk) begin
       if(rst) begin
-         count_o <=           `ZeroWord;
-         compare_o <=         `ZeroWord;
-         status_o <=          32'b000000000_1_000000_00000000_000000_0_0;
-         cause_o <=           32'b0_0_000000000000000_00000000_0_00000_00;
-         epc_o <=             `ZeroWord;
-         config_o <=          32'h0000_8000;
-         prid_o <=            32'h004c_0102;
-         timer_int_o <=       `InterruptNotAssert;
+         count_inner <= 33'b0;
+         compare_o   <= `ZeroWord;
+         status_o    <= 32'b000000000_1_000000_00000000_000000_0_0;  //BEV置为1
+         cause_o     <= 32'b0_0_000000000000000_00000000_0_00000_00;
+         epc_o       <= `ZeroWord;
+         config_o    <= 32'h0000_8000;
+         prid_o      <= 32'h004c_0102;
+         timer_int_o <= `InterruptNotAssert;
       end
       else begin
-         count_o <= count_o + 1;
-         if(compare_o != 32'b0 && count_o == compare_o) begin
+         //计时器加1
+         count_inner = count_inner + 1;
+         if(compare_o != 32'b0 && count_inner == compare_o) begin
             timer_int_o <= `InterruptAssert;
          end
 
+         //遇到异常
+         if(en) begin
+            case (except_type_i)
+               `EXC_TYPE_INT: begin
+                  if(is_in_delayslot_i == `InDelaySlot) begin
+                     epc_o <= current_inst_addr_i - 4;
+                     cause_o[`BD_BIT] <= 1'b1;
+                  end else begin 
+                     epc_o <= current_inst_addr_i;
+                     cause_o[`BD_BIT] <= 1'b0;
+                  end
+                  status_o[`EXL_BIT] <= 1'b1;
+                  cause_o[`EXC_CODE_BITS] <= `EXC_CODE_INT;
+               end
+               `EXC_TYPE_ADEL: begin
+                  if(is_in_delayslot_i == `InDelaySlot) begin
+                     epc_o <= current_inst_addr_i - 4;
+                     cause_o[`BD_BIT] <= 1'b1;
+                  end else begin 
+                     epc_o <= current_inst_addr_i;
+                     cause_o[`BD_BIT] <= 1'b0;
+                  end
+                  status_o[`EXL_BIT] <= 1'b1;
+                  cause_o[`EXC_CODE_BITS] <= `EXC_CODE_ADEL;
+                  badvaddr_o <= badvaddr_i;
+               end
+               `EXC_TYPE_RI: begin
+                  if(is_in_delayslot_i == `InDelaySlot) begin
+                     epc_o <= current_inst_addr_i - 4;
+                     cause_o[`BD_BIT] <= 1'b1;
+                  end else begin 
+                     epc_o <= current_inst_addr_i;
+                     cause_o[`BD_BIT] <= 1'b0;
+                  end
+                  status_o[`EXL_BIT] <= 1'b1;
+                  cause_o[`EXC_CODE_BITS] <= `EXC_CODE_RI;
+               end
+               `EXC_TYPE_SYS: begin
+                  if(is_in_delayslot_i == `InDelaySlot) begin
+                     epc_o <= current_inst_addr_i - 4;
+                     cause_o[`BD_BIT] <= 1'b1;
+                  end else begin 
+                     epc_o <= current_inst_addr_i;
+                     cause_o[`BD_BIT] <= 1'b0;
+                  end
+                  status_o[`EXL_BIT] <= 1'b1;
+                  cause_o[`EXC_CODE_BITS] <= `EXC_CODE_SYS;
+               end
+               `EXC_TYPE_BP: begin
+                  if(is_in_delayslot_i == `InDelaySlot) begin
+                     epc_o <= current_inst_addr_i - 4;
+                     cause_o[`BD_BIT] <= 1'b1;
+                  end else begin 
+                     epc_o <= current_inst_addr_i;
+                     cause_o[`BD_BIT] <= 1'b0;
+                  end
+                  status_o[`EXL_BIT] <= 1'b1;
+                  cause_o[`EXC_CODE_BITS] <= `EXC_CODE_BP;
+               end
+               `EXC_TYPE_ADES: begin
+                  if(is_in_delayslot_i == `InDelaySlot) begin
+                     epc_o <= current_inst_addr_i - 4;
+                     cause_o[`BD_BIT] <= 1'b1;
+                  end else begin 
+                     epc_o <= current_inst_addr_i;
+                     cause_o[`BD_BIT] <= 1'b0;
+                  end
+                  status_o[`EXL_BIT] <= 1'b1;
+                  cause_o[`EXC_CODE_BITS] <= `EXC_CODE_ADES;
+                  badvaddr_o <= badvaddr_i;
+               end
+               `EXC_TYPE_OV: begin
+                  if(is_in_delayslot_i == `InDelaySlot) begin
+                     epc_o <= current_inst_addr_i - 4;
+                     cause_o[`BD_BIT] <= 1'b1;
+                  end else begin 
+                     epc_o <= current_inst_addr_i;
+                     cause_o[`BD_BIT] <= 1'b0;
+                  end
+                  status_o[`EXL_BIT] <= 1'b1;
+                  cause_o[`EXC_CODE_BITS] <= `EXC_CODE_OV;
+               end
+               // 32'h0000000d: begin             //自陷异常
+               //    if(is_in_delayslot_i == `InDelaySlot) begin
+               //       /* code */
+               //       epc_o <= current_inst_addr_i - 4;
+               //       cause_o[`BD_BIT] <= 1'b1;
+               //    end else begin 
+               //       epc_o <= current_inst_addr_i;
+               //       cause_o[`BD_BIT] <= 1'b0;
+               //    end
+               //    status_o[`EXL_BIT] <= 1'b1;
+               //    cause_o[`EXC_CODE_BITS] <= 5'b01101;
+               // end
+               `EXC_TYPE_ERET: begin
+                  status_o[`EXL_BIT] <= 1'b0;
+               end
+            endcase
+         end
          // mtc0
-         if(we_i) begin
+         else if(we_i) begin
             case (waddr_i)
                `CP0_REG_COUNT:begin 
-                  count_o <= data_i;
+                  count_inner <= data_i;
                end
                `CP0_REG_COMPARE:begin 
                   compare_o <= data_i;
                   timer_int_o <= `InterruptNotAssert;
                end
                `CP0_REG_STATUS:begin 
-                  status_o[0] <= data_i[0];
-                  // status_o[1] <= data_i[1];
-                  status_o[15:8] <= data_i[15:8];
+                  status_o[`IE_BIT] <= data_i[`IE_BIT];
+                  // status_o[`EXL_BIT] <= data_i[`EXL_BIT];
+                  status_o[`IM7_IM0_BITS] <= data_i[`IM7_IM0_BITS];
                end
                `CP0_REG_CAUSE:begin 
-                  cause_o[9:8] <= data_i[9:8];
+                  cause_o[`IP1_IP0_BITS] <= data_i[`IP1_IP0_BITS];
                end
                `CP0_REG_EPC:begin 
                   epc_o <= data_i;
-               end
-            endcase
-         end
-
-         // 
-         if(en) begin
-            case (except_type_i)
-               `EXC_TYPE_INT: begin
-                  if(is_in_delayslot_i == `InDelaySlot) begin
-                     epc_o <= current_inst_addr_i - 4;
-                     cause_o[31] <= 1'b1;
-                  end else begin 
-                     epc_o <= current_inst_addr_i;
-                     cause_o[31] <= 1'b0;
-                  end
-                  status_o[1] <= 1'b1;
-                  cause_o[6:2] <= `EXC_CODE_INT;
-               end
-               `EXC_TYPE_ADEL: begin
-                  if(is_in_delayslot_i == `InDelaySlot) begin
-                     epc_o <= current_inst_addr_i - 4;
-                     cause_o[31] <= 1'b1;
-                  end else begin 
-                     epc_o <= current_inst_addr_i;
-                     cause_o[31] <= 1'b0;
-                  end
-                  status_o[1] <= 1'b1;
-                  cause_o[6:2] <= `EXC_CODE_ADEL;
-                  badvaddr_o <= badvaddr_i;
-               end
-               `EXC_TYPE_RI: begin
-                  if(is_in_delayslot_i == `InDelaySlot) begin
-                     epc_o <= current_inst_addr_i - 4;
-                     cause_o[31] <= 1'b1;
-                  end else begin 
-                     epc_o <= current_inst_addr_i;
-                     cause_o[31] <= 1'b0;
-                  end
-                  status_o[1] <= 1'b1;
-                  cause_o[6:2] <= `EXC_CODE_RI;
-               end
-               `EXC_TYPE_SYS: begin
-                  if(is_in_delayslot_i == `InDelaySlot) begin
-                     epc_o <= current_inst_addr_i - 4;
-                     cause_o[31] <= 1'b1;
-                  end else begin 
-                     epc_o <= current_inst_addr_i;
-                     cause_o[31] <= 1'b0;
-                  end
-                  status_o[1] <= 1'b1;
-                  cause_o[6:2] <= `EXC_CODE_SYS;
-               end
-               `EXC_TYPE_BP: begin
-                  if(is_in_delayslot_i == `InDelaySlot) begin
-                     epc_o <= current_inst_addr_i - 4;
-                     cause_o[31] <= 1'b1;
-                  end else begin 
-                     epc_o <= current_inst_addr_i;
-                     cause_o[31] <= 1'b0;
-                  end
-                  status_o[1] <= 1'b1;
-                  cause_o[6:2] <= `EXC_CODE_BP;
-               end
-               `EXC_TYPE_ADES: begin
-                  if(is_in_delayslot_i == `InDelaySlot) begin
-                     epc_o <= current_inst_addr_i - 4;
-                     cause_o[31] <= 1'b1;
-                  end else begin 
-                     epc_o <= current_inst_addr_i;
-                     cause_o[31] <= 1'b0;
-                  end
-                  status_o[1] <= 1'b1;
-                  cause_o[6:2] <= `EXC_CODE_ADES;
-                  badvaddr_o <= badvaddr_i;
-               end
-               `EXC_TYPE_OV: begin
-                  if(is_in_delayslot_i == `InDelaySlot) begin
-                     epc_o <= current_inst_addr_i - 4;
-                     cause_o[31] <= 1'b1;
-                  end else begin 
-                     epc_o <= current_inst_addr_i;
-                     cause_o[31] <= 1'b0;
-                  end
-                  status_o[1] <= 1'b1;
-                  cause_o[6:2] <= `EXC_CODE_OV;
-               end
-               // 32'h0000000d: begin             //自陷异常
-               //    if(is_in_delayslot_i == `InDelaySlot) begin
-               //       /* code */
-               //       epc_o <= current_inst_addr_i - 4;
-               //       cause_o[31] <= 1'b1;
-               //    end else begin 
-               //       epc_o <= current_inst_addr_i;
-               //       cause_o[31] <= 1'b0;
-               //    end
-               //    status_o[1] <= 1'b1;
-               //    cause_o[6:2] <= 5'b01101;
-               // end
-               `EXC_TYPE_ERET: begin
-                  status_o[1] <= 1'b0;
                end
             endcase
          end

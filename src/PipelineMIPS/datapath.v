@@ -518,18 +518,19 @@ module datapath (
         .rst(rst),
         
         .en(flush_exceptionM),
+
         .we_i(cp0_wenM & ~stallW),
         .waddr_i(rdM),
         .data_i(rt_valueM),
         
         .raddr_i(rdM),
+        .data_o(cp0_data_oW),
 
         .except_type_i(except_typeM),
         .current_inst_addr_i(pcM),
         .is_in_delayslot_i(is_in_delayslot_iM),
         .badvaddr_i(badvaddrM),
 
-        .data_o(cp0_data_oW),
         .status_o(cp0_statusW),
         .cause_o(cp0_causeW),
         .epc_o(cp0_epcW)
