@@ -15,8 +15,8 @@ module d_tlb (
                 {3'b0, data_vaddr2[28:0]} :          //直接映射：去掉高3位
                 data_vaddr2;
     
-    // assign no_cache = data_vaddr[31:29] == 3'b101 ? //kseg1
-    //                     1'b1 : 1'b0;
-    assign no_cache = data_vaddr[31:16] == 16'hbfaf ?   //外设，临时调d_cache用
+    assign no_cache = data_vaddr[31:29] == 3'b101 ? //kseg1
                         1'b1 : 1'b0;
+    // assign no_cache = data_vaddr[31:16] == 16'hbfaf ?   //外设，临时调d_cache用
+    //                     1'b1 : 1'b0;
 endmodule
