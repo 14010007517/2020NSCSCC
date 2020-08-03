@@ -812,18 +812,10 @@
       <wvobject fp_name="group158" type="group">
          <obj_property name="label">MemCtrl</obj_property>
          <obj_property name="DisplayName">label</obj_property>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/mem_ctrl0/instrM" type="array">
-            <obj_property name="ElementShortName">instrM[31:0]</obj_property>
-            <obj_property name="ObjectShortName">instrM[31:0]</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/mem_ctrl0/addr" type="array">
-            <obj_property name="ElementShortName">addr[31:0]</obj_property>
-            <obj_property name="ObjectShortName">addr[31:0]</obj_property>
-         </wvobject>
+         <obj_property name="isExpanded"></obj_property>
          <wvobject fp_name="group321" type="group">
             <obj_property name="label">W</obj_property>
             <obj_property name="DisplayName">label</obj_property>
-            <obj_property name="isExpanded"></obj_property>
             <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/mem_ctrl0/mem_wenM" type="array">
                <obj_property name="ElementShortName">mem_wenM[3:0]</obj_property>
                <obj_property name="ObjectShortName">mem_wenM[3:0]</obj_property>
@@ -853,7 +845,6 @@
          <wvobject fp_name="group318" type="group">
             <obj_property name="label">Error</obj_property>
             <obj_property name="DisplayName">label</obj_property>
-            <obj_property name="isExpanded"></obj_property>
             <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/mem_ctrl0/addr_error_sw" type="logic">
                <obj_property name="ElementShortName">addr_error_sw</obj_property>
                <obj_property name="ObjectShortName">addr_error_sw</obj_property>
@@ -862,10 +853,6 @@
                <obj_property name="ElementShortName">addr_error_lw</obj_property>
                <obj_property name="ObjectShortName">addr_error_lw</obj_property>
             </wvobject>
-         </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/mem_ctrl0/mem_byte_wen" type="array">
-            <obj_property name="ElementShortName">mem_byte_wen[3:0]</obj_property>
-            <obj_property name="ObjectShortName">mem_byte_wen[3:0]</obj_property>
          </wvobject>
          <wvobject fp_name="group773" type="group">
             <obj_property name="label">no use</obj_property>
@@ -918,10 +905,6 @@
                <obj_property name="ElementShortName">instr_lbu</obj_property>
                <obj_property name="ObjectShortName">instr_lbu</obj_property>
             </wvobject>
-            <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/mem_ctrl0/op_code" type="array">
-               <obj_property name="ElementShortName">op_code[5:0]</obj_property>
-               <obj_property name="ObjectShortName">op_code[5:0]</obj_property>
-            </wvobject>
          </wvobject>
       </wvobject>
       <wvobject fp_name="group169" type="group">
@@ -967,7 +950,6 @@
       <wvobject fp_name="group191" type="group">
          <obj_property name="label">Exception</obj_property>
          <obj_property name="DisplayName">label</obj_property>
-         <obj_property name="isExpanded"></obj_property>
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/exception0/rst" type="logic">
             <obj_property name="ElementShortName">rst</obj_property>
             <obj_property name="ObjectShortName">rst</obj_property>
@@ -1056,7 +1038,6 @@
       <wvobject fp_name="group221" type="group">
          <obj_property name="label">CP0</obj_property>
          <obj_property name="DisplayName">label</obj_property>
-         <obj_property name="isExpanded"></obj_property>
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/cp0/clk" type="logic">
             <obj_property name="ElementShortName">clk</obj_property>
             <obj_property name="ObjectShortName">clk</obj_property>
@@ -1214,6 +1195,7 @@
    <wvobject fp_name="group276" type="group">
       <obj_property name="label">Hazard</obj_property>
       <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="group893" type="group">
          <obj_property name="label">no use</obj_property>
          <obj_property name="DisplayName">label</obj_property>
@@ -1257,6 +1239,10 @@
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hazard0/stallF" type="logic">
             <obj_property name="ElementShortName">stallF</obj_property>
             <obj_property name="ObjectShortName">stallF</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hazard0/stall_ltypeM" type="logic">
+            <obj_property name="ElementShortName">stall_ltypeM</obj_property>
+            <obj_property name="ObjectShortName">stall_ltypeM</obj_property>
          </wvobject>
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hazard0/stallD" type="logic">
             <obj_property name="ElementShortName">stallD</obj_property>
@@ -1347,6 +1333,7 @@
       <wvobject fp_name="group870" type="group">
          <obj_property name="label">Forward</obj_property>
          <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="isExpanded"></obj_property>
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hazard0/forward_aE" type="array">
             <obj_property name="ElementShortName">forward_aE[1:0]</obj_property>
             <obj_property name="ObjectShortName">forward_aE[1:0]</obj_property>
@@ -2493,5 +2480,34 @@
          <obj_property name="ObjectShortName">ix_d[31:0]</obj_property>
          <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
       </wvobject>
+   </wvobject>
+   <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/l_s_typeM" type="array">
+      <obj_property name="ElementShortName">l_s_typeM[7:0]</obj_property>
+      <obj_property name="ObjectShortName">l_s_typeM[7:0]</obj_property>
+      <obj_property name="Radix">BINARYRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hazard0/rsE" type="array">
+      <obj_property name="ElementShortName">rsE[4:0]</obj_property>
+      <obj_property name="ObjectShortName">rsE[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hazard0/rtE" type="array">
+      <obj_property name="ElementShortName">rtE[4:0]</obj_property>
+      <obj_property name="ObjectShortName">rtE[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hazard0/reg_write_enM" type="logic">
+      <obj_property name="ElementShortName">reg_write_enM</obj_property>
+      <obj_property name="ObjectShortName">reg_write_enM</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hazard0/reg_write_enW" type="logic">
+      <obj_property name="ElementShortName">reg_write_enW</obj_property>
+      <obj_property name="ObjectShortName">reg_write_enW</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hazard0/reg_writeM" type="array">
+      <obj_property name="ElementShortName">reg_writeM[4:0]</obj_property>
+      <obj_property name="ObjectShortName">reg_writeM[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hazard0/reg_writeW" type="array">
+      <obj_property name="ElementShortName">reg_writeW[4:0]</obj_property>
+      <obj_property name="ObjectShortName">reg_writeW[4:0]</obj_property>
    </wvobject>
 </wave_config>

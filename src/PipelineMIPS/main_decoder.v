@@ -3,12 +3,14 @@
 module main_decoder(
     input clk, rst,
     input wire [31:0] instrD,
+	input wire [31:0] pcD,
 
 	input wire stallE, stallM, stallW,
 	input wire flushE, flushM, flushW,
     //ID
     output wire sign_extD,          //立即数是否为符号扩展
-	output wire is_divD,			//是否为除法指令
+	output wire is_divD,is_multD,			//是否为除法指令
+	output wire [7:0] l_s_typeD,
     //EX
     output reg [1:0] reg_dstE,     	//写寄存器选择  00-> rd, 01-> rt, 10-> 写$ra
     output reg alu_imm_selE,        //alu srcb选择 0->rd2E, 1->immE
@@ -74,6 +76,7 @@ module main_decoder(
 	assign eretD = ~(|(instrD ^ {`EXE_ERET_MFTC, `EXE_ERET}));
 
 	assign is_divD = ~(|op_code) & ~(|(funct[5:1] ^ 5'b01101));	//opcode==0, funct==01101x
+	assign is_multD = ~(|op_code) & ~(|(funct[5:1] ^ 5'b01100));
 
 	always @(*) begin
 		riD = 1'b0;
@@ -254,5 +257,20 @@ module main_decoder(
     end
 
 // MEM-WB flop
-   
+
+	//
+	
+	wire instr_lw, instr_lh, instr_lhu, instr_lb, instr_lbu, instr_sw, instr_sh, instr_sb;
+    wire addr_W0, addr_B2, addr_B1, addr_B3;
+
+	assign l_s_typeD = {instr_lw, instr_lh, instr_lhu, instr_lb, instr_lbu, instr_sw, instr_sh, instr_sb};
+
+	assign instr_lw = ~(|(op_code ^ `EXE_LW));
+    assign instr_lb = ~(|(op_code ^ `EXE_LB));
+    assign instr_lh = ~(|(op_code ^ `EXE_LH));
+    assign instr_lbu = ~(|(op_code ^ `EXE_LBU));
+    assign instr_lhu = ~(|(op_code ^ `EXE_LHU));
+    assign instr_sw = ~(|(op_code ^ `EXE_SW)); 
+    assign instr_sh = ~(|(op_code ^ `EXE_SH));
+    assign instr_sb = ~(|(op_code ^ `EXE_SB));
 endmodule

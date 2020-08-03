@@ -1,8 +1,8 @@
 `include "defines.vh"
 
 module mem_ctrl(
-    input wire [31:0] instrM,
-    input wire [31:0] addr,
+    input wire [7:0] l_s_typeM,
+    input wire [3:0] addr,
 
     input wire [31:0] data_wdataM,
     output wire [31:0] mem_wdataM,
@@ -13,34 +13,20 @@ module mem_ctrl(
 
     output wire addr_error_sw, addr_error_lw
 );
-    wire [3:0] mem_byte_wen;
-    wire [5:0] op_code;
-
-    wire instr_lw, instr_lh, instr_lb, instr_sw, instr_sh, instr_sb, instr_lhu;
+    wire instr_lw, instr_lh, instr_lhu, instr_lb, instr_lbu, instr_sw, instr_sh, instr_sb;
     wire addr_W0, addr_B2, addr_B1, addr_B3;
     
-
-    assign op_code = instrM[31:26];
-
-    assign addr_W0 = ~(|(addr[1:0] ^ 2'b00));
-    assign addr_B2 = ~(|(addr[1:0] ^ 2'b10));
-    assign addr_B1 = ~(|(addr[1:0] ^ 2'b01));
-    assign addr_B3 = ~(|(addr[1:0] ^ 2'b11));
-
-    assign instr_lw = ~(|(op_code ^ `EXE_LW));
-    assign instr_lb = ~(|(op_code ^ `EXE_LB));
-    assign instr_lh = ~(|(op_code ^ `EXE_LH));
-    assign instr_lbu = ~(|(op_code ^ `EXE_LBU));
-    assign instr_lhu = ~(|(op_code ^ `EXE_LHU));
-    assign instr_sw = ~(|(op_code ^ `EXE_SW)); 
-    assign instr_sh = ~(|(op_code ^ `EXE_SH));
-    assign instr_sb = ~(|(op_code ^ `EXE_SB));
-
+	assign {instr_lw, instr_lh, instr_lhu, instr_lb, instr_lbu, instr_sw, instr_sh, instr_sb} = l_s_typeM;
 
     assign addr_error_sw = (instr_sw & ~addr_W0)
                         | (  instr_sh & ~(addr_W0 | addr_B2));
     assign addr_error_lw = (instr_lw & ~addr_W0)
                         | (( instr_lh | instr_lhu ) & ~(addr_W0 | addr_B2));
+
+    assign addr_W0 = ~(|(addr[1:0] ^ 2'b00));
+    assign addr_B2 = ~(|(addr[1:0] ^ 2'b10));
+    assign addr_B1 = ~(|(addr[1:0] ^ 2'b01));
+    assign addr_B3 = ~(|(addr[1:0] ^ 2'b11));
 
 // wdata  and  byte_wen
     assign mem_wenM = ( {4{( instr_sw & addr_W0 )}} & 4'b1111)

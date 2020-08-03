@@ -17,6 +17,7 @@ module id_ex (
     input wire [4:0] alu_controlD,
     input wire jumpD,
     input wire [4:0] branch_judge_controlD,
+    input wire [7:0] l_s_typeD,
 
 
     output reg [31:0] pcE,
@@ -33,7 +34,8 @@ module id_ex (
     output reg is_in_delayslot_iE,
     output reg [4:0] alu_controlE,
     output reg jumpE,
-    output reg [4:0] branch_judge_controlE
+    output reg [4:0] branch_judge_controlE,
+    output reg [7:0] l_s_typeE
 );
     always @(posedge clk) begin
         if(rst | flushE) begin
@@ -55,6 +57,7 @@ module id_ex (
             alu_controlE            <=   0 ;
             jumpE                   <=   0 ;
             branch_judge_controlE   <=   0 ;
+            l_s_typeE               <=   0 ;
         end 
         else if(~stallE) begin
             pcE                     <= pcD                  ;
@@ -75,6 +78,7 @@ module id_ex (
             alu_controlE            <= alu_controlD         ;
             jumpE                   <= jumpD                ;
             branch_judge_controlE   <= branch_judge_controlD;
+            l_s_typeE               <= l_s_typeD            ;
         end
     end
 endmodule
