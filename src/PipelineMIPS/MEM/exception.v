@@ -35,26 +35,24 @@ module exception(
                            (eretM)                 ? `EXC_TYPE_ERET :
                                                      `EXC_TYPE_NOEXC;
    //interupt pc address
-   assign pc_exception =      (except_type == `EXC_TYPE_NOEXC) ? `ZeroWord:
-                           (except_type == `EXC_TYPE_ERET)? cp0_epc :
-                           32'hbfc0_0380;
-   assign pc_trap =        (except_type == `EXC_TYPE_NOEXC) ? 1'b0:
-                           1'b1;
-   assign flush_exception =   (except_type == `EXC_TYPE_NOEXC) ? 1'b0:
-                           1'b1;
-   assign badvaddrM =      (pcError) ? pcM : alu_outM;
+   // assign pc_exception =      (except_type == `EXC_TYPE_NOEXC) ? `ZeroWord:
+   //                         (except_type == `EXC_TYPE_ERET)? cp0_epc :
+   //                         32'hbfc0_0380;
+   // assign pc_trap =        (except_type == `EXC_TYPE_NOEXC) ? 1'b0:
+   //                         1'b1;
+   // assign flush_exception =   (except_type == `EXC_TYPE_NOEXC) ? 1'b0:
+   //                         1'b1;
+   // assign badvaddrM =      (pcError) ? pcM : alu_outM;
 
    // // 提高性能;
-   //  assign pc_except =      (int) | (addrErrorLw | pcError) | (ri) | (break) | (overflow)  
-   //                                                  ? 32'hbfc0_0380 
-   //                          (eretM)                 ? `ZeroWord       :
-   //                                                      cp0_epc         ;
+    assign pc_exception    =  (int) | (addrErrorLw | pcError) | (ri) | (break) | (overflow) ? 32'hbfc0_0380 : 
+                              (eretM)  ?    `ZeroWord       :
+                              cp0_epc;
 
-   //  assign pc_trap =      (int) | (addrErrorLw | pcError) | (ri) | (break) | (overflow) | (eretM) 
-   //                                                  ? 1'b1   :  1'b0  ;
+    assign pc_trap         =  (int) | (addrErrorLw | pcError) | (ri) | (break) | (overflow) | (eretM);
 
-   //  assign flush_except =   pc_trap                          ;
+    assign flush_exception =  pc_trap;
 
-   //  assign badvaddrM =      (pcError) ? pcM : alu_outM       ;
+    assign badvaddrM       =  (pcError) ? pcM : alu_outM       ;
    
 endmodule

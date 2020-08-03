@@ -94,6 +94,7 @@ module datapath (
     wire reg_write_enM;
     wire mem_to_regM;
     wire [31:0] resultM;
+    wire [31:0] resultM_without_rdata;
     wire actual_takeM;
     wire succM;
     wire pred_takeM;
@@ -139,6 +140,11 @@ module datapath (
     wire [31:0] resultW;
 
     wire [31:0] cp0_statusW, cp0_causeW, cp0_epcW, cp0_data_oW;
+    
+    wire [7:0] l_s_typeD, l_s_typeE, l_s_typeM;
+    wire [3:0] addr_typeD, addr_typeE, addr_typeM;
+    wire mult_stallE;
+    wire is_multD;
 
 // stall
 
@@ -159,6 +165,8 @@ module datapath (
         //ID
         .sign_extD(sign_extD),
         .is_divD(is_divD),
+        .is_multD(is_multD),
+        .l_s_typeD(l_s_typeD),
         //EX
         .reg_dstE(reg_dstE),
         .alu_imm_selE(alu_imm_selE),
@@ -194,12 +202,14 @@ module datapath (
     hazard hazard0(
         .clk(clk), .rst(rst),
         .instrE(instrE), .instrM(instrM),
+        .l_s_typeM(l_s_typeM),
 
         .i_cache_stall(i_cache_stall),
         .d_cache_stall(d_cache_stall),
         .mem_read_enM(mem_read_enM),
         .mem_write_enM(mem_write_enM),
         .div_stallE(div_stallE),
+        .mult_stallE(mult_stallE),
 
         .flush_jump_confilctE   (flush_jump_confilctE),
         .flush_pred_failedM     (flush_pred_failedM),
@@ -357,6 +367,7 @@ module datapath (
         .alu_controlD(alu_controlD),
         .jumpD(jumpD),
         .branch_judge_controlD(branch_judge_controlD),
+        .l_s_typeD(l_s_typeD),
         
         .pcE(pcE),
         .rsE(rsE), .rd1E(rd1E), .rd2E(rd2E),
@@ -372,7 +383,8 @@ module datapath (
         .saE(saE),
         .alu_controlE(alu_controlE),
         .jumpE(jumpE),
-        .branch_judge_controlE(branch_judge_controlE)
+        .branch_judge_controlE(branch_judge_controlE),
+        .l_s_typeE(l_s_typeE)
     );
 //EX
     alu alu0(
@@ -385,8 +397,10 @@ module datapath (
         .hilo(hiloM),
         .stallD(stallD),
         .is_divD(is_divD),
+        .is_multD(is_multD),
 
         .div_stallE(div_stallE),
+        .mult_stallE(mult_stallE),
         .alu_outE(alu_outE),
         .overflowE(overflowE)
     );
@@ -402,7 +416,7 @@ module datapath (
     //数据前推(bypass)
     mux4 #(32) mux4_forward_aE(
         rd1E,                       
-        resultM,
+        resultM_without_rdata,
         resultW,
         pc_plus4D,                          // 执行jalr，jal指令；写入到$ra寄存器的数据（跳转指令对应延迟槽指令的下一条指令的地址即PC+8） //可以保证延迟槽指令不会被flush，故plush_4D存在
         {2{jumpE | branchE}} | forward_aE,  // 当exe阶段是jal或者jalr指令，或者bxxzal时，jumpE | branchE== 1；选择pc_plus4D；
@@ -411,15 +425,15 @@ module datapath (
     );
     mux4 #(32) mux4_forward_bE(
         rd2E,                               //
-        resultM,                            //
+        resultM_without_rdata,                            //
         resultW,                            // 
         immE,                               //立即数
         {2{alu_imm_selE}} | forward_bE,     //main_decoder产生alu_imm_selE信号，表示alu第二个操作数为立即数
 
         src_bE
     );
-    mux4 #(32) mux4_rs_valueE(rd1E, resultM, resultW, 32'b0, forward_aE, rs_valueE); //数据前推后的rs寄存器的值
-    mux4 #(32) mux4_rt_valueE(rd2E, resultM, resultW, 32'b0, forward_bE, rt_valueE); //数据前推后的rt寄存器的值
+    mux4 #(32) mux4_rs_valueE(rd1E, resultM_without_rdata, resultW, 32'b0, forward_aE, rs_valueE); //数据前推后的rs寄存器的值
+    mux4 #(32) mux4_rt_valueE(rd2E, resultM_without_rdata, resultW, 32'b0, forward_bE, rt_valueE); //数据前推后的rt寄存器的值
 
     //计算branch结果
     branch_judge branch_judge0(
@@ -451,6 +465,7 @@ module datapath (
         .is_in_delayslot_iE(is_in_delayslot_iE),
         .rdE(rdE),
         .actual_takeE(actual_takeE),
+        .l_s_typeE(l_s_typeE),
 
         .pcM(pcM),
         .alu_outM(alu_outM),
@@ -463,7 +478,8 @@ module datapath (
         .overflowM(overflowM),
         .is_in_delayslot_iM(is_in_delayslot_iM),
         .rdM(rdM),
-        .actual_takeM(actual_takeM)
+        .actual_takeM(actual_takeM),
+        .l_s_typeM(l_s_typeM)
     );
 //MEM
     assign mem_addrM = alu_outM;
@@ -471,9 +487,9 @@ module datapath (
 
     // 是否需要控制 mem_en
     mem_ctrl mem_ctrl0(
-        .instrM(instrM),
-        .addr(alu_outM),
-    
+        .l_s_typeM(l_s_typeM),
+	    .addr(alu_outM),
+
         .data_wdataM(rt_valueM),    //原始的wdata
         .mem_wdataM(mem_wdataM),    //新的wdata
         .mem_wenM(mem_wenM),
@@ -535,6 +551,7 @@ module datapath (
         .epc_o(cp0_epcW)
     );
 
+    mux4 #(32) mux4_mem_forward(alu_outM, 0, hilo_oM, cp0_data_oW, {(hilo_to_regM | cp0_to_regM), (mem_to_regM | cp0_to_regM)}, resultM_without_rdata);
     mux4 #(32) mux4_mem_to_reg(alu_outM, mem_ctrl_rdataM, hilo_oM, cp0_data_oW, {(hilo_to_regM | cp0_to_regM), (mem_to_regM | cp0_to_regM)}, resultM);
 
     //branch predict result

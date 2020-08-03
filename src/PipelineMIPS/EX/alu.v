@@ -9,23 +9,29 @@ module alu (
     input wire [63:0] hilo,
     input wire stallD,
     input wire is_divD,
+    input wire is_multD,
 
     output reg div_stallE,
+    output wire mult_stallE,
     output wire [63:0] alu_outE,
     output wire overflowE
 );
-    wire [63:0] alu_out_div, alu_out_mul;
-    wire mul_sign;
-    wire mul_valid;
+    wire [63:0] alu_out_div, alu_out_mult;
+    wire mult_sign;
+    wire mult_valid;
     wire div_sign;
 	wire div_vaild;
 	wire ready;
     reg [31:0] alu_out_not_mul_div; //拓展成33位，便于判断溢出
     reg carry_bit;
 
+    wire [63:0] alu_out_signed_mult, alu_out_unsigned_mult;
+    wire signed_mult_ce, unsigned_mult_ce;
+    reg [1:0] cnt;
+
     assign alu_outE = ({64{div_vaild}} & alu_out_div)
-                    | ({64{mul_valid}} & alu_out_mul)
-                    | ({64{~mul_valid & ~div_vaild}} & {32'b0, alu_out_not_mul_div})
+                    | ({64{mult_valid}} & alu_out_mult)
+                    | ({64{~mult_valid & ~div_vaild}} & {32'b0, alu_out_not_mul_div})
                     | ({64{(alu_controlE == `ALU_MTHI)}} & {src_aE, hilo[31:0]})
                     | ({64{(alu_controlE == `ALU_MTLO)}} & {hilo[31:0], src_aE});
 
@@ -91,15 +97,43 @@ module alu (
 	);
 
     //multiply
-	assign mul_sign = (alu_controlE == `ALU_SIGNED_MULT);
-    assign mul_valid = (alu_controlE == `ALU_SIGNED_MULT) | (alu_controlE == `ALU_UNSIGNED_MULT);
-	mul_booth2 MUL(
-		.a(src_aE),
-		.b(src_bE),
-		.sign(mul_sign),   //1:signed
+	assign mult_sign = (alu_controlE == `ALU_SIGNED_MULT);
+    assign mult_valid = (alu_controlE == `ALU_SIGNED_MULT) | (alu_controlE == `ALU_UNSIGNED_MULT);
 
-		.result(alu_out_mul)
-	);
+    assign alu_out_mult = mult_sign ? alu_out_signed_mult : alu_out_unsigned_mult;
+	// 	.a(src_aE),
+	// 	.b(src_bE),
+	// 	.sign(mult_sign),   //1:signed
 
+	// 	.result(alu_out_mult)
+	// );
+
+    
+
+    always@(posedge clk) begin
+        cnt <= rst | (is_multD & ~stallD & ~flushE)  ? 0 :
+                (cnt[0] & cnt[1]) ? cnt :
+                cnt + 1;
+    end
+
+    assign unsigned_mult_ce = mult_valid & ~(cnt[0] & cnt[1]) ;
+    assign signed_mult_ce =  mult_valid & ~(cnt[0] & cnt[1]) ;
+    assign mult_stallE = mult_valid & (unsigned_mult_ce | signed_mult_ce);
+
+    signed_mult signed_mult0 (
+        .CLK(clk),  // input wire CLK
+        .A(src_aE),      // input wire [31 : 0] A
+        .B(src_bE),      // input wire [31 : 0] B
+        .CE(signed_mult_ce),    // input wire CE
+        .P(alu_out_signed_mult)      // output wire [63 : 0] P
+    );
+
+    unsigned_mult unsigned_mult0 (
+        .CLK(clk),  // input wire CLK
+        .A(src_aE),      // input wire [31 : 0] A
+        .B(src_bE),      // input wire [31 : 0] B
+        .CE(unsigned_mult_ce),    // input wire CE
+        .P(alu_out_unsigned_mult)      // output wire [63 : 0] P
+    );
 
 endmodule
