@@ -512,7 +512,7 @@ module datapath (
         .hilo(hiloM)        //传给alu进行拼接
     );
 
-    assign pcErrorM = |(pcM[1:0] ^ 2'b00); 
+    assign pcErrorM = |(pcM[1:0] ^ 2'b00);
     
     exception exception0(
         .rst(rst),

@@ -1,10 +1,12 @@
 module d_tlb (
     input wire [31:0] data_vaddr,
     input wire [31:0] data_vaddr2,
+    input wire [31:0] pcF,
 
     output wire [31:0] data_paddr,
     output wire [31:0] data_paddr2,
-    output wire no_cache
+    output wire no_cache,
+    output wire no_cache_i
 );
 
     assign data_paddr = data_vaddr[31:30]==2'b10 ? //kseg0 + kseg1
@@ -17,6 +19,10 @@ module d_tlb (
     
     assign no_cache = data_vaddr[31:29] == 3'b101 ? //kseg1
                         1'b1 : 1'b0;
+    
+    assign no_cache_i = pcF[31:29] == 3'b101 ? //kseg1
+                        1'b1 : 1'b0;
+
     // assign no_cache = data_vaddr[31:16] == 16'hbfaf ?   //外设，临时调d_cache用
     //                     1'b1 : 1'b0;
 endmodule

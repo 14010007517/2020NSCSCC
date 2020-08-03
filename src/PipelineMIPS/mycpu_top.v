@@ -56,7 +56,8 @@ module mycpu_top (
     assign rst = ~aresetn;
 
     //d_tlb - d_cache
-    wire no_cache           ;
+    wire no_cache           ;   //数据
+    wire no_cache_i         ;   //指令
 
     //datapath - cache
     wire inst_en            ;
@@ -148,15 +149,20 @@ module mycpu_top (
     d_tlb d_tlb0(
         .data_vaddr(data_addr_tmp),
         .data_vaddr2(mem_addrE_tmp),
+        .pcF(pcF),
 
         .data_paddr(data_addr),
         .data_paddr2(mem_addrE),
-        .no_cache(no_cache)
+        .no_cache(no_cache),
+        .no_cache_i(no_cache_i)
     );
 
     i_cache i_cache(
         .clk(clk), .rst(rst),
 
+        //TLB
+        .no_cache(no_cache_i),
+        
         //datapath
         .inst_en(inst_en),
         .pc_next(pc_next),

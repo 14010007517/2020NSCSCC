@@ -161,13 +161,10 @@ module d_cache (
 
     wire not_data_en = (state==HitJudge) && ~data_en;
 
-    wire w54;
-    assign w54 = |wena_tag_ram_way && (addra==7'h54);
-
     //-------------------debug-----------------
 //FSM
-    reg [2:0] state;
-    parameter IDLE = 3'b000, HitJudge = 3'b001, MissHandle=3'b011, NoCache=3'b010;
+    reg [1:0] state;
+    parameter IDLE = 2'b00, HitJudge = 2'b01, MissHandle=2'b11, NoCache=2'b10;
 
     always @(posedge clk) begin
         if(rst) begin
@@ -242,7 +239,7 @@ module d_cache (
 
     always @(posedge clk) begin
         saved_rdata <= rst ? 32'b0 :
-                      ( data_back & (cnt==offset)) | (no_cache & read_finish) ? rdata : saved_rdata;
+                      ( data_back & (cnt==offset) & ~no_cache) | (no_cache & read_finish) ? rdata : saved_rdata;
     end
 
     assign data_back = raddr_rcv & (rvalid & rready);
