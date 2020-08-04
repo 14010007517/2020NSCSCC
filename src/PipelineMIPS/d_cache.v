@@ -92,13 +92,15 @@ module d_cache (
     reg [WAY_NUM-2:0] LRU_bit[CACHE_LINE_NUM-1:0];  //4路采用3bit作为伪LRU算法
     reg [CACHE_LINE_NUM-1:0] dirty_bits_way[WAY_NUM-1:0];
 
+    //valid reg
+    reg [CACHE_LINE_NUM-1:0] valid_bits_way[WAY_NUM-1:0];
 
     //valid
     wire valid_way[WAY_NUM-1:0];
-    assign valid_way[0] = tag_way[0][0];
-    assign valid_way[1] = tag_way[1][0];
-    assign valid_way[2] = tag_way[2][0];
-    assign valid_way[3] = tag_way[3][0];
+    assign valid_way[0] =valid_bits_way[0][index];
+    assign valid_way[1] =valid_bits_way[1][index];
+    assign valid_way[2] =valid_bits_way[2][index];
+    assign valid_way[3] =valid_bits_way[3][index];
 
     //hit & miss
     wire hit, miss;
@@ -298,6 +300,24 @@ module d_cache (
                 LRU_bit[index][1] <= ~LRU_visit[1] ? ~LRU_visit[0] : LRU_bit[index][1];
                 LRU_bit[index][2] <=  LRU_visit[1] ? ~LRU_visit[0] : LRU_bit[index][2];
             end
+        end
+    end
+    
+//valid bit
+    always @(posedge clk) begin
+        if(rst) begin
+            for(tt=0; tt<CACHE_LINE_NUM; tt=tt+1) begin
+                valid_bits_way[0][tt] <= 0;
+                valid_bits_way[1][tt] <= 0;
+                valid_bits_way[2][tt] <= 0;
+                valid_bits_way[3][tt] <= 0;
+            end
+        end
+        else begin
+            valid_bits_way[0][index] <= wena_tag_ram_way[0] ? 1'b1 : valid_bits_way[0][index];
+            valid_bits_way[1][index] <= wena_tag_ram_way[1] ? 1'b1 : valid_bits_way[1][index];
+            valid_bits_way[2][index] <= wena_tag_ram_way[2] ? 1'b1 : valid_bits_way[2][index];
+            valid_bits_way[3][index] <= wena_tag_ram_way[3] ? 1'b1 : valid_bits_way[3][index];
         end
     end
 
