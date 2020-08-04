@@ -1,5 +1,8 @@
 module i_cache (
     input wire clk, rst,
+    
+    //tlb
+    input wire no_cache,
     //datapath
     input wire inst_en,
     input wire [31:0] pc_next,
@@ -108,7 +111,7 @@ module i_cache (
 
 //FSM
     reg [1:0] state;
-    parameter IDLE = 2'b00, HitJudge = 2'b01, LoadMemory = 2'b11;
+    parameter IDLE = 2'b00, HitJudge = 2'b01, LoadMemory = 2'b11, NoCache=2'b10;;
     always @(posedge clk) begin
         if(rst) begin
             state <= IDLE;
@@ -116,8 +119,10 @@ module i_cache (
         else begin
             case(state)
                 IDLE        : state <= ~stallF ? HitJudge : IDLE;
-                HitJudge    : state <= inst_en & miss ? LoadMemory : HitJudge;
+                HitJudge    : state <= inst_en & no_cache ? NoCache:
+                                       inst_en & miss     ? LoadMemory : HitJudge;
                 LoadMemory  : state <= read_finish ? IDLE : state;
+                NoCache     : state <= read_finish ? IDLE : NoCache;
             endcase
         end
     end
@@ -125,12 +130,13 @@ module i_cache (
 //DATAPATH
     reg [31:0] saved_rdata;
     assign stall = ~(state==IDLE || (state==HitJudge && hit));
-    assign inst_rdata = hit ? block_sel_way[sel] : saved_rdata;
+    assign inst_rdata = hit & ~no_cache ? block_sel_way[sel] : saved_rdata;
 
 //AXI
     always @(posedge clk) begin
         read_req <= (rst)               ? 1'b0 :
                     inst_en & (state == HitJudge) & miss & ~read_req ? 1'b1 :
+                    inst_en & no_cache & (state == HitJudge) & ~read_req ? 1'b1 :
                     read_finish         ? 1'b0 : read_req;
     end
     
@@ -142,21 +148,21 @@ module i_cache (
 
     reg [OFFSET_WIDTH-3:0] cnt;  //burst传输，计数当前传递的bank的编号
     always @(posedge clk) begin
-        cnt <= rst |read_finish ? 1'b0 :
+        cnt <= rst |read_finish|no_cache ? 1'b0 :
                data_back        ? cnt + 1 : cnt;
     end
 
     always @(posedge clk) begin
         saved_rdata <= rst                     ? 32'b0 :
-                       data_back & cnt==offset ? rdata : saved_rdata;
+                       (data_back & (cnt==offset) & ~no_cache) | (no_cache & read_finish) ? rdata : saved_rdata;
     end
 
     assign data_back = addr_rcv & (rvalid & rready);
     assign read_finish = addr_rcv & (rvalid & rready & rlast);
 
     //AXI signal
-    assign araddr = {tag, index}<<OFFSET_WIDTH; //将offset清0
-    assign arlen = BLOCK_NUM-1;
+    assign araddr = ~no_cache ? {tag, index}<<OFFSET_WIDTH : pcF; //将offset清0
+    assign arlen = ~no_cache ? BLOCK_NUM-1 : 8'd0;
     assign arvalid = read_req & ~addr_rcv;
     assign rready = addr_rcv;
 
@@ -164,7 +170,7 @@ module i_cache (
     wire write_LRU_en;
     wire [LOG2_WAY_NUM-1:0] LRU_visit;  //记录最近访问了哪路，用于更新LRU 
 
-    assign write_LRU_en = hit | read_finish;
+    assign write_LRU_en = ~no_cache & hit | ~no_cache & read_finish;
     assign LRU_visit = hit ? sel : evict_way;
     
     integer tt;
@@ -196,7 +202,7 @@ module i_cache (
     //write
     assign addra = index;
         //tag ram
-    assign wena_tag_ram_way = {WAY_NUM{read_finish}} & evict_mask;
+    assign wena_tag_ram_way = {WAY_NUM{read_finish & ~no_cache}} & evict_mask;
 
     assign tag_ram_dina = {tag, 1'b1};
 
@@ -205,10 +211,10 @@ module i_cache (
         //解码器
     decoder3x8 decoder0(cnt, wena_data_bank_mask);
     
-    assign wena_data_bank_way[0] = wena_data_bank_mask & {BLOCK_NUM{data_back & evict_mask[0]}};
-    assign wena_data_bank_way[1] = wena_data_bank_mask & {BLOCK_NUM{data_back & evict_mask[1]}};
-    assign wena_data_bank_way[2] = wena_data_bank_mask & {BLOCK_NUM{data_back & evict_mask[2]}};
-    assign wena_data_bank_way[3] = wena_data_bank_mask & {BLOCK_NUM{data_back & evict_mask[3]}};
+    assign wena_data_bank_way[0] = wena_data_bank_mask & {BLOCK_NUM{data_back & evict_mask[0] & ~no_cache}};
+    assign wena_data_bank_way[1] = wena_data_bank_mask & {BLOCK_NUM{data_back & evict_mask[1] & ~no_cache}};
+    assign wena_data_bank_way[2] = wena_data_bank_mask & {BLOCK_NUM{data_back & evict_mask[2] & ~no_cache}};
+    assign wena_data_bank_way[3] = wena_data_bank_mask & {BLOCK_NUM{data_back & evict_mask[3] & ~no_cache}};
 
     assign data_bank_dina = rdata;
 

@@ -56,12 +56,15 @@ module mycpu_top (
     assign rst = ~aresetn;
 
     //d_tlb - d_cache
-    wire no_cache           ;
+    wire no_cache_d         ;   //数据
+    wire no_cache_i         ;   //指令
 
     //datapath - cache
     wire inst_en            ;
     wire [31:0] pcF         ;
+    wire [31:0] pcF_tmp     ;
     wire [31:0] pc_next     ;
+    wire [31:0] pc_next_tmp ;
     wire [31:0] inst_rdata  ; 
     wire i_cache_stall      ;
     wire stallF             ;
@@ -121,8 +124,8 @@ module mycpu_top (
         .ext_int(ext_int),
 
         //inst
-        .pcF(pcF),
-        .pc_next(pc_next),
+        .pcF(pcF_tmp),
+        .pc_next(pc_next_tmp),
         .inst_enF(inst_en),
         .instrF(inst_rdata),
         .i_cache_stall(i_cache_stall),
@@ -148,17 +151,25 @@ module mycpu_top (
 
     //简易的MMU
     d_tlb d_tlb0(
+        .inst_vaddr(pcF_tmp),
+        .inst_vaddr2(pc_next_tmp),
         .data_vaddr(data_addr_tmp),
         .data_vaddr2(mem_addrE_tmp),
 
+        .inst_paddr(pcF),
+        .inst_paddr2(pc_next),
         .data_paddr(data_addr),
         .data_paddr2(mem_addrE),
-        .no_cache(no_cache)
+        .no_cache_d(no_cache_d),
+        .no_cache_i(no_cache_i)
     );
 
     i_cache i_cache(
         .clk(clk), .rst(rst),
 
+        //TLB
+        .no_cache(no_cache_i),
+        
         //datapath
         .inst_en(inst_en),
         .pc_next(pc_next),
@@ -183,7 +194,7 @@ module mycpu_top (
         .clk(clk), .rst(rst),
 
         //TLB
-        .no_cache(no_cache),
+        .no_cache(no_cache_d),
 
         //datapath
         .data_en(data_en),
