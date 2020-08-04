@@ -223,7 +223,7 @@ module i_cache (
         for(i = 0; i < WAY_NUM; i=i+1) begin: way
             i_tag_ram tag_ram (
                 .clka(clk),    // input wire clka
-                .ena(wena_tag_ram_way[i]),      // input wire ena
+                .ena(wena_tag_ram_way[i] & ~no_cache),      // input wire ena
                 .wea(wena_tag_ram_way[i]),      // input wire [0 : 0] wea
                 .addra(addra),  // input wire [9 : 0] addra
                 .dina(tag_ram_dina),    // input wire [20 : 0] dina
@@ -235,7 +235,7 @@ module i_cache (
             for(j = 0; j < BLOCK_NUM; j=j+1) begin: bank
                 i_data_bank data_bank (
                     .clka(clk),    // input wire clka
-                    .ena(wena_data_bank_way[i][j]),      // input wire ena
+                    .ena(wena_data_bank_way[i][j] & ~no_cache),      // input wire ena
                     .wea({4{wena_data_bank_way[i][j]}}),      // input wire [3 : 0] wea
                     .addra(addra),  // input wire [9 : 0] addra
                     .dina(data_bank_dina),    // input wire [31 : 0] dina

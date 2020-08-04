@@ -354,21 +354,25 @@ module d_cache (
     genvar i;
     generate
         for(i = 0; i< BLOCK_NUM; i=i+1) begin: wena_data_bank
-            mux2 mux2_way0({4{data_back & wena_data_bank_mask[i] & evict_mask[0] & ~no_cache}}, data_wen, write & hit & (i==offset) & sel_mask[0], wena_data_bank_way[0][i]);
-            mux2 mux2_way1({4{data_back & wena_data_bank_mask[i] & evict_mask[1] & ~no_cache}}, data_wen, write & hit & (i==offset) & sel_mask[1], wena_data_bank_way[1][i]);
-            mux2 mux2_way2({4{data_back & wena_data_bank_mask[i] & evict_mask[2] & ~no_cache}}, data_wen, write & hit & (i==offset) & sel_mask[2], wena_data_bank_way[2][i]);
-            mux2 mux2_way3({4{data_back & wena_data_bank_mask[i] & evict_mask[3] & ~no_cache}}, data_wen, write & hit & (i==offset) & sel_mask[3], wena_data_bank_way[3][i]);
+            mux2 #(4) mux2_way0({4{data_back & wena_data_bank_mask[i] & evict_mask[0] & ~no_cache}}, data_wen, write & hit & (i==offset) & sel_mask[0], wena_data_bank_way[0][i]);
+            mux2 #(4) mux2_way1({4{data_back & wena_data_bank_mask[i] & evict_mask[1] & ~no_cache}}, data_wen, write & hit & (i==offset) & sel_mask[1], wena_data_bank_way[1][i]);
+            mux2 #(4) mux2_way2({4{data_back & wena_data_bank_mask[i] & evict_mask[2] & ~no_cache}}, data_wen, write & hit & (i==offset) & sel_mask[2], wena_data_bank_way[2][i]);
+            mux2 #(4) mux2_way3({4{data_back & wena_data_bank_mask[i] & evict_mask[3] & ~no_cache}}, data_wen, write & hit & (i==offset) & sel_mask[3], wena_data_bank_way[3][i]);
         end
     endgenerate
             //写数据
-    assign data_bank_dina = (write & hit) | (write & (cnt == offset)) ? data_wdata : rdata; 
-
+    wire [31:0] data_wen32;
+    assign data_wen32 = {{8{data_wen[3]}}, {8{data_wen[2]}}, {8{data_wen[1]}}, {8{data_wen[0]}}};
+    assign data_bank_dina = (write & hit) ? data_wdata :
+                            (write & (cnt == offset)) ? (rdata & ~data_wen32) | (data_wdata & data_wen32) :
+                            rdata;
+    
     genvar j;
     generate
         for(i = 0; i < WAY_NUM; i=i+1) begin: way
             d_tag_ram tag_ram (
                 .clka(clk),    // input wire clka
-                .ena(wena_tag_ram_way[i]),      // input wire ena
+                .ena(wena_tag_ram_way[i] & ~no_cache),      // input wire ena
                 .wea(wena_tag_ram_way[i]),      // input wire [0 : 0] wea
                 .addra(addra),  // input wire [9 : 0] addra
                 .dina(tag_ram_dina),    // input wire [20 : 0] dina
@@ -381,7 +385,7 @@ module d_cache (
             for(j = 0; j < BLOCK_NUM; j=j+1) begin: bank
                 d_data_bank data_bank (
                     .clka(clk),    // input wire clka
-                    .ena(|wena_data_bank_way[i][j]),      // input wire ena
+                    .ena(|wena_data_bank_way[i][j] & ~no_cache),      // input wire ena
                     .wea(wena_data_bank_way[i][j]),      // input wire [3 : 0] wea
                     .addra(addra),  // input wire [9 : 0] addra
                     .dina(data_bank_dina),    // input wire [31 : 0] dina
