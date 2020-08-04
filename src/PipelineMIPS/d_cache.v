@@ -195,7 +195,7 @@ module d_cache (
         collisionM <= rst ? 0 : collisionE;
     end
 
-    assign stall = ~(state==IDLE || state==HitJudge && hit);
+    assign stall = ~(state==IDLE || state==HitJudge && hit && ~no_cache);
     assign data_rdata = hit & ~no_cache & ~collisionM ? block_sel_way[sel]:
                         collisionM     ? data_wdata_r: saved_rdata;
 //AXI

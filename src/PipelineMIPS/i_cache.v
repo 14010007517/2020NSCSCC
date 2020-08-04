@@ -129,7 +129,7 @@ module i_cache (
 
 //DATAPATH
     reg [31:0] saved_rdata;
-    assign stall = ~(state==IDLE || (state==HitJudge && hit));
+    assign stall = ~(state==IDLE || (state==HitJudge) && hit && ~no_cache);
     assign inst_rdata = hit & ~no_cache ? block_sel_way[sel] : saved_rdata;
 
 //AXI
