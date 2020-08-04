@@ -9,6 +9,7 @@ module datapath (
     input wire [31:0] instrF,  //注：instr ram时钟取反
     input wire i_cache_stall,
     output wire stallF,
+    output wire stallM,
 
     //data
     output wire mem_enM,                    
@@ -196,13 +197,13 @@ module datapath (
         .branch_judge_controlD(branch_judge_controlD)
     );
 
-    wire stallF, stallD, stallE, stallM, stallW;
+    wire stallD, stallE, stallW;
     wire flushF, flushD, flushE, flushM, flushW;
     wire [1:0] forward_aE, forward_bE;
     hazard hazard0(
         .clk(clk), .rst(rst),
         .instrE(instrE), .instrM(instrM),
-        .l_s_typeM(l_s_typeM),
+        .l_s_typeE(l_s_typeE),
 
         .i_cache_stall(i_cache_stall),
         .d_cache_stall(d_cache_stall),
@@ -215,10 +216,12 @@ module datapath (
         .flush_pred_failedM     (flush_pred_failedM),
         .flush_exceptionM       (flush_exceptionM),
 
-        .rsE(rsE),
-        .rtE(rtE),
+        .rsE(rsE),  .rsD(rsD),
+        .rtE(rtE),  .rtD(rtD),
         .reg_write_enM(reg_write_enM),
+        .reg_write_enE(reg_write_enE),
         .reg_write_enW(reg_write_enW),
+        .reg_writeE(reg_writeE),
         .reg_writeM(reg_writeM),
         .reg_writeW(reg_writeW),
 

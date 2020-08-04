@@ -13,7 +13,7 @@ module d_cache (
     input wire [31:0] mem_addrE,
     input wire mem_read_enE,
     input wire mem_write_enE,
-    input wire stallF,
+    input wire stallM,
 
     //arbitrater
     output wire [31:0] araddr,
@@ -175,7 +175,7 @@ module d_cache (
         end
         else begin
             case(state)
-                IDLE        : state <= (mem_read_enE | mem_write_enE) & ~stallF ? HitJudge : IDLE;
+                IDLE        : state <= (mem_read_enE | mem_write_enE) & ~stallM ? HitJudge : IDLE;
                 HitJudge    : state <= data_en & no_cache           ? NoCache :
                                        data_en & miss               ? MissHandle :
                                        mem_read_enE | mem_write_enE ? HitJudge :
@@ -285,7 +285,7 @@ module d_cache (
     wire write_LRU_en;
     wire [LOG2_WAY_NUM-1:0] LRU_visit;  //记录最近访问了哪路，用于更新LRU 
 
-    assign write_LRU_en = ~no_cache & hit & ~stallF | ~no_cache & read_finish;
+    assign write_LRU_en = ~no_cache & hit & ~stallM | ~no_cache & read_finish;
     assign LRU_visit = hit ? sel : evict_way;
     integer tt;
     always @(posedge clk) begin
@@ -310,7 +310,7 @@ module d_cache (
     wire write_dirty_bit;   //dirty被修改成什么
 
     assign write_dirty_bit_en =  ~no_cache & (
-                                    read & read_finish | write & hit & ~stallF |
+                                    read & read_finish | write & hit & ~stallM |
                                     (state==MissHandle) & read_finish
                                 );
     assign write_way_sel = write & hit ? sel : evict_way;
@@ -338,8 +338,8 @@ module d_cache (
     end
 //cache ram
     //read
-    assign enb_tag_ram = (mem_read_enE || mem_write_enE) && ~stallF; 
-    assign enb_data_bank = (mem_read_enE || mem_write_enE) && ~stallF; //#sw时，不用读取data# 改：sw遇到miss和dirty, 仍然需要读 #除非延迟一个周期写。
+    assign enb_tag_ram = (mem_read_enE || mem_write_enE) && ~stallM; 
+    assign enb_data_bank = (mem_read_enE || mem_write_enE) && ~stallM; //#sw时，不用读取data# 改：sw遇到miss和dirty, 仍然需要读 #除非延迟一个周期写。
 
     assign addrb = indexE;  //read: 读tag ram和data ram; write: 读tag ram
     //write

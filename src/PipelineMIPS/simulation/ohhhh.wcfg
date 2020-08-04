@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="444461500fs"></ZoomStartTime>
-      <ZoomEndTime time="444870501fs"></ZoomEndTime>
-      <Cursor1Time time="444533500fs"></Cursor1Time>
+      <ZoomStartTime time="64495060fs"></ZoomStartTime>
+      <ZoomEndTime time="64508101fs"></ZoomEndTime>
+      <Cursor1Time time="64498170fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="232"></NameColumnWidth>
-      <ValueColumnWidth column_width="58"></ValueColumnWidth>
+      <NameColumnWidth column_width="313"></NameColumnWidth>
+      <ValueColumnWidth column_width="172"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="13" />
+   <WVObjectSize size="20" />
    <wave_markers>
       <marker time="11885500" label="" />
       <marker time="472565600" label="" />
@@ -37,6 +37,7 @@
    <wvobject fp_name="group40" type="group">
       <obj_property name="label">DEBUG</obj_property>
       <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="/tb_top/cpu_clk" type="logic">
          <obj_property name="ElementShortName">cpu_clk</obj_property>
          <obj_property name="ObjectShortName">cpu_clk</obj_property>
@@ -464,6 +465,7 @@
    <wvobject fp_name="group222" type="group">
       <obj_property name="label">EXE</obj_property>
       <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="group107" type="group">
          <obj_property name="label">ALU</obj_property>
          <obj_property name="DisplayName">label</obj_property>
@@ -516,21 +518,9 @@
             <obj_property name="ElementShortName">alu_out_div[63:0]</obj_property>
             <obj_property name="ObjectShortName">alu_out_div[63:0]</obj_property>
          </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/alu0/alu_out_mul" type="array">
-            <obj_property name="ElementShortName">alu_out_mul[63:0]</obj_property>
-            <obj_property name="ObjectShortName">alu_out_mul[63:0]</obj_property>
-         </wvobject>
          <wvobject fp_name="group703" type="group">
             <obj_property name="label">no use</obj_property>
             <obj_property name="DisplayName">label</obj_property>
-            <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/alu0/mul_sign" type="logic">
-               <obj_property name="ElementShortName">mul_sign</obj_property>
-               <obj_property name="ObjectShortName">mul_sign</obj_property>
-            </wvobject>
-            <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/alu0/mul_valid" type="logic">
-               <obj_property name="ElementShortName">mul_valid</obj_property>
-               <obj_property name="ObjectShortName">mul_valid</obj_property>
-            </wvobject>
             <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/alu0/div_sign" type="logic">
                <obj_property name="ElementShortName">div_sign</obj_property>
                <obj_property name="ObjectShortName">div_sign</obj_property>
@@ -1195,7 +1185,6 @@
    <wvobject fp_name="group276" type="group">
       <obj_property name="label">Hazard</obj_property>
       <obj_property name="DisplayName">label</obj_property>
-      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="group893" type="group">
          <obj_property name="label">no use</obj_property>
          <obj_property name="DisplayName">label</obj_property>
@@ -1765,8 +1754,8 @@
                   <obj_property name="ObjectShortName">write_LRU_en</obj_property>
                </wvobject>
                <wvobject fp_name="/tb_top/soc_lite/u_cpu/d_cache/LRU_bit" type="array">
-                  <obj_property name="ElementShortName">LRU_bit[127:0][3:0]</obj_property>
-                  <obj_property name="ObjectShortName">LRU_bit[127:0][3:0]</obj_property>
+                  <obj_property name="ElementShortName">LRU_bit[127:0][2:0]</obj_property>
+                  <obj_property name="ObjectShortName">LRU_bit[127:0][2:0]</obj_property>
                </wvobject>
             </wvobject>
             <wvobject fp_name="group637" type="group">
@@ -2087,8 +2076,8 @@
             <obj_property name="ObjectShortName">offset[2:0]</obj_property>
          </wvobject>
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/d_cache/LRU_bit" type="array">
-            <obj_property name="ElementShortName">LRU_bit[127:0][3:0]</obj_property>
-            <obj_property name="ObjectShortName">LRU_bit[127:0][3:0]</obj_property>
+            <obj_property name="ElementShortName">LRU_bit[127:0][2:0]</obj_property>
+            <obj_property name="ObjectShortName">LRU_bit[127:0][2:0]</obj_property>
          </wvobject>
          <wvobject fp_name="group626" type="group">
             <obj_property name="label">AXI Req</obj_property>
@@ -2440,46 +2429,6 @@
    <wvobject fp_name="group1886" type="group">
       <obj_property name="label">Rate</obj_property>
       <obj_property name="DisplayName">label</obj_property>
-      <wvobject fp_name="/tb_top/soc_lite/u_cpu/i_cache/i_hit" type="array">
-         <obj_property name="ElementShortName">i_hit[31:0]</obj_property>
-         <obj_property name="ObjectShortName">i_hit[31:0]</obj_property>
-         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_cpu/i_cache/instr_cnt" type="array">
-         <obj_property name="ElementShortName">instr_cnt[31:0]</obj_property>
-         <obj_property name="ObjectShortName">instr_cnt[31:0]</obj_property>
-         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_cpu/d_cache/d_hit" type="array">
-         <obj_property name="ElementShortName">d_hit[31:0]</obj_property>
-         <obj_property name="ObjectShortName">d_hit[31:0]</obj_property>
-         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_cpu/d_cache/storeload_cnt" type="array">
-         <obj_property name="ElementShortName">storeload_cnt[31:0]</obj_property>
-         <obj_property name="ObjectShortName">storeload_cnt[31:0]</obj_property>
-         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_cpu/hit_rate0/i_d" type="array">
-         <obj_property name="ElementShortName">i_d[31:0]</obj_property>
-         <obj_property name="ObjectShortName">i_d[31:0]</obj_property>
-         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_cpu/hit_rate0/ix_dx" type="array">
-         <obj_property name="ElementShortName">ix_dx[31:0]</obj_property>
-         <obj_property name="ObjectShortName">ix_dx[31:0]</obj_property>
-         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_cpu/hit_rate0/i_dx" type="array">
-         <obj_property name="ElementShortName">i_dx[31:0]</obj_property>
-         <obj_property name="ObjectShortName">i_dx[31:0]</obj_property>
-         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_top/soc_lite/u_cpu/hit_rate0/ix_d" type="array">
-         <obj_property name="ElementShortName">ix_d[31:0]</obj_property>
-         <obj_property name="ObjectShortName">ix_d[31:0]</obj_property>
-         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-      </wvobject>
    </wvobject>
    <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/l_s_typeM" type="array">
       <obj_property name="ElementShortName">l_s_typeM[7:0]</obj_property>
