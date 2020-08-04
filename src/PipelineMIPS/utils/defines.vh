@@ -36,6 +36,7 @@
 
 `define EXE_MULT    6'b011000
 `define EXE_MULTU   6'b011001
+`define EXE_MUL     6'b011100
 
 `define EXE_DIV  6'b011010
 `define EXE_DIVU  6'b011011

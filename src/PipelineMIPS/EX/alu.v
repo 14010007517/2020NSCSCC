@@ -98,7 +98,7 @@ module alu (
 
     //multiply
 	assign mult_sign = (alu_controlE == `ALU_SIGNED_MULT);
-    assign mult_valid = (alu_controlE == `ALU_SIGNED_MULT) | (alu_controlE == `ALU_UNSIGNED_MULT);
+    assign mult_valid = (alu_controlE == `ALU_SIGNED_MULT) | (alu_controlE == `ALU_UNSIGNED_MULT)  | (alu_controlE == `ALU_MUL);
 
     assign alu_out_mult = mult_sign ? alu_out_signed_mult : alu_out_unsigned_mult;
 	// 	.a(src_aE),

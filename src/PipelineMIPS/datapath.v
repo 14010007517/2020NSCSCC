@@ -155,6 +155,11 @@ module datapath (
     assign debug_wb_rf_wnum     = datapath.reg_writeM;
     assign debug_wb_rf_wdata    = datapath.resultM;
 
+    (*mark_debug = "true"*) wire [31:0] ila_pcF;
+    (*mark_debug = "true"*) wire [31:0] ila_instrF;
+    assign ila_pcF = pcF;
+    assign ila_instrF = instrF;
+
 //-------------------------------------------------------------------
 //模块实例化
     main_decoder main_decoder0(

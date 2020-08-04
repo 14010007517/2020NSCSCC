@@ -28,6 +28,6 @@
 `define ALU_NEQ             5'b1_1010
 `define ALU_MTHI            5'b1_1011
 `define ALU_MTLO            5'b1_1100
-                            // 5'b1_1101
+`define ALU_MUL             5'b1_1101
                             // 5'b1_1110
 `define ALU_DONOTHING       5'b1_1111

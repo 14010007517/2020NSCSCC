@@ -76,7 +76,7 @@ module main_decoder(
 	assign eretD = ~(|(instrD ^ {`EXE_ERET_MFTC, `EXE_ERET}));
 
 	assign is_divD = ~(|op_code) & ~(|(funct[5:1] ^ 5'b01101));	//opcode==0, funct==01101x
-	assign is_multD = ~(|op_code) & ~(|(funct[5:1] ^ 5'b01100));
+	assign is_multD = (~(|op_code) & ~(|(funct[5:1] ^ 5'b01100))) | op_code == `EXE_MUL;
 
 	always @(*) begin
 		riD = 1'b0;
@@ -87,7 +87,7 @@ module main_decoder(
 					`EXE_ADD,`EXE_ADDU,`EXE_SUB,`EXE_SUBU,`EXE_SLTU,`EXE_SLT ,
 					`EXE_AND,`EXE_NOR, `EXE_OR, `EXE_XOR,
 					`EXE_SLLV, `EXE_SLL, `EXE_SRAV, `EXE_SRA, `EXE_SRLV, `EXE_SRL,
-					`EXE_MFHI, `EXE_MFLO : begin
+					`EXE_MFHI, `EXE_MFLO: begin
 						regfile_ctrl 	 =  4'b1_00_0;
 						mem_ctrl 		 =  3'b0;
 					end
@@ -180,6 +180,11 @@ module main_decoder(
 						mem_ctrl  =  3'b0;
 					end
 				endcase
+			end
+
+			`EXE_MUL: begin
+				regfile_ctrl  =  4'b1_00_0;
+				mem_ctrl  =  3'b0;
 			end
 
 			default: begin

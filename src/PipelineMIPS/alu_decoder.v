@@ -71,6 +71,7 @@ module alu_decoder(
 				//memory
 			`EXE_LW, `EXE_LB, `EXE_LBU, `EXE_LH, `EXE_LHU, `EXE_SW, `EXE_SB, `EXE_SH:
 						alu_controlD <= `ALU_ADDU;
+			`EXE_MUL: alu_controlD <= `ALU_MUL;
 			// `EXE_BEQ:
             //     alu_controlD <= `ALU_EQ;
             // `EXE_BGTZ:
