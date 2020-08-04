@@ -377,7 +377,7 @@ module d_cache (
                 .dina(tag_ram_dina),    // input wire [20 : 0] dina
 
                 .clkb(clk),    // input wire clkb
-                .enb(enb_tag_ram),      // input wire enb
+                .enb(enb_tag_ram & ~collisionE),      // input wire enb
                 .addrb(addrb),  // input wire [9 : 0] addrb
                 .doutb(tag_way[i])  // output wire [20 : 0] doutb
             );
@@ -390,7 +390,7 @@ module d_cache (
                     .dina(data_bank_dina),    // input wire [31 : 0] dina
 
                     .clkb(clk),    // input wire clkb
-                    .enb(enb_data_bank),      // input wire enb
+                    .enb(enb_data_bank & ~collisionE),      // input wire enb
                     .addrb(addrb),  // input wire [9 : 0] addrb
                     .doutb(block_way[i][j])  // output wire [31 : 0] doutb
                 );

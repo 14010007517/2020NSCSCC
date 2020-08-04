@@ -45,11 +45,11 @@ module exception(
    // assign badvaddrM =      (pcError) ? pcM : alu_outM;
 
    // // 提高性能;
-    assign pc_exception    =  (int) | (addrErrorLw | pcError) | (ri) | (break) | (overflow) ? 32'hbfc0_0380 : 
-                              (eretM)  ?    `ZeroWord       :
-                              cp0_epc;
+    assign pc_exception    =  (int) | (addrErrorLw | pcError | addrErrorSw) | (ri) | (break) | (overflow) |(syscall) ? 32'hbfc0_0380 : 
+                              (eretM)  ?     cp0_epc :
+                              `ZeroWord;
 
-    assign pc_trap         =  (int) | (addrErrorLw | pcError) | (ri) | (break) | (overflow) | (eretM);
+    assign pc_trap         =  (int) | (addrErrorLw | pcError | addrErrorSw) | (ri) | (break) | (overflow) | (eretM) | (syscall);
 
     assign flush_exception =  pc_trap;
 
