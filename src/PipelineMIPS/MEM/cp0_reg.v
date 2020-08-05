@@ -61,7 +61,8 @@ module cp0_reg(
       end
       else begin
          //计时器加1
-         count_inner = count_inner + 1;
+         cause_o[`IP7_IP2_BITS] <= ext_int;   
+         count_inner <= count_inner + 1;
          if(compare_o != 32'b0 && count_inner == compare_o) begin
             timer_int_o <= `InterruptAssert;
          end
@@ -78,7 +79,6 @@ module cp0_reg(
                      cause_o[`BD_BIT] <= 1'b0;
                   end
                   status_o[`EXL_BIT] <= 1'b1;
-                  cause_o[`IP7_IP2_BITS] <= ext_int;
                   cause_o[`EXC_CODE_BITS] <= `EXC_CODE_INT;
                end
                `EXC_TYPE_ADEL: begin
