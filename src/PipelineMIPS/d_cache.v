@@ -97,10 +97,10 @@ module d_cache (
 
     //valid
     wire valid_way[WAY_NUM-1:0];
-    assign valid_way[0] =valid_bits_way[0]index];
-    assign valid_way[1] =valid_bits_way[1]index];
-    assign valid_way[2] =valid_bits_way[2]index];
-    assign valid_way[3] =valid_bits_way[3]index];
+    assign valid_way[0] =valid_bits_way[0][index];
+    assign valid_way[1] =valid_bits_way[1][index];
+    assign valid_way[2] =valid_bits_way[2][index];
+    assign valid_way[3] =valid_bits_way[3][index];
 
     //hit & miss
     wire hit, miss;

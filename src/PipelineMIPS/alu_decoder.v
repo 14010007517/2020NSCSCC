@@ -40,7 +40,7 @@ module alu_decoder(
 						//div and mul
 					`EXE_DIV:   	alu_controlD <= `ALU_SIGNED_DIV;
 					`EXE_DIVU:  	alu_controlD <= `ALU_UNSIGNED_DIV;
-					`EXE_MULT:  	alu_controlD <= `ALU_SIGNED_MULT;
+					`EXE_MULT, `EXE_MUL:  	alu_controlD <= `ALU_SIGNED_MULT;
 					`EXE_MULTU: 	alu_controlD <= `ALU_UNSIGNED_MULT;
 
 					//移位指令
