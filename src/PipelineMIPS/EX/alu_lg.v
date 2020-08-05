@@ -121,7 +121,7 @@ module alulg (
     //assign slt_result[0] = src_aE < src_bE ;
 
     assign sltu_result[31:1] = 31'd0;
-    assign sltu_result[0] = adder_cout;
+    assign sltu_result[0] = ~adder_cout;
     //assign sltu_result = {1'b0,src_aE} < {1'b0,src_bE};
 
     assign sll_result  = src_bE << src_aE[4:0];                                     // sll
@@ -188,7 +188,7 @@ module alulg (
 
     wire mult_ready;
     reg [3:0] cnt;
-    assign mult_ready = !(cnt ^ 4'b1000);
+    assign mult_ready = !(cnt ^ 4'b1001);
     always@(posedge clk) begin
         cnt <= rst | (is_multD & ~stallD & ~flushE) | flushE ? 0 :
                 mult_ready ? cnt :

@@ -104,7 +104,7 @@ module alu (
 	// );
 
     wire mult_ready;
-    assign mult_ready = !(cnt ^ 4'b1000);
+    assign mult_ready = !(cnt ^ 4'b1001);
 
     always@(posedge clk) begin
         cnt <= rst | (is_multD & ~stallD & ~flushE) | flushE ? 0 :
