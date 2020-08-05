@@ -72,7 +72,7 @@ module cp0_reg(
          if(en) begin
             case (except_type_i)
                `EXC_TYPE_INT: begin
-                  if(is_in_delayslot_i == `InDelaySlot) begin
+                  if(is_in_delayslot_i) begin
                      epc_o <= current_inst_addr_i - 4;
                      cause_o[`BD_BIT] <= 1'b1;
                   end else begin 
@@ -83,7 +83,7 @@ module cp0_reg(
                   cause_o[`EXC_CODE_BITS] <= `EXC_CODE_INT;
                end
                `EXC_TYPE_ADEL: begin
-                  if(is_in_delayslot_i == `InDelaySlot) begin
+                  if(is_in_delayslot_i) begin
                      epc_o <= current_inst_addr_i - 4;
                      cause_o[`BD_BIT] <= 1'b1;
                   end else begin 
@@ -95,7 +95,7 @@ module cp0_reg(
                   badvaddr_o <= badvaddr_i;
                end
                `EXC_TYPE_RI: begin
-                  if(is_in_delayslot_i == `InDelaySlot) begin
+                  if(is_in_delayslot_i) begin
                      epc_o <= current_inst_addr_i - 4;
                      cause_o[`BD_BIT] <= 1'b1;
                   end else begin 
@@ -106,7 +106,7 @@ module cp0_reg(
                   cause_o[`EXC_CODE_BITS] <= `EXC_CODE_RI;
                end
                `EXC_TYPE_SYS: begin
-                  if(is_in_delayslot_i == `InDelaySlot) begin
+                  if(is_in_delayslot_i) begin
                      epc_o <= current_inst_addr_i - 4;
                      cause_o[`BD_BIT] <= 1'b1;
                   end else begin 
@@ -117,7 +117,7 @@ module cp0_reg(
                   cause_o[`EXC_CODE_BITS] <= `EXC_CODE_SYS;
                end
                `EXC_TYPE_BP: begin
-                  if(is_in_delayslot_i == `InDelaySlot) begin
+                  if(is_in_delayslot_i) begin
                      epc_o <= current_inst_addr_i - 4;
                      cause_o[`BD_BIT] <= 1'b1;
                   end else begin 
@@ -128,7 +128,7 @@ module cp0_reg(
                   cause_o[`EXC_CODE_BITS] <= `EXC_CODE_BP;
                end
                `EXC_TYPE_ADES: begin
-                  if(is_in_delayslot_i == `InDelaySlot) begin
+                  if(is_in_delayslot_i) begin
                      epc_o <= current_inst_addr_i - 4;
                      cause_o[`BD_BIT] <= 1'b1;
                   end else begin 
@@ -140,7 +140,7 @@ module cp0_reg(
                   badvaddr_o <= badvaddr_i;
                end
                `EXC_TYPE_OV: begin
-                  if(is_in_delayslot_i == `InDelaySlot) begin
+                  if(is_in_delayslot_i) begin
                      epc_o <= current_inst_addr_i - 4;
                      cause_o[`BD_BIT] <= 1'b1;
                   end else begin 
@@ -151,7 +151,7 @@ module cp0_reg(
                   cause_o[`EXC_CODE_BITS] <= `EXC_CODE_OV;
                end
                // 32'h0000000d: begin             //自陷异常
-               //    if(is_in_delayslot_i == `InDelaySlot) begin
+               //    if(is_in_delayslot_i) begin
                //       /* code */
                //       epc_o <= current_inst_addr_i - 4;
                //       cause_o[`BD_BIT] <= 1'b1;
@@ -163,7 +163,7 @@ module cp0_reg(
                //    cause_o[`EXC_CODE_BITS] <= 5'b01101;
                // end
                `EXC_TYPE_ERET: begin
-                  status_o[`EXL_BIT] <= 1'b0;
+                  status_o[`EXL_BIT] <= 1'b0 ;
                end
             endcase
          end

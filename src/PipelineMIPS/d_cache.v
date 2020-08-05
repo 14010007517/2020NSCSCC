@@ -143,26 +143,6 @@ module d_cache (
     wire write_finish;  //写事务结束
 
     //-------------------debug-----------------
-    wire cache_lw, cache_sw;
-    assign cache_lw = ~no_cache & read;
-    assign cache_sw = ~no_cache & write;
-
-    wire miss_dirty;
-    assign miss_dirty = data_en & miss & dirty & ~no_cache;
-
-    wire lw_miss;
-    wire sw_miss, sw_hit;
-    wire lw_miss_dirty;
-    wire sw_miss_dirty;
-
-    assign sw_hit  = write & hit;
-    assign lw_miss = read & miss;
-    assign sw_miss = write & miss;
-    assign lw_miss_dirty = read & miss & dirty;
-    assign sw_miss_dirty = write & miss & dirty;
-
-    wire not_data_en = (state==HitJudge) && ~data_en;
-
     //-------------------debug-----------------
 //FSM
     reg [1:0] state;

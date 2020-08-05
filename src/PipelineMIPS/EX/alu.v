@@ -27,7 +27,7 @@ module alu (
 
     wire [63:0] alu_out_signed_mult, alu_out_unsigned_mult;
     wire signed_mult_ce, unsigned_mult_ce;
-    reg [2:0] cnt;
+    reg [3:0] cnt;
 
     assign alu_outE = ({64{div_vaild}} & alu_out_div)
                     | ({64{mult_valid}} & alu_out_mult)
@@ -108,16 +108,17 @@ module alu (
 	// 	.result(alu_out_mult)
 	// );
 
-    
+    wire mult_ready;
+    assign mult_ready = !(cnt ^ 4'b1000);
 
     always@(posedge clk) begin
-        cnt <= rst | (is_multD & ~stallD & ~flushE) |flushE ? 0 :
-                (cnt[2] & cnt[1] & cnt[0]) ? cnt :
+        cnt <= rst | (is_multD & ~stallD & ~flushE) | flushE ? 0 :
+                mult_ready ? cnt :
                 cnt + 1;
     end
 
-    assign unsigned_mult_ce = mult_valid & ~(cnt[2] & cnt[1] & cnt[0]) ;
-    assign signed_mult_ce =  mult_valid & ~(cnt[2] & cnt[1] & cnt[0]) ;
+    assign unsigned_mult_ce = mult_valid & ~mult_ready;
+    assign signed_mult_ce =  mult_valid & ~mult_ready;
     assign mult_stallE = mult_valid & (unsigned_mult_ce | signed_mult_ce);
 
     signed_mult signed_mult0 (
