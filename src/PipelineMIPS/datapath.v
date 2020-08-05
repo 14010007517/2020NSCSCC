@@ -540,6 +540,7 @@ module datapath (
     cp0_reg cp0(
         .clk(clk),
         .rst(rst),
+        .ext_int(ext_int),
         
         .en(flush_exceptionM),
 

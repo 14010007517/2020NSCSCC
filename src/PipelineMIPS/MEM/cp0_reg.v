@@ -11,10 +11,12 @@
 `define BD_BIT 31             //延迟槽
 `define TI_BIT 30             //计时器中断指示
 `define IP1_IP0_BITS 9:8      //软件中断位
+`define IP7_IP2_BITS 15:10      //软件中断位
 `define EXC_CODE_BITS 6:2     //异常编码
 
 module cp0_reg(
       input wire clk,rst,
+      input wire [5:0] ext_int,
       
       input wire en,                      //异常
 
@@ -76,6 +78,7 @@ module cp0_reg(
                      cause_o[`BD_BIT] <= 1'b0;
                   end
                   status_o[`EXL_BIT] <= 1'b1;
+                  cause_o[`IP7_IP2_BITS] <= ext_int;
                   cause_o[`EXC_CODE_BITS] <= `EXC_CODE_INT;
                end
                `EXC_TYPE_ADEL: begin
@@ -175,7 +178,7 @@ module cp0_reg(
                end
                `CP0_REG_STATUS:begin 
                   status_o[`IE_BIT] <= data_i[`IE_BIT];
-                  // status_o[`EXL_BIT] <= data_i[`EXL_BIT];
+                  status_o[`EXL_BIT] <= data_i[`EXL_BIT];
                   status_o[`IM7_IM0_BITS] <= data_i[`IM7_IM0_BITS];
                end
                `CP0_REG_CAUSE:begin 
