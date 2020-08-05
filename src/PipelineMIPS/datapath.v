@@ -154,20 +154,6 @@ module datapath (
     assign debug_wb_rf_wen      = {4{reg_write_enM & ~stallW & ~flush_exceptionM}};
     assign debug_wb_rf_wnum     = datapath.reg_writeM;
     assign debug_wb_rf_wdata    = datapath.resultM;
-
-     wire [31:0] ila_pcF;
-    //  wire [31:0] ila_instrF;
-    assign ila_pcF = pcF;
-    // assign ila_instrF = instrF;
-
-    ila_0 ila_00 (
-        .clk(clk), // input wire clk
-
-        .probe0(pcF), // input wire [31:0]  probe0  
-        .probe1(cp0_causeM), // input wire [31:0]  probe1 
-        .probe2({ext_int[2], stallW, i_cache_stall, stallF}) // input wire [3:0]  probe2
-    );
-
 //-------------------------------------------------------------------
 //模块实例化
     main_decoder main_decoder0(
