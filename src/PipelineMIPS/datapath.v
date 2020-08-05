@@ -407,7 +407,7 @@ module datapath (
     //     .overflowE(overflowE)
     // );
 
-    aluyz alu0(
+    alulg alu0(
         .clk(clk),
         .rst(rst),
         .flushE(flushE),
