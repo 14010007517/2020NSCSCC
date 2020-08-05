@@ -29,8 +29,9 @@ module d_tlb (
                 {3'b0, data_vaddr2[28:0]} :          //直接映射：去掉高3位
                 data_vaddr2;
     
-    assign no_cache_d = data_vaddr[31:29] == 3'b101 ? //kseg1
-                        1'b1 : 1'b0;
+    assign no_cache_d = (data_vaddr[31:29] == 3'b101) | //kseg1
+                        (data_vaddr[31] & ~(|data_vaddr[30:22]) & (|data_vaddr[21:20])) //8010_0000 - 803F_FFFF 为跑监控程序时用户代码空间。直接设置为非cache，从而不用实现i_cache和d_cache的一致性
+                        ? 1'b1 : 1'b0;
     
     assign no_cache_i = inst_vaddr[31:29] == 3'b101 ? //kseg1
                         1'b1 : 1'b0;
