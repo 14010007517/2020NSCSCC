@@ -111,7 +111,7 @@ module alu (
     
 
     always@(posedge clk) begin
-        cnt <= rst | (is_multD & ~stallD & ~flushE)  ? 0 :
+        cnt <= rst | (is_multD & ~stallD & ~flushE) |flushE ? 0 :
                 (cnt[2] & cnt[1] & cnt[0]) ? cnt :
                 cnt + 1;
     end

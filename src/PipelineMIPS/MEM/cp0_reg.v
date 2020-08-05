@@ -17,6 +17,7 @@
 module cp0_reg(
       input wire clk,rst,
       input wire [5:0] ext_int,
+      input wire stallW,                  
       
       input wire en,                      //异常
 
@@ -61,7 +62,7 @@ module cp0_reg(
       end
       else begin
          //计时器加1
-         cause_o[`IP7_IP2_BITS] <= ext_int;   
+         cause_o[`IP7_IP2_BITS] <= ~stallW ? ext_int : 0;   
          count_inner <= count_inner + 1;
          if(compare_o != 32'b0 && count_inner == compare_o) begin
             timer_int_o <= `InterruptAssert;

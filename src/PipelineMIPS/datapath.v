@@ -491,7 +491,7 @@ module datapath (
     );
 //MEM
     assign mem_addrM = alu_outM;
-    assign mem_enM = (mem_read_enM | mem_write_enM) & (~addrErrorSwM & ~addrErrorLwM);
+    assign mem_enM = (mem_read_enM | mem_write_enM) & ~flush_exceptionM;
 
     // 是否需要控制 mem_en
     mem_ctrl mem_ctrl0(
@@ -541,6 +541,7 @@ module datapath (
         .clk(clk),
         .rst(rst),
         .ext_int(ext_int),
+        .stallW(stallW),
         
         .en(flush_exceptionM),
 

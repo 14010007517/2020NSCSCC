@@ -18,10 +18,10 @@ module exception(
    //INTERUPT
    wire int;
    //             //IE             //EXL            
-   assign int =   cp0_status[0] && ~cp0_status[1] && (
+   assign int =   ~cp0_status[0] && ~cp0_status[1] && (
                      //IM                 //IP
                   ( |(cp0_status[9:8] & cp0_cause[9:8]) ) ||        //soft interupt
-                  ( |(cp0_status[15:10] & ext_int) )           //hard interupt
+                  ( |(cp0_status[15:10] & cp0_cause[15:10]) )           //hard interupt
    );
    // 全局中断开启,且没有例外在处理,识别软件中断或者硬件中断;
 
