@@ -160,6 +160,14 @@ module datapath (
     assign ila_pcF = pcF;
     // assign ila_instrF = instrF;
 
+    ila_0 ila_00 (
+        .clk(clk), // input wire clk
+
+        .probe0(pcF), // input wire [31:0]  probe0  
+        .probe1(cp0_causeM), // input wire [31:0]  probe1 
+        .probe2({ext_int[2], stallW, i_cache_stall, stallF}) // input wire [3:0]  probe2
+    );
+
 //-------------------------------------------------------------------
 //模块实例化
     main_decoder main_decoder0(
@@ -524,7 +532,6 @@ module datapath (
     
     exception exception0(
         .rst(rst),
-        .ext_int(ext_int),
         .ri(riM), .break(breakM), .syscall(syscallM), .overflow(overflowM), .addrErrorSw(addrErrorSwM), .addrErrorLw(addrErrorLwM), .pcError(pcErrorM), .eretM(eretM),
         .cp0_status(cp0_statusW), .cp0_cause(cp0_causeW), .cp0_epc(cp0_epcW),
         .pcM(pcM),

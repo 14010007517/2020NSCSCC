@@ -2,7 +2,6 @@
 
 module exception(
    input rst,
-   input [5:0] ext_int,
    input ri, break, syscall, overflow, addrErrorSw, addrErrorLw, pcError, eretM,
    input [31:0] cp0_status, cp0_cause, cp0_epc,
    input [31:0] pcM,
@@ -18,7 +17,7 @@ module exception(
    //INTERUPT
    wire int;
    //             //IE             //EXL            
-   assign int =   ~cp0_status[0] && ~cp0_status[1] && (
+   assign int =   cp0_status[0] && ~cp0_status[1] && (
                      //IM                 //IP
                   ( |(cp0_status[9:8] & cp0_cause[9:8]) ) ||        //soft interupt
                   ( |(cp0_status[15:10] & cp0_cause[15:10]) )           //hard interupt
