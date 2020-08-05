@@ -26,7 +26,7 @@ module datapath (
     output wire [31:0]  debug_wb_pc,      
     output wire [3:0]   debug_wb_rf_wen,
     output wire [4:0]   debug_wb_rf_wnum, 
-    output wire [31:0]  debug_wb_rf_wdata
+    (*mark_debug = "true"*)output wire [31:0]  debug_wb_rf_wdata
 );
 
 //变量声明
@@ -156,9 +156,9 @@ module datapath (
     assign debug_wb_rf_wdata    = datapath.resultM;
 
     (*mark_debug = "true"*) wire [31:0] ila_pcF;
-    (*mark_debug = "true"*) wire [31:0] ila_instrF;
+    // (*mark_debug = "true"*) wire [31:0] ila_instrF;
     assign ila_pcF = pcF;
-    assign ila_instrF = instrF;
+    // assign ila_instrF = instrF;
 
 //-------------------------------------------------------------------
 //模块实例化

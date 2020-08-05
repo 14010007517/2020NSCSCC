@@ -15,6 +15,7 @@
 
 module cp0_reg(
       input wire clk,rst,
+      input wire [5:0] ext_int,
       
       input wire en,                      //异常
 
@@ -32,7 +33,7 @@ module cp0_reg(
 
       //cp0寄存器
       output reg [31:0] status_o,
-      output reg [31:0] cause_o,
+      (*mark_debug = "true"*)output reg [31:0] cause_o,
       output reg [31:0] epc_o,
 
       output reg        timer_int_o

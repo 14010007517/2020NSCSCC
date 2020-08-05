@@ -9,7 +9,7 @@ module exception(
    input [31:0] alu_outM,
 
    output [31:0] except_type,
-   output flush_exception,
+   (*mark_debug = "true"*)output flush_exception,
    output [31:0] pc_exception,
    output pc_trap,
    output [31:0] badvaddrM
