@@ -389,7 +389,25 @@ module datapath (
         .l_s_typeE(l_s_typeE)
     );
 //EX
-    alu alu0(
+    // alu alu0(
+    //     .clk(clk),
+    //     .rst(rst),
+    //     .flushE(flushE),
+    //     .src_aE(src_aE), .src_bE(src_bE),
+    //     .alu_controlE(alu_controlE),
+    //     .sa(saE),
+    //     .hilo(hiloM),
+    //     .stallD(stallD),
+    //     .is_divD(is_divD),
+    //     .is_multD(is_multD),
+
+    //     .div_stallE(div_stallE),
+    //     .mult_stallE(mult_stallE),
+    //     .alu_outE(alu_outE),
+    //     .overflowE(overflowE)
+    // );
+
+    aluyz alu0(
         .clk(clk),
         .rst(rst),
         .flushE(flushE),

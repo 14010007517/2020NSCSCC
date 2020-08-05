@@ -45,23 +45,18 @@ module alu (
             `ALU_OR:        alu_out_not_mul_div = src_aE | src_bE;
             `ALU_NOR:       alu_out_not_mul_div =~(src_aE | src_bE);
             `ALU_XOR:       alu_out_not_mul_div = src_aE ^ src_bE;
-
             `ALU_ADD:       {carry_bit, alu_out_not_mul_div} = {src_aE[31], src_aE} + {src_bE[31], src_bE};
             `ALU_ADDU:      alu_out_not_mul_div = src_aE + src_bE;
             `ALU_SUB:       {carry_bit, alu_out_not_mul_div} = {src_aE[31], src_aE} - {src_bE[31], src_bE};
             `ALU_SUBU:      alu_out_not_mul_div = src_aE - src_bE;
-
             `ALU_SLT:       alu_out_not_mul_div = $signed(src_aE) < $signed(src_bE);
             `ALU_SLTU:      alu_out_not_mul_div = src_aE < src_bE;
-
             `ALU_SLL:       alu_out_not_mul_div = src_bE << src_aE[4:0];
             `ALU_SRL:       alu_out_not_mul_div = src_bE >> src_aE[4:0];
             `ALU_SRA:       alu_out_not_mul_div = $signed(src_bE) >>> src_aE[4:0];
-
             `ALU_SLL_SA:    alu_out_not_mul_div = src_bE << sa;
             `ALU_SRL_SA:    alu_out_not_mul_div = src_bE >> sa;
             `ALU_SRA_SA:    alu_out_not_mul_div = $signed(src_bE) >>> sa;
-
             `ALU_LUI:       alu_out_not_mul_div = {src_bE[15:0], 16'b0};
             `ALU_DONOTHING: alu_out_not_mul_div = src_aE;
 
