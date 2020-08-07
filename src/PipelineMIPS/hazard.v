@@ -1,11 +1,7 @@
 module hazard (
     input wire clk,rst,
-    input wire [31:0] instrE,//no use
-    input wire [31:0] instrM,//no use
     input wire i_cache_stall,
     input wire d_cache_stall,
-    input wire mem_read_enM,
-    input wire mem_write_enM,
     input wire div_stallE,
     input wire mult_stallE,
     input wire [7:0] l_s_typeE,
@@ -14,15 +10,12 @@ module hazard (
 
     input wire [4:0] rsE, rsD,
     input wire [4:0] rtE, rtD,
-    input wire reg_write_enE,
-    input wire reg_write_enM,
-    input wire reg_write_enW,
-    input wire [4:0] reg_writeM, reg_writeE,
-    input wire [4:0] reg_writeW, 
+    input wire reg_write_enE, reg_write_enM, reg_write_enW,
+    input wire [4:0] reg_writeE, reg_writeM, reg_writeW,
     
     output wire stallF, stallD, stallE, stallM, stallW,
     output wire flushF, flushD, flushE, flushM, flushW,
-    output wire [1:0] forward_aE, forward_bE //00-> NONE, 01-> MEM, 10-> WB (LW instr)
+    output wire [1:0] forward_aE, forward_bE
 );
     assign forward_aE = rsE != 0 && reg_write_enM && (rsE == reg_writeM) ? 2'b01 :
                         rsE != 0 && reg_write_enW && (rsE == reg_writeW) ? 2'b10 :
@@ -30,28 +23,25 @@ module hazard (
     assign forward_bE = rtE != 0 && reg_write_enM && (rtE == reg_writeM) ? 2'b01 :
                         rtE != 0 && reg_write_enW && (rtE == reg_writeW) ? 2'b10 :
                         2'b00;
-    wire stall_ltypeE; // 将lw读出的数据，在mem阶段不进行前推；若产生冲突： ID：add； EXE：lw，则暂停一个周期，产生一个空泡，在wb阶段前推
-    assign stall_ltypeE = |(l_s_typeE[7:3]) & ((rsD != 0 && reg_write_enE && (rsD == reg_writeE)) || (rtD != 0 && reg_write_enE && (rtD == reg_writeE)));
+    wire stall_ltypeD; // 将lw读出的数据，在mem阶段不进行前推；若产生冲突： ID：add； EXE：lw，则暂停一个周期，产生一个空泡，在wb阶段前推
+    assign stall_ltypeD = |(l_s_typeE[7:3]) & ((rsD != 0 && reg_write_enE && (rsD == reg_writeE)) || 
+                                               (rtD != 0 && reg_write_enE && (rtD == reg_writeE))
+                                              ) & ~flush_exceptionM & ~flush_pred_failedM; //若M阶段产生分支预测失败，则D阶段指令无需执行，故不用暂停
     
     wire longest_stall;
-    
     assign longest_stall = i_cache_stall | d_cache_stall | div_stallE | mult_stallE;
     
-    assign stallF = ~flush_exceptionM & (longest_stall | (stall_ltypeE & ~flush_pred_failedM));
-    assign stallD = (longest_stall | stall_ltypeE);
+    assign stallF = longest_stall | stall_ltypeD;
+    assign stallD = longest_stall | stall_ltypeD;
     assign stallE = longest_stall;
     assign stallM = longest_stall;
-    assign stallW = longest_stall;              // 不暂停,会减少jr等指令冲突; (现在划去这句话)
-
-    assign flushF = 1'b0;
+    assign stallW = longest_stall;
 
     /* 当flush一个阶段时，如果其后面的阶段被暂停，则不能flush
     */
-    //EX: jr(冲突), MEM: lw这种情况时，flush_jump_confilctE会导致暂停在D阶段jr的延迟槽指令消失
-    assign flushD = flush_exceptionM | (flush_pred_failedM & ~longest_stall) | (flush_jump_confilctE & ~longest_stall & ~stall_ltypeE);       
-    //EX: div, MEM: beq, beq预测失败，要flush D和E，但由于div暂停在E，因此只需要flushD就可以了
-    assign flushE = flush_exceptionM | (flush_pred_failedM & ~longest_stall) | (stall_ltypeE & ~longest_stall);     
-    // 当检测到冲突时，
+    assign flushF = 1'b0;
+    assign flushD = flush_exceptionM;
+    assign flushE = flush_exceptionM | (flush_pred_failedM & ~longest_stall) | (stall_ltypeD & ~longest_stall);     
     assign flushM = flush_exceptionM;
     assign flushW = 1'b0;
 endmodule

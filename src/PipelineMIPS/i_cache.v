@@ -121,7 +121,8 @@ module i_cache (
             case(state)
                 IDLE        : state <= ~stallF ? HitJudge : IDLE;
                 HitJudge    : state <= inst_en & no_cache ? NoCache:
-                                       inst_en & miss     ? LoadMemory : HitJudge;
+                                       inst_en & miss     ? LoadMemory :
+                                       ~stallF            ? HitJudge : IDLE;    //命中->HitJudge, 因div等其它因素而暂停->IDLE
                 LoadMemory  : state <= read_finish ? IDLE : state;
                 NoCache     : state <= read_finish ? IDLE : NoCache;
             endcase
@@ -130,14 +131,15 @@ module i_cache (
 
 //DATAPATH
     reg [31:0] saved_rdata;
-    assign stall = ~(state==IDLE || (state==HitJudge) && hit && ~no_cache);
-    assign inst_rdata = hit & ~no_cache ? block_sel_way[sel] : saved_rdata;
+    assign stall = ~(state==IDLE || (state==HitJudge) && hit && ~no_cache || ~inst_en);
+    assign inst_rdata = ~inst_en ? 32'b0:
+                        hit & ~no_cache ? block_sel_way[sel] : saved_rdata;
 
 //AXI
     always @(posedge clk) begin
         read_req <= (rst)               ? 1'b0 :
-                    inst_en & (state == HitJudge) & miss & ~read_req ? 1'b1 :
-                    inst_en & no_cache & (state == HitJudge) & ~read_req ? 1'b1 :
+                    inst_en & (state == HitJudge) & miss ? 1'b1 :
+                    inst_en & no_cache & (state == HitJudge) ? 1'b1 :
                     read_finish         ? 1'b0 : read_req;
     end
     
