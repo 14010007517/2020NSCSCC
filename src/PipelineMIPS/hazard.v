@@ -30,12 +30,12 @@ module hazard (
     assign forward_bE = rtE != 0 && reg_write_enM && (rtE == reg_writeM) ? 2'b01 :
                         rtE != 0 && reg_write_enW && (rtE == reg_writeW) ? 2'b10 :
                         2'b00;
-    wire stall_ltypeE; // 将lw读出的数据，在mem阶段不进行前推；若产生冲突： exe：add； mem：lw，则暂停一个周期，在wb阶段前推
+    wire stall_ltypeE; // 将lw读出的数据，在mem阶段不进行前推；若产生冲突： ID：add； EXE：lw，则暂停一个周期，产生一个空泡，在wb阶段前推
     assign stall_ltypeE = |(l_s_typeE[7:3]) & ((rsD != 0 && reg_write_enE && (rsD == reg_writeE)) || (rtD != 0 && reg_write_enE && (rtD == reg_writeE)));
     
     wire longest_stall;
     
-    assign longest_stall = i_cache_stall | d_cache_stall | div_stallE | mult_stallE; //longest of lw, sw, 取指 and div_stall;
+    assign longest_stall = i_cache_stall | d_cache_stall | div_stallE | mult_stallE;
     
     assign stallF = ~flush_exceptionM & (longest_stall | (stall_ltypeE & ~flush_pred_failedM));
     assign stallD = (longest_stall | stall_ltypeE);

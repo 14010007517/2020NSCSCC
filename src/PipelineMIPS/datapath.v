@@ -6,10 +6,9 @@ module datapath (
     output wire [31:0] pcF,
     output wire [31:0] pc_next,
     output wire inst_enF,
-    input wire [31:0] instrF,  //注：instr ram时钟取反
+    input wire [31:0] instrF,
     input wire i_cache_stall,
     output wire stallF,
-    output wire stallM,
 
     //data
     output wire mem_enM,                    
@@ -21,6 +20,7 @@ module datapath (
     output wire [31:0] mem_addrE,
     output wire mem_read_enE,
     output wire mem_write_enE,
+    output wire stallM,
 
     //debug
     output wire [31:0]  debug_wb_pc,      
@@ -36,7 +36,6 @@ module datapath (
     wire [2:0] pc_sel;
     wire [31:0] instrF_temp;
     wire is_in_delayslot_iF;
-    // wire pcerrorD, pcerrorE, pcerrorM; 
 //ID
     wire [31:0] instrD;
     wire [31:0] pcD, pc_plus4D;
@@ -254,7 +253,7 @@ module datapath (
         .x6(pc_exceptionM),             //异常的跳转地址
         .x5(pc_plus4E),                 //预测跳，实际不跳。将pc_next指向branch指令的PC+8（注：pc_plus4E等价于branch指令的PC+8） //可以保证延迟槽指令不会被flush，故plush_4E存在
         .x4(pc_branchM),                //预测不跳，实际跳转。将pc_next指向pc_branchD传到M阶段的值
-        .x3(pc_jumpE),                  //jump冲突，在E阶段
+        .x3(pc_jumpE),                  //jump冲突，在E阶段获得跳转的地址
         .x2(pc_jumpD),                  //D阶段jump不冲突跳转的地址（rs寄存器或立即数）
         .x1(pc_branchD),                //D阶段预测跳转的跳转地址（PC+offset）
         .x0(pc_plus4F),                 //下一条指令的地址
