@@ -18,7 +18,7 @@ module id_ex (
     input wire jumpD,
     input wire [4:0] branch_judge_controlD,
     input wire [7:0] l_s_typeD,
-
+    input wire [1:0] mfhi_loD,
 
     output reg [31:0] pcE,
     output reg [31:0] rd1E, rd2E,
@@ -35,29 +35,31 @@ module id_ex (
     output reg [4:0] alu_controlE,
     output reg jumpE,
     output reg [4:0] branch_judge_controlE,
-    output reg [7:0] l_s_typeE
+    output reg [7:0] l_s_typeE,
+    output reg [1:0] mfhi_loE
 );
     always @(posedge clk) begin
         if(rst | flushE) begin
-            pcE                     <=   0 ;
-            rd1E                    <=   0 ;
-            rd2E                    <=   0 ;
-            rsE                     <=   0 ;
-            rtE                     <=   0 ;
-            rdE                     <=   0 ;
-            immE                    <=   0 ;
-            pc_plus4E               <=   0 ;
-            instrE                  <=   0 ;
-            pc_branchE              <=   0 ;
-            pred_takeE              <=   0 ;
-            branchE                 <=   0 ;
-            jump_conflictE          <=   0 ;
-            saE                     <=   0 ;
-            is_in_delayslot_iE      <=   0 ;
-            alu_controlE            <=   0 ;
-            jumpE                   <=   0 ;
-            branch_judge_controlE   <=   0 ;
-            l_s_typeE               <=   0 ;
+            pcE                     <=      0 ;
+            rd1E                    <=      0 ;
+            rd2E                    <=      0 ;
+            rsE                     <=      0 ;
+            rtE                     <=      0 ;
+            rdE                     <=      0 ;
+            immE                    <=      0 ;
+            pc_plus4E               <=      0 ;
+            instrE                  <=      0 ;
+            pc_branchE              <=      0 ;
+            pred_takeE              <=      0 ;
+            branchE                 <=      0 ;
+            jump_conflictE          <=      0 ;
+            saE                     <=      0 ;
+            is_in_delayslot_iE      <=      0 ;
+            alu_controlE            <=      0 ;
+            jumpE                   <=      0 ;
+            branch_judge_controlE   <=      0 ;
+            l_s_typeE               <=      0 ;
+            mfhi_loE                <=      0 ;
         end 
         else if(~stallE) begin
             pcE                     <= pcD                  ;
@@ -79,6 +81,7 @@ module id_ex (
             jumpE                   <= jumpD                ;
             branch_judge_controlE   <= branch_judge_controlD;
             l_s_typeE               <= l_s_typeD            ;
+            mfhi_loE                <= mfhi_loD             ;
         end
     end
 endmodule

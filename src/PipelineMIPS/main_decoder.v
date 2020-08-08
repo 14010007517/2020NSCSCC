@@ -10,6 +10,7 @@ module main_decoder(
     output wire sign_extD,          //立即数是否为符号扩展
 	output wire is_divD,is_multD,			//是否为除法指令
 	output wire [7:0] l_s_typeD,
+	output wire [1:0] mfhi_loD,
     //EX
     output reg [1:0] reg_dstE,     	//写寄存器选择  00-> rd, 01-> rt, 10-> 写$ra
     output reg alu_imm_selE,        //alu srcb选择 0->rd2E, 1->immE
@@ -76,6 +77,14 @@ module main_decoder(
 
 	assign is_divD = ~(|op_code) & ~(|(funct[5:1] ^ 5'b01101));	//opcode==0, funct==01101x
 	assign is_multD = (~(|op_code) & ~(|(funct[5:1] ^ 5'b01100))) | op_code == `EXE_MUL;
+	
+	
+	wire mfhi;
+	wire mflo;
+	assign mfhi = !(op_code ^ `EXE_R_TYPE) & !(funct ^ `EXE_MFHI);
+	assign mflo = !(op_code ^ `EXE_R_TYPE) & !(funct ^ `EXE_MFLO);
+
+	assign mfhi_loD = {mfhi, mflo};
 
 	always @(*) begin
 		riD = 1'b0;

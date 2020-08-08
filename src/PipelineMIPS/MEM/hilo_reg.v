@@ -3,7 +3,7 @@
 
 module hilo_reg(
                 input wire        clk,rst,we, //both write lo and hi
-                input wire [31:0] instrM,
+                input wire [1:0] mfhi_loM,
 
                 input wire [63:0] hilo_i,
                 output wire [31:0] hilo_o,
@@ -21,11 +21,10 @@ module hilo_reg(
    
    // assign hilo_ii = ( {64{~rst & we}} & hilo_i );
 
-   // 读cp0逻辑；
-   wire mfhi;
-   wire mflo;
-   assign mfhi = ~(|(instrM[31:26] ^ `EXE_R_TYPE)) & ~(|(instrM[5:0] ^ `EXE_MFHI));
-   assign mflo = ~(|(instrM[31:26] ^ `EXE_R_TYPE)) & ~(|(instrM[5:0] ^ `EXE_MFLO));
+   // 读hilo逻辑；
+   wire mfhi, mflo;
+   assign mfhi = mfhi_loM[0];
+   assign mflo = mfhi_loM[1];
 
    assign hilo_o = ({32{mfhi}} & hilo[63:32]) | ({32{mflo}} & hilo[31:0]);
 endmodule

@@ -144,6 +144,8 @@ module datapath (
     wire [3:0] addr_typeD, addr_typeE, addr_typeM;
     wire mult_stallE;
     wire is_multD;
+    wire [1:0] mfhi_loD, mfhi_loE, mfhi_loM;
+
 
 // hazard
     wire stallD, stallE, stallW;
@@ -168,6 +170,7 @@ module datapath (
         .is_divD(is_divD),
         .is_multD(is_multD),
         .l_s_typeD(l_s_typeD),
+        .mfhi_loD(mfhi_loD),
         //EX
         .reg_dstE(reg_dstE),
         .alu_imm_selE(alu_imm_selE),
@@ -366,6 +369,7 @@ module datapath (
         .jumpD(jumpD),
         .branch_judge_controlD(branch_judge_controlD),
         .l_s_typeD(l_s_typeD),
+        .mfhi_loD(mfhi_loD),
         
         .pcE(pcE),
         .rsE(rsE), .rd1E(rd1E), .rd2E(rd2E),
@@ -382,7 +386,8 @@ module datapath (
         .alu_controlE(alu_controlE),
         .jumpE(jumpE),
         .branch_judge_controlE(branch_judge_controlE),
-        .l_s_typeE(l_s_typeE)
+        .l_s_typeE(l_s_typeE),
+        .mfhi_loE(mfhi_loE)
     );
 //EX
     alu alu0(
@@ -463,6 +468,7 @@ module datapath (
         .rdE(rdE),
         .actual_takeE(actual_takeE),
         .l_s_typeE(l_s_typeE),
+        .mfhi_loE(mfhi_loE),
 
         .pcM(pcM),
         .alu_outM(alu_outM),
@@ -476,7 +482,8 @@ module datapath (
         .is_in_delayslot_iM(is_in_delayslot_iM),
         .rdM(rdM),
         .actual_takeM(actual_takeM),
-        .l_s_typeM(l_s_typeM)
+        .l_s_typeM(l_s_typeM),
+        .mfhi_loM(mfhi_loM)
     );
 //MEM
     assign mem_addrM = alu_outM;
@@ -501,7 +508,7 @@ module datapath (
     hilo_reg hilo0(
         .clk(clk),
         .rst(rst),
-        .instrM(instrM),    // 用于识别mfhi，mflo，决定输出；
+        .mfhi_loM(mfhi_loM),
         .we(hilo_wenE & ~flush_exceptionM & ~stallM),     // both write lo and hi
         .hilo_i(alu_outE),
 
