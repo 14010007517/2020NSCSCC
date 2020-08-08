@@ -167,7 +167,7 @@ module alu (
     assign div_res_ready = div_valid & ~stallM;
     assign div_stallE = div_valid & ~div_res_valid & ~flush_exceptionM;
 
-	div_self_align DIV(
+	div_radix2 DIV(
 		.clk(clk),
 		.rst(rst | flushE),
 		.a(src_aE),         //divident
