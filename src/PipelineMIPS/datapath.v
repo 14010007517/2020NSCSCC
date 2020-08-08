@@ -103,7 +103,6 @@ module datapath (
 
     wire [31:0] mem_ctrl_rdataM;
     wire [31:0] mem_wdataM_temp;
-    wire [31:0] mem_ctrl_rdataM;
 
     wire hilo_wenE;
     wire [31:0] hilo_oM;
@@ -146,7 +145,10 @@ module datapath (
     wire mult_stallE;
     wire is_multD;
 
-// stall
+// hazard
+    wire stallD, stallE, stallW;
+    wire flushF, flushD, flushE, flushM, flushW;
+    wire [1:0] forward_aE, forward_bE;
 
 //--------------------debug---------------------
     assign debug_wb_pc          = datapath.pcM;
@@ -195,9 +197,6 @@ module datapath (
         .branch_judge_controlD(branch_judge_controlD)
     );
 
-    wire stallD, stallE, stallW;
-    wire flushF, flushD, flushE, flushM, flushW;
-    wire [1:0] forward_aE, forward_bE;
     hazard hazard0(
         .clk(clk), .rst(rst),
 
@@ -486,7 +485,7 @@ module datapath (
     // 是否需要控制 mem_en
     mem_ctrl mem_ctrl0(
         .l_s_typeM(l_s_typeM),
-	    .addr(alu_outM),
+	    .addr(alu_outM[3:0]),
 
         .data_wdataM(rt_valueM),    //原始的wdata
         .mem_wdataM(mem_wdataM),    //新的wdata

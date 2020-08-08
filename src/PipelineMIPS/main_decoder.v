@@ -3,7 +3,6 @@
 module main_decoder(
     input clk, rst,
     input wire [31:0] instrD,
-	input wire [31:0] pcD,
 
 	input wire stallE, stallM, stallW,
 	input wire flushE, flushM, flushW,

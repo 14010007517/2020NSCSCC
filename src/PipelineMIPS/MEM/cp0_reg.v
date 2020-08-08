@@ -36,17 +36,17 @@ module cp0_reg(
       //cp0寄存器
       output reg [31:0] status_o,
       output reg [31:0] cause_o,
-      output reg [31:0] epc_o,
-
-      output reg        timer_int_o
+      output reg [31:0] epc_o
    );
    //cp0寄存器
    reg [31:0] config_o;
    reg [31:0] prid_o;
    reg [31:0] badvaddr_o;
    reg [31:0] compare_o;
-
    reg [32:0] count_inner;                //每个时钟加1
+   
+   reg        timer_int_o;
+
    assign count_o = count_inner[32:1];    //右移1位，相当于每两个时钟加1
 
    always @(posedge clk) begin

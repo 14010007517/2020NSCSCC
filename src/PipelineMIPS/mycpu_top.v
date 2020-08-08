@@ -6,7 +6,7 @@ module mycpu_top (
 
     output wire[3:0] arid,
     output wire[31:0] araddr,
-    output wire[7:0] arlen,
+    output wire[3:0] arlen,
     output wire[2:0] arsize,
     output wire[1:0] arburst,
     output wire[1:0] arlock,
@@ -24,7 +24,7 @@ module mycpu_top (
                
     output wire[3:0] awid,
     output wire[31:0] awaddr,
-    output wire[7:0] awlen,
+    output wire[3:0] awlen,
     output wire[2:0] awsize,
     output wire[1:0] awburst,
     output wire[1:0] awlock,
@@ -84,7 +84,7 @@ module mycpu_top (
 
     //i_cache - arbitrater
     wire [31:0] i_araddr    ;
-    wire [7:0] i_arlen      ;
+    wire [3:0] i_arlen      ;
     wire i_arvalid          ;
     wire i_arready          ;
 
@@ -95,7 +95,7 @@ module mycpu_top (
 
     //d_cache - arbitrater
     wire [31:0] d_araddr    ;
-    wire [7:0] d_arlen      ;
+    wire [3:0] d_arlen      ;
     wire d_arvalid          ;
     wire d_arready          ;
 
@@ -105,7 +105,7 @@ module mycpu_top (
     wire d_rready           ;
 
     wire [31:0] d_awaddr    ;
-    wire [7:0] d_awlen      ;
+    wire [3:0] d_awlen      ;
     wire [2:0] d_awsize     ;
     wire d_awvalid          ;
     wire d_awready          ;

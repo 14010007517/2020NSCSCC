@@ -2,7 +2,7 @@ module arbitrater (
     input wire clk, rst,
     //I CACHE
     input wire [31:0] i_araddr,
-    input wire [7:0] i_arlen,
+    input wire [3:0] i_arlen,
     input wire i_arvalid,
     output wire i_arready,
 
@@ -13,7 +13,7 @@ module arbitrater (
 
     //D CACHE
     input wire [31:0] d_araddr,
-    input wire [7:0] d_arlen,
+    input wire [3:0] d_arlen,
     input wire d_arvalid,
     output wire d_arready,
 
@@ -23,7 +23,7 @@ module arbitrater (
     input wire d_rready,
     //write
     input wire [31:0] d_awaddr,
-    input wire [7:0] d_awlen,
+    input wire [3:0] d_awlen,
     input wire [2:0] d_awsize,
     input wire d_awvalid,
     output wire d_awready,
@@ -39,7 +39,7 @@ module arbitrater (
     //Outer
     output wire[3:0] arid,
     output wire[31:0] araddr,
-    output wire[7:0] arlen,
+    output wire[3:0] arlen,
     output wire[2:0] arsize,
     output wire[1:0] arburst,
     output wire[1:0] arlock,
@@ -57,7 +57,7 @@ module arbitrater (
                
     output wire[3:0] awid,
     output wire[31:0] awaddr,
-    output wire[7:0] awlen,
+    output wire[3:0] awlen,
     output wire[2:0] awsize,
     output wire[1:0] awburst,
     output wire[1:0] awlock,

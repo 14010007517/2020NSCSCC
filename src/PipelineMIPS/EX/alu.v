@@ -29,16 +29,6 @@ module alu (
     wire signed_mult_ce, unsigned_mult_ce;
 
     wire alu_mfhi, alu_mflo;
-    assign alu_mfhi = !(alu_controlE ^ `ALU_MTHI);
-    assign alu_mflo = !(alu_controlE ^ `ALU_MTLO);
-
-    assign alu_outE = ({64{div_valid}} & alu_out_div)
-                    | ({64{mult_valid}} & alu_out_mult)
-                    | ({64{alu_mfhi}} & {src_aE, hilo[31:0]})
-                    | ({64{alu_mflo}} & {hilo[31:0], src_aE})
-                    | ({64{~mult_valid & ~div_valid & ~alu_mfhi & ~alu_mflo}} & {32'b0, alu_out_not_mul_div});
-
-    assign overflowE = (alu_add || alu_sub) & (adder_cout ^ alu_out_not_mul_div[31]) & !(adder_a[31] ^ adder_b[31]);
 
     wire alu_and        ;      
     wire alu_or         ;      
@@ -100,6 +90,9 @@ module alu (
 
     assign alu_lui       = !(alu_controlE ^ `ALU_LUI      );
     assign alu_donothing = !(alu_controlE ^ `ALU_DONOTHING);
+
+    assign alu_mfhi = !(alu_controlE ^ `ALU_MTHI);
+    assign alu_mflo = !(alu_controlE ^ `ALU_MTLO);
 
     assign and_result    = src_aE & src_bE;
     assign or_result     = src_aE | src_bE;
@@ -188,7 +181,6 @@ module alu (
 	);
 
     //multiply
-    wire signed_mult_ce, unsigned_mult_ce;
     reg [3:0] cnt;
 
 	assign mult_sign = (alu_controlE == `ALU_SIGNED_MULT);
@@ -226,4 +218,13 @@ module alu (
         .SCLR(flushE),
         .P(alu_out_unsigned_mult)      // output wire [63 : 0] P
     );
+
+    //RESULT
+    assign alu_outE = ({64{div_valid}} & alu_out_div)
+                    | ({64{mult_valid}} & alu_out_mult)
+                    | ({64{alu_mfhi}} & {src_aE, hilo[31:0]})
+                    | ({64{alu_mflo}} & {hilo[31:0], src_aE})
+                    | ({64{~mult_valid & ~div_valid & ~alu_mfhi & ~alu_mflo}} & {32'b0, alu_out_not_mul_div});
+
+    assign overflowE = (alu_add || alu_sub) & (adder_cout ^ alu_out_not_mul_div[31]) & !(adder_a[31] ^ adder_b[31]);
 endmodule

@@ -5,7 +5,6 @@ module mem_wb (
     input wire [31:0] alu_outM,
     input wire [4:0] reg_writeM,
     input wire reg_write_enM,
-    input wire [31:0] mem_rdataM,
     input wire [31:0] resultM,
 
 
@@ -22,7 +21,6 @@ module mem_wb (
             alu_outW <= 0;
             reg_writeW <= 0;
             reg_write_enW <= 0;
-            mem_rdataW <= 0;
             resultW <= 0;
         end
         else if(~stallW) begin
@@ -30,7 +28,6 @@ module mem_wb (
             alu_outW <= alu_outM;
             reg_writeW <= reg_writeM;
             reg_write_enW <= reg_write_enM;
-            mem_rdataW <= mem_rdataM;
             resultW <= resultM;
         end
     end

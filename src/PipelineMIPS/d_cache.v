@@ -17,7 +17,7 @@ module d_cache (
 
     //arbitrater
     output wire [31:0] araddr,
-    output wire [7:0] arlen,
+    output wire [3:0] arlen,
     output wire arvalid,
     input wire arready,
 
@@ -28,7 +28,7 @@ module d_cache (
 
     //write
     output wire [31:0] awaddr,
-    output wire [7:0] awlen,
+    output wire [3:0] awlen,
     output wire [2:0] awsize,
     output wire awvalid,
     input wire awready,
@@ -232,7 +232,7 @@ module d_cache (
     //AXI signal
     //read
     assign araddr = ~no_cache ? {tag, index}<<OFFSET_WIDTH: data_addr; //将offset清0
-    assign arlen = ~no_cache ? BLOCK_NUM-1 : 8'd0;
+    assign arlen = ~no_cache ? BLOCK_NUM-1 : 4'd0;
     assign arvalid = read_req & ~raddr_rcv;
     assign rready = raddr_rcv;
     //write
@@ -247,7 +247,7 @@ module d_cache (
 
 
     assign awaddr = ~no_cache ? dirty_write_addr : data_addr;
-    assign awlen = ~no_cache ? BLOCK_NUM-1 : 8'd0;
+    assign awlen = ~no_cache ? BLOCK_NUM-1 : 4'd0;
     assign awsize = ~no_cache ? 4'b10 :
                                 data_wen==4'b1111 ? 4'b10:
                                 data_wen==4'b1100 || data_wen==4'b0011 ? 4'b01: 4'b00;

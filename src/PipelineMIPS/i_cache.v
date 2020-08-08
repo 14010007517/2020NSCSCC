@@ -13,7 +13,7 @@ module i_cache (
 
     //arbitrater
     output wire [31:0] araddr,
-    output wire [7:0] arlen,
+    output wire [3:0] arlen,
     output wire arvalid,
     input wire arready,
 
@@ -165,7 +165,7 @@ module i_cache (
 
     //AXI signal
     assign araddr = ~no_cache ? {tag, index}<<OFFSET_WIDTH : pcF; //将offset清0
-    assign arlen = ~no_cache ? BLOCK_NUM-1 : 8'd0;
+    assign arlen = ~no_cache ? BLOCK_NUM-1 : 4'd0;
     assign arvalid = read_req & ~addr_rcv;
     assign rready = addr_rcv;
 

@@ -30,18 +30,24 @@ module div_self_align(
     */
 
     reg [31:0] a_save, b_save;
-    
-    reg [64:0] SR; //shift register
-    reg [31:0] REMAINER;  //divisor 2's complement
+
+    reg [64:0] SR;          //shift register
+    reg [31:0] REMAINER;    //divisor 2's complement
     wire [31:0] QUOTIENT;
     wire [32:0] DIVISOR;
-    assign DIVISOR = SR[64:32];
-    //倒序
-    assign QUOTIENT = {SR[0],SR[1],SR[2],SR[3],SR[4],SR[5],SR[6],SR[7],SR[8],SR[9],SR[10],SR[11],SR[12],SR[13],SR[14],SR[15],SR[16],SR[17],SR[18],SR[19],SR[20],SR[21],SR[22],SR[23],SR[24],SR[25],SR[26],SR[27],SR[28],SR[29],SR[30],SR[31]};
 
     wire [31:0] divident_abs;
     wire [31:0] divisor_abs;
     wire [31:0] remainer, quotient;
+
+    //FSM
+    reg start;
+    reg left_shift;
+    reg [31:0] flag;        //标记1的位置，可左右移动
+
+    assign DIVISOR = SR[64:32];
+    //倒序
+    assign QUOTIENT = {SR[0],SR[1],SR[2],SR[3],SR[4],SR[5],SR[6],SR[7],SR[8],SR[9],SR[10],SR[11],SR[12],SR[13],SR[14],SR[15],SR[16],SR[17],SR[18],SR[19],SR[20],SR[21],SR[22],SR[23],SR[24],SR[25],SR[26],SR[27],SR[28],SR[29],SR[30],SR[31]};
 
     assign divident_abs = (sign & a[31]) ? ~a + 1'b1 : a;
     assign divisor_abs = (sign & b[31]) ? ~b + 1'b1 : b;
@@ -65,9 +71,6 @@ module div_self_align(
     assign mux_result = ~left_shift & CO ? sub_result[31:0] : REMAINER; //右移且CO为1时余数更新
 
     //state machine
-    reg start;
-    reg left_shift;
-    reg [31:0] flag; //标记1的位置，可左右移动
     always @(posedge clk) begin
         if(rst) begin
             SR <= 0;

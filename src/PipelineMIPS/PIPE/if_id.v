@@ -6,13 +6,13 @@ module if_id(
     input wire [31:0] pc_plus4F,
 
     input wire [31:0] instrF,
-    input wire [31:0] is_in_delayslot_iF,
+    input wire is_in_delayslot_iF,
 
 
     output reg [31:0] pcD,
     output reg [31:0] pc_plus4D,
     output reg [31:0] instrD,
-    output reg [31:0] is_in_delayslot_iD
+    output reg is_in_delayslot_iD
 );
 
     always @(posedge clk) begin
