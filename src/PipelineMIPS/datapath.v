@@ -391,6 +391,7 @@ module datapath (
         .rst(rst),
         .flushE(flushE),
         .flush_exceptionM(flush_exceptionM),
+        .stallM(stallM),
         .src_aE(src_aE), .src_bE(src_bE),
         .alu_controlE(alu_controlE),
         .sa(saE),

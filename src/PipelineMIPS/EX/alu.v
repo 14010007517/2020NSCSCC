@@ -4,6 +4,7 @@ module alu (
     input wire clk, rst,
     input wire flushE,
     input wire flush_exceptionM,
+    input wire stallM,
     input wire [31:0] src_aE, src_bE,
     input wire [4:0] alu_controlE,
     input wire [4:0] sa,
@@ -21,15 +22,15 @@ module alu (
     wire mult_sign;
     wire mult_valid;
     wire div_sign;
-	wire div_vaild;
+	wire div_valid;
     reg [31:0] alu_out_not_mul_div; //拓展成33位，便于判断溢出
     reg carry_bit;
 
     wire [63:0] alu_out_signed_mult, alu_out_unsigned_mult;
 
-    assign alu_outE = ({64{div_vaild}} & alu_out_div)
+    assign alu_outE = ({64{div_valid}} & alu_out_div)
                     | ({64{mult_valid}} & alu_out_mult)
-                    | ({64{~mult_valid & ~div_vaild}} & {32'b0, alu_out_not_mul_div})
+                    | ({64{~mult_valid & ~div_valid}} & {32'b0, alu_out_not_mul_div})
                     | ({64{(alu_controlE == `ALU_MTHI)}} & {src_aE, hilo[31:0]})
                     | ({64{(alu_controlE == `ALU_MTLO)}} & {hilo[31:0], src_aE});
 
@@ -64,31 +65,24 @@ module alu (
 
     //divide
 	assign div_sign = (alu_controlE == `ALU_SIGNED_DIV);
-	assign div_vaild = (alu_controlE == `ALU_SIGNED_DIV || alu_controlE == `ALU_UNSIGNED_DIV);
+	assign div_valid = (alu_controlE == `ALU_SIGNED_DIV || alu_controlE == `ALU_UNSIGNED_DIV);
 
-    // reg vaild, stall;
-    // wire ready;
-    // always @(posedge clk) begin
-    //     stall <= rst  ? 1'b0 :
-    //                   is_divD & ~stallD & ~flushE ? 1'b1 :
-    //                   ready | flushE ? 1'b0 : stall;
-    //     vaild <= rst ? 1'b0 :
-    //                  is_divD & ~stallD & ~flushE ? 1'b1 : 1'b0;
-    // end
-    // assign div_stallE = stall & ~flushE;
-    wire div_ready;
-    assign div_stallE = div_vaild & ~div_ready & ~flush_exceptionM;
+    wire div_res_valid;
+    wire div_res_ready;
 
-	div_radix2 DIV(
+    assign div_res_ready = div_valid & ~stallM;
+    assign div_stallE = div_valid & ~div_res_valid & ~flush_exceptionM;
+
+	div_self_align DIV(
 		.clk(clk),
-		.rst(rst),
-        .flush(flushE),
-		.a(src_aE),  //divident
-		.b(src_bE),  //divisor
-		.valid(div_vaild),
-		.sign(div_sign),   //1 signed
+		.rst(rst | flushE),
+		.a(src_aE),         //divident
+		.b(src_bE),         //divisor
+		.sign(div_sign),    //1 signed
 
-		.ready(div_ready),
+		.opn_valid(div_valid),
+        .res_valid(div_res_valid),
+        .res_ready(div_res_ready),
 		.result(alu_out_div)
 	);
 
@@ -131,5 +125,4 @@ module alu (
         .SCLR(flushE),
         .P(alu_out_unsigned_mult)      // output wire [63 : 0] P
     );
-
 endmodule
