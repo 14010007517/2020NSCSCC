@@ -33,7 +33,7 @@ module alulg (
                     | ({64{ !(alu_controlE ^ `ALU_MTHI) }} & {src_aE, hilo[31:0]})
                     | ({64{ !(alu_controlE ^ `ALU_MTLO) }} & {hilo[31:0], src_aE});
 
-    assign overflowE = ( !(alu_controlE ^ `ALU_ADD) || !(alu_controlE ^ `ALU_SUB)) & (adder_cout ^ alu_out_not_mul_div[31]);
+    assign overflowE = (alu_add || alu_sub) & (adder_cout ^ alu_out_not_mul_div[31]) & !(adder_a[31] ^ adder_b[31]);
 
     wire alu_and        ;      
     wire alu_or         ;      
@@ -44,13 +44,13 @@ module alulg (
     wire alu_sub        ;      
     wire alu_subu       ;     
     wire alu_slt        ;      
-    wire alu_sltu       ;      
+    wire alu_sltu       ;
+
     wire alu_sll        ;      
-    wire alu_srl        ;      
-    wire alu_sra        ;      
     wire alu_sll_sa     ;      
-    wire alu_srl_sa     ;      
-    wire alu_sra_sa     ;      
+    wire alu_sr         ;      
+    wire alu_sr_sa      ;
+
     wire alu_lui        ;      
     wire alu_donothing  ;     
 
@@ -67,7 +67,7 @@ module alulg (
     wire [31:0] slt_result          ;
     wire [31:0] sltu_result         ;
     
-    wire [31:0] sll_sult            ;
+    wire [31:0] sll_result          ;
     wire [31:0] sll_sa_result       ;
     wire [31:0] sr_result           ;
     wire [31:0] sr_sa_result        ;
@@ -85,12 +85,14 @@ module alulg (
     assign alu_subu      = !(alu_controlE ^ `ALU_SUBU     );
     assign alu_slt       = !(alu_controlE ^ `ALU_SLT      );
     assign alu_sltu      = !(alu_controlE ^ `ALU_SLTU     );
+
     assign alu_sll       = !(alu_controlE ^ `ALU_SLL      );
+    assign alu_sll_sa    = !(alu_controlE ^ `ALU_SLL_SA   );
     assign alu_srl       = !(alu_controlE ^ `ALU_SRL      );
     assign alu_sra       = !(alu_controlE ^ `ALU_SRA      );
-    assign alu_sll_sa    = !(alu_controlE ^ `ALU_SLL_SA   );
     assign alu_srl_sa    = !(alu_controlE ^ `ALU_SRL_SA   );
     assign alu_sra_sa    = !(alu_controlE ^ `ALU_SRA_SA   );
+
     assign alu_lui       = !(alu_controlE ^ `ALU_LUI      );
     assign alu_donothing = !(alu_controlE ^ `ALU_DONOTHING);
 
@@ -108,11 +110,15 @@ module alulg (
     wire        adder_cout;
     wire [63:0] sr64_sa_result, sr64_result;
 
+    // 这个是个蛇皮，这个补码是32位的补码，而非33位的补码；所以sltu_result[0] = ~adder_cout;
+    // b + [b] = 1; 若a<b, 则 a + [b] < 1; 所以adder_cout = 0;
+    // 溢出： 有符号相同符号相加可能会产生溢出，分为正溢出（{adder_cout, result[31]}: 01）与负溢出（{adder_cout, result[31]}:10）；
+    // 建议通过有符号拓展理解；
 
     assign adder_a = src_aE;
     assign adder_b = src_bE ^ {32{alu_sub | alu_subu | alu_slt | alu_sltu}};
     assign adder_cin = alu_sub | alu_subu | alu_slt | alu_sltu;
-    assign {adder_cout,adder_result} = adder_a + adder_b + adder_cin;
+    assign {adder_cout,adder_result} =adder_a + adder_b + adder_cin;
     assign add_sub_result = adder_result;
 
     assign slt_result[31:1] = 31'd0;
@@ -135,22 +141,22 @@ module alulg (
     assign donothing_result = src_aE;
 
     assign alu_out_not_mul_div = 
-                    ({32{alu_and        }} & and_result)    |
-                    ({32{alu_nor        }} & nor_result)    |
-                    ({32{alu_or         }} & or_result)     |
-                    ({32{alu_xor        }} & xor_result)    |
+                    ({32{alu_and        }} & and_result)            |
+                    ({32{alu_nor        }} & nor_result)            |
+                    ({32{alu_or         }} & or_result)             |
+                    ({32{alu_xor        }} & xor_result)            |
                     
                     ({32{alu_add | alu_addu | alu_sub | alu_subu}} & add_sub_result) |
                     
-                    ({32{alu_slt        }} & slt_result)    |
-                    ({32{alu_sltu       }} & sltu_result)   |
+                    ({32{alu_slt        }} & slt_result)            |
+                    ({32{alu_sltu       }} & sltu_result)           |
                     
-                    ({32{alu_sll                    }} & sll_result     )    |
-                    ({32{alu_sll_sa                 }} & sll_sa_result  )    |
-                    ({32{alu_srl     | alu_sra      }} & sr_result      )    |
-                    ({32{alu_srl_sa  | alu_sra_sa   }} & sr_sa_result   )    |
+                    ({32{alu_sll        }} & sll_result     )       |
+                    ({32{alu_sll_sa     }} & sll_sa_result  )       |
+                    ({32{alu_sra    | alu_srl    }} & sr_result      )       |
+                    ({32{alu_sra_sa | alu_srl_sa }} & sr_sa_result   )       |
                     
-                    ({32{alu_lui        }} & lui_result)    |
+                    ({32{alu_lui        }} & lui_result)            |
                     ({32{alu_donothing  }} & donothing_result);
 
     //divide
