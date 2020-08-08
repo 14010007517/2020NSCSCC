@@ -6,10 +6,9 @@ module datapath (
     output wire [31:0] pcF,
     output wire [31:0] pc_next,
     output wire inst_enF,
-    input wire [31:0] instrF,  //注：instr ram时钟取反
+    input wire [31:0] instrF,
     input wire i_cache_stall,
     output wire stallF,
-    output wire stallM,
 
     //data
     output wire mem_enM,                    
@@ -21,6 +20,7 @@ module datapath (
     output wire [31:0] mem_addrE,
     output wire mem_read_enE,
     output wire mem_write_enE,
+    output wire stallM,
 
     //debug
     output wire [31:0]  debug_wb_pc,      
@@ -34,9 +34,8 @@ module datapath (
     wire [31:0] pc_plus4F;
     wire pc_reg_ceF;
     wire [2:0] pc_sel;
-    wire [31:0] instrF_temp;
+    wire pc_errorF;
     wire is_in_delayslot_iF;
-    // wire pcerrorD, pcerrorE, pcerrorM; 
 //ID
     wire [31:0] instrD;
     wire [31:0] pcD, pc_plus4D;
@@ -201,15 +200,12 @@ module datapath (
     wire [1:0] forward_aE, forward_bE;
     hazard hazard0(
         .clk(clk), .rst(rst),
-        .instrE(instrE), .instrM(instrM),
-        .l_s_typeE(l_s_typeE),
 
         .i_cache_stall(i_cache_stall),
         .d_cache_stall(d_cache_stall),
-        .mem_read_enM(mem_read_enM),
-        .mem_write_enM(mem_write_enM),
         .div_stallE(div_stallE),
         .mult_stallE(mult_stallE),
+        .l_s_typeE(l_s_typeE),
 
         .flush_jump_confilctE   (flush_jump_confilctE),
         .flush_pred_failedM     (flush_pred_failedM),
@@ -217,8 +213,8 @@ module datapath (
 
         .rsE(rsE),  .rsD(rsD),
         .rtE(rtE),  .rtD(rtD),
-        .reg_write_enM(reg_write_enM),
         .reg_write_enE(reg_write_enE),
+        .reg_write_enM(reg_write_enM),
         .reg_write_enW(reg_write_enW),
         .reg_writeE(reg_writeE),
         .reg_writeM(reg_writeM),
@@ -254,7 +250,7 @@ module datapath (
         .x6(pc_exceptionM),             //异常的跳转地址
         .x5(pc_plus4E),                 //预测跳，实际不跳。将pc_next指向branch指令的PC+8（注：pc_plus4E等价于branch指令的PC+8） //可以保证延迟槽指令不会被flush，故plush_4E存在
         .x4(pc_branchM),                //预测不跳，实际跳转。将pc_next指向pc_branchD传到M阶段的值
-        .x3(pc_jumpE),                  //jump冲突，在E阶段
+        .x3(pc_jumpE),                  //jump冲突，在E阶段获得跳转的地址
         .x2(pc_jumpD),                  //D阶段jump不冲突跳转的地址（rs寄存器或立即数）
         .x1(pc_branchD),                //D阶段预测跳转的跳转地址（PC+offset）
         .x0(pc_plus4F),                 //下一条指令的地址
@@ -273,9 +269,10 @@ module datapath (
         .ce(pc_reg_ceF)
     );
 
-    assign inst_enF = pc_reg_ceF & ~flush_exceptionM;
+    assign pc_errorF = pcF[1:0]!=2'b0 ? 1'b1 : 1'b0;
 
-    assign instrF_temp = ({32{~(|(pcF[1:0] ^ 2'b00))}} & instrF);
+    assign inst_enF = pc_reg_ceF & ~flush_exceptionM & ~pc_errorF & ~flush_pred_failedM & ~flush_jump_confilctE;
+
     assign is_in_delayslot_iF = branchD | jumpD;
 //IF_ID
     if_id if_id0(
@@ -284,7 +281,7 @@ module datapath (
         .flushD(flushD),
         .pcF(pcF),
         .pc_plus4F(pc_plus4F),
-        .instrF(instrF_temp),
+        .instrF(instrF),
         .is_in_delayslot_iF(is_in_delayslot_iF),
         
         .pcD(pcD),
@@ -389,28 +386,12 @@ module datapath (
         .l_s_typeE(l_s_typeE)
     );
 //EX
-    // alu alu0(
-    //     .clk(clk),
-    //     .rst(rst),
-    //     .flushE(flushE),
-    //     .src_aE(src_aE), .src_bE(src_bE),
-    //     .alu_controlE(alu_controlE),
-    //     .sa(saE),
-    //     .hilo(hiloM),
-    //     .stallD(stallD),
-    //     .is_divD(is_divD),
-    //     .is_multD(is_multD),
-
-    //     .div_stallE(div_stallE),
-    //     .mult_stallE(mult_stallE),
-    //     .alu_outE(alu_outE),
-    //     .overflowE(overflowE)
-    // );
-
-    alulg alu0(
+    alu_lg alu0(
         .clk(clk),
         .rst(rst),
         .flushE(flushE),
+        .flush_exceptionM(flush_exceptionM),
+        .stallM(stallM),
         .src_aE(src_aE), .src_bE(src_bE),
         .alu_controlE(alu_controlE),
         .sa(saE),
@@ -429,9 +410,6 @@ module datapath (
 
     //mux write reg
     mux4 #(5) mux4_reg_dst(rdE, rtE, 5'd31, 5'b0, reg_dstE, reg_writeE);
-
-    //mux alu imm sel
-    // mux2 #(32) mux2_alu_imm_selb(rd2E, immE, alu_imm_selE, src_bE);
 
     //数据前推(bypass)
     mux4 #(32) mux4_forward_aE(

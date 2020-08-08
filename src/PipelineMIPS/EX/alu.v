@@ -3,6 +3,8 @@
 module alu (
     input wire clk, rst,
     input wire flushE,
+    input wire flush_exceptionM,
+    input wire stallM,
     input wire [31:0] src_aE, src_bE,
     input wire [4:0] alu_controlE,
     input wire [4:0] sa,
@@ -11,7 +13,7 @@ module alu (
     input wire is_divD,
     input wire is_multD,
 
-    output reg div_stallE,
+    output wire div_stallE,
     output wire mult_stallE,
     output wire [63:0] alu_outE,
     output wire overflowE
@@ -21,87 +23,174 @@ module alu (
     wire mult_valid;
     wire div_sign;
 	wire div_vaild;
-	wire ready;
-    reg [31:0] alu_out_not_mul_div; //拓展成33位，便于判断溢出
-    reg carry_bit;
+    wire [31:0] alu_out_not_mul_div; //拓展成33位，便于判断溢出
 
     wire [63:0] alu_out_signed_mult, alu_out_unsigned_mult;
     wire signed_mult_ce, unsigned_mult_ce;
-    reg [3:0] cnt;
 
     assign alu_outE = ({64{div_vaild}} & alu_out_div)
                     | ({64{mult_valid}} & alu_out_mult)
                     | ({64{~mult_valid & ~div_vaild}} & {32'b0, alu_out_not_mul_div})
-                    | ({64{(alu_controlE == `ALU_MTHI)}} & {src_aE, hilo[31:0]})
-                    | ({64{(alu_controlE == `ALU_MTLO)}} & {hilo[31:0], src_aE});
+                    | ({64{ !(alu_controlE ^ `ALU_MTHI) }} & {src_aE, hilo[31:0]})
+                    | ({64{ !(alu_controlE ^ `ALU_MTLO) }} & {hilo[31:0], src_aE});
 
-    assign overflowE = (alu_controlE==`ALU_ADD || alu_controlE==`ALU_SUB) & (carry_bit ^ alu_out_not_mul_div[31]);
+    assign overflowE = (alu_add || alu_sub) & (adder_cout ^ alu_out_not_mul_div[31]) & !(adder_a[31] ^ adder_b[31]);
 
-    // simple
-    always @(*) begin
-        carry_bit = 0;
-        case(alu_controlE)
-            `ALU_AND:       alu_out_not_mul_div = src_aE & src_bE;
-            `ALU_OR:        alu_out_not_mul_div = src_aE | src_bE;
-            `ALU_NOR:       alu_out_not_mul_div =~(src_aE | src_bE);
-            `ALU_XOR:       alu_out_not_mul_div = src_aE ^ src_bE;
-            `ALU_ADD:       {carry_bit, alu_out_not_mul_div} = {src_aE[31], src_aE} + {src_bE[31], src_bE};
-            `ALU_ADDU:      alu_out_not_mul_div = src_aE + src_bE;
-            `ALU_SUB:       {carry_bit, alu_out_not_mul_div} = {src_aE[31], src_aE} - {src_bE[31], src_bE};
-            `ALU_SUBU:      alu_out_not_mul_div = src_aE - src_bE;
-            `ALU_SLT:       alu_out_not_mul_div = $signed(src_aE) < $signed(src_bE);
-            `ALU_SLTU:      alu_out_not_mul_div = src_aE < src_bE;
-            `ALU_SLL:       alu_out_not_mul_div = src_bE << src_aE[4:0];
-            `ALU_SRL:       alu_out_not_mul_div = src_bE >> src_aE[4:0];
-            `ALU_SRA:       alu_out_not_mul_div = $signed(src_bE) >>> src_aE[4:0];
-            `ALU_SLL_SA:    alu_out_not_mul_div = src_bE << sa;
-            `ALU_SRL_SA:    alu_out_not_mul_div = src_bE >> sa;
-            `ALU_SRA_SA:    alu_out_not_mul_div = $signed(src_bE) >>> sa;
-            `ALU_LUI:       alu_out_not_mul_div = {src_bE[15:0], 16'b0};
-            `ALU_DONOTHING: alu_out_not_mul_div = src_aE;
+    wire alu_and        ;      
+    wire alu_or         ;      
+    wire alu_nor        ;      
+    wire alu_xor        ;      
+    wire alu_add        ;      
+    wire alu_addu       ;      
+    wire alu_sub        ;      
+    wire alu_subu       ;     
+    wire alu_slt        ;      
+    wire alu_sltu       ;
 
-            default:    alu_out_not_mul_div = 32'b0;
-        endcase
-    end
+    wire alu_sll        ;      
+    wire alu_sll_sa     ;      
+    wire alu_sr         ;      
+    wire alu_sr_sa      ;
+
+    wire alu_lui        ;      
+    wire alu_donothing  ;     
+
+    wire [31:0] and_result          ;
+    wire [31:0] or_result           ;
+    wire [31:0] nor_result          ;
+    wire [31:0] xor_result          ;
+
+    wire [31:0] add_sub_result      ;
+    wire [31:0] addu_result         ;
+    wire [31:0] sub_result          ;
+    wire [31:0] subu_result         ;
+
+    wire [31:0] slt_result          ;
+    wire [31:0] sltu_result         ;
+    
+    wire [31:0] sll_result          ;
+    wire [31:0] sll_sa_result       ;
+    wire [31:0] sr_result           ;
+    wire [31:0] sr_sa_result        ;
+
+    wire [31:0] lui_result          ;
+    wire [31:0] donothing_result    ;
+
+    assign alu_and       = !(alu_controlE ^ `ALU_AND      );
+    assign alu_or        = !(alu_controlE ^ `ALU_OR       );
+    assign alu_nor       = !(alu_controlE ^ `ALU_NOR      );
+    assign alu_xor       = !(alu_controlE ^ `ALU_XOR      );
+    assign alu_add       = !(alu_controlE ^ `ALU_ADD      );
+    assign alu_addu      = !(alu_controlE ^ `ALU_ADDU     );
+    assign alu_sub       = !(alu_controlE ^ `ALU_SUB      );
+    assign alu_subu      = !(alu_controlE ^ `ALU_SUBU     );
+    assign alu_slt       = !(alu_controlE ^ `ALU_SLT      );
+    assign alu_sltu      = !(alu_controlE ^ `ALU_SLTU     );
+
+    assign alu_sll       = !(alu_controlE ^ `ALU_SLL      );
+    assign alu_sll_sa    = !(alu_controlE ^ `ALU_SLL_SA   );
+    assign alu_srl       = !(alu_controlE ^ `ALU_SRL      );
+    assign alu_sra       = !(alu_controlE ^ `ALU_SRA      );
+    assign alu_srl_sa    = !(alu_controlE ^ `ALU_SRL_SA   );
+    assign alu_sra_sa    = !(alu_controlE ^ `ALU_SRA_SA   );
+
+    assign alu_lui       = !(alu_controlE ^ `ALU_LUI      );
+    assign alu_donothing = !(alu_controlE ^ `ALU_DONOTHING);
+
+    assign and_result    = src_aE & src_bE;
+    assign or_result     = src_aE | src_bE;
+    assign nor_result    = ~or_result;
+    assign xor_result    = src_aE ^ src_bE;
+    assign lui_result    = {src_bE[15:0],  16'd0};
+
+
+    wire [31:0] adder_a;
+    wire [31:0] adder_b;
+    wire        adder_cin;
+    wire [31:0] adder_result;
+    wire        adder_cout;
+    wire [63:0] sr64_sa_result, sr64_result;
+
+    // 这个是个蛇皮，这个补码是32位的补码，而非33位的补码；所以sltu_result[0] = ~adder_cout;
+    // b + [b] = 1; 若a<b, 则 a + [b] < 1; 所以adder_cout = 0;
+    // 溢出： 有符号相同符号相加可能会产生溢出，分为正溢出（{adder_cout, result[31]}: 01）与负溢出（{adder_cout, result[31]}:10）；
+    // 建议通过有符号拓展理解；
+
+    assign adder_a = src_aE;
+    assign adder_b = src_bE ^ {32{alu_sub | alu_subu | alu_slt | alu_sltu}};
+    assign adder_cin = alu_sub | alu_subu | alu_slt | alu_sltu;
+    assign {adder_cout,adder_result} =adder_a + adder_b + adder_cin;
+    assign add_sub_result = adder_result;
+
+    assign slt_result[31:1] = 31'd0;
+    assign slt_result[0] = (src_aE[31] & ~src_bE[31]) |
+                        (~(src_aE[31]^src_bE[31]) & adder_result[31]);
+    //assign slt_result[0] = src_aE < src_bE ;
+
+    assign sltu_result[31:1] = 31'd0;
+    assign sltu_result[0] = ~adder_cout;
+    //assign sltu_result = {1'b0,src_aE} < {1'b0,src_bE};
+
+    assign sll_result  = src_bE << src_aE[4:0];                                     // sll
+    assign sll_sa_result = src_bE << sa;                                            // sll_sa
+    
+    assign sr64_result = {{32{alu_sra & src_bE[31]}},src_bE[31:0]} >> src_aE[4:0]; // sra srl
+    assign sr_result   = sr64_result[31:0];                                      
+    assign sr64_sa_result = {{32{alu_sra_sa & src_bE[31]}},src_bE[31:0]} >> sa;       // sra_sa srl_sa
+    assign sr_sa_result = sr64_sa_result[31:0];
+
+    assign donothing_result = src_aE;
+
+    assign alu_out_not_mul_div = 
+                    ({32{alu_and        }} & and_result)            |
+                    ({32{alu_nor        }} & nor_result)            |
+                    ({32{alu_or         }} & or_result)             |
+                    ({32{alu_xor        }} & xor_result)            |
+                    
+                    ({32{alu_add | alu_addu | alu_sub | alu_subu}} & add_sub_result) |
+                    
+                    ({32{alu_slt        }} & slt_result)            |
+                    ({32{alu_sltu       }} & sltu_result)           |
+                    
+                    ({32{alu_sll        }} & sll_result     )       |
+                    ({32{alu_sll_sa     }} & sll_sa_result  )       |
+                    ({32{alu_sra    | alu_srl    }} & sr_result      )       |
+                    ({32{alu_sra_sa | alu_srl_sa }} & sr_sa_result   )       |
+                    
+                    ({32{alu_lui        }} & lui_result)            |
+                    ({32{alu_donothing  }} & donothing_result);
 
     //divide
 	assign div_sign = (alu_controlE == `ALU_SIGNED_DIV);
-	assign div_vaild = (alu_controlE == `ALU_SIGNED_DIV || alu_controlE == `ALU_UNSIGNED_DIV);
+	assign div_valid = (alu_controlE == `ALU_SIGNED_DIV || alu_controlE == `ALU_UNSIGNED_DIV);
 
-    reg vaild;
-    wire ready;
-    always @(posedge clk) begin
-        div_stallE <= rst  ? 1'b0 :
-                      is_divD & ~stallD & ~flushE ? 1'b1 :
-                      ready | flushE ? 1'b0 : div_stallE;
-        vaild <= rst ? 1'b0 :
-                     is_divD & ~stallD & ~flushE ? 1'b1 : 1'b0;
-    end
+    wire div_res_valid;
+    wire div_res_ready;
 
-	div_radix2 DIV(
+    assign div_res_ready = div_valid & ~stallM;
+    assign div_stallE = div_valid & ~div_res_valid & ~flush_exceptionM;
+
+	div_self_align DIV(
 		.clk(clk),
-		.rst(rst),
-        .flush(flushE),
-		.a(src_aE),  //divident
-		.b(src_bE),  //divisor
-		.valid(vaild ),
-		.sign(div_sign),   //1 signed
+		.rst(rst | flushE),
+		.a(src_aE),         //divident
+		.b(src_bE),         //divisor
+		.sign(div_sign),    //1 signed
 
-		.ready(ready),
+		.opn_valid(div_valid),
+        .res_valid(div_res_valid),
+        .res_ready(div_res_ready),
 		.result(alu_out_div)
 	);
 
     //multiply
+    wire signed_mult_ce, unsigned_mult_ce;
+    reg [3:0] cnt;
+
 	assign mult_sign = (alu_controlE == `ALU_SIGNED_MULT);
     assign mult_valid = (alu_controlE == `ALU_SIGNED_MULT) | (alu_controlE == `ALU_UNSIGNED_MULT);
 
     assign alu_out_mult = mult_sign ? alu_out_signed_mult : alu_out_unsigned_mult;
-	// 	.a(src_aE),
-	// 	.b(src_bE),
-	// 	.sign(mult_sign),   //1:signed
-
-	// 	.result(alu_out_mult)
-	// );
 
     wire mult_ready;
     assign mult_ready = !(cnt ^ 4'b1001);
@@ -112,15 +201,16 @@ module alu (
                 cnt + 1;
     end
 
-    assign unsigned_mult_ce = mult_valid & ~mult_ready;
-    assign signed_mult_ce =  mult_valid & ~mult_ready;
-    assign mult_stallE = mult_valid & (unsigned_mult_ce | signed_mult_ce);
+    assign unsigned_mult_ce = ~mult_sign & mult_valid & ~mult_ready;
+    assign signed_mult_ce = mult_sign & mult_valid & ~mult_ready;
+    assign mult_stallE = mult_valid & ~mult_ready & ~flush_exceptionM;
 
     signed_mult signed_mult0 (
         .CLK(clk),  // input wire CLK
         .A(src_aE),      // input wire [31 : 0] A
         .B(src_bE),      // input wire [31 : 0] B
         .CE(signed_mult_ce),    // input wire CE
+        .SCLR(flushE),
         .P(alu_out_signed_mult)      // output wire [63 : 0] P
     );
 
@@ -129,7 +219,7 @@ module alu (
         .A(src_aE),      // input wire [31 : 0] A
         .B(src_bE),      // input wire [31 : 0] B
         .CE(unsigned_mult_ce),    // input wire CE
+        .SCLR(flushE),
         .P(alu_out_unsigned_mult)      // output wire [63 : 0] P
     );
-
 endmodule
