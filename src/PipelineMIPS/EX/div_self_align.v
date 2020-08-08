@@ -1,13 +1,15 @@
 //module:       div
 //description:  self-align divider
 //              迭代次数约为，3 + max{2*(a的有效位数-b的有效位数), 0}
-//version:      1.3
+//version:      1.4
 
 /** log:
 1.1: 增加了存储输入的逻辑 (不暂停M,W阶段, 数据前推导致输入发生变化)
 1.2: 增加了flush逻辑，用于发生异常时停止计算除法（1.3: 合并到rst中）
 1.3: 接口增加axi握手逻辑。其中“地址”握手(opn_valid)，认为是单向握手（slave随时都准备好接收输入）
+1.4: rst时将一些reg清0，防止result出现xxx的情况
 */
+
 module div_self_align(
     input wire clk,
     input wire rst,
@@ -66,8 +68,13 @@ module div_self_align(
     reg start;
     reg left_shift;
     reg [31:0] flag; //标记1的位置，可左右移动
-    always @(posedge clk,posedge rst) begin
+    always @(posedge clk) begin
         if(rst) begin
+            SR <= 0;
+            REMAINER <= 0;
+            a_save <= 0;
+            b_save <= 0;
+
             start <= 1'b0;
             left_shift <= 1'b1;
         end

@@ -386,7 +386,7 @@ module datapath (
         .l_s_typeE(l_s_typeE)
     );
 //EX
-    alu_lg alu0(
+    alu alu0(
         .clk(clk),
         .rst(rst),
         .flushE(flushE),

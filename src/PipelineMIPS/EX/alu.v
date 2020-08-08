@@ -22,17 +22,21 @@ module alu (
     wire mult_sign;
     wire mult_valid;
     wire div_sign;
-	wire div_vaild;
+	wire div_valid;
     wire [31:0] alu_out_not_mul_div; //拓展成33位，便于判断溢出
 
     wire [63:0] alu_out_signed_mult, alu_out_unsigned_mult;
     wire signed_mult_ce, unsigned_mult_ce;
 
-    assign alu_outE = ({64{div_vaild}} & alu_out_div)
+    wire alu_mfhi, alu_mflo;
+    assign alu_mfhi = !(alu_controlE ^ `ALU_MTHI);
+    assign alu_mflo = !(alu_controlE ^ `ALU_MTLO);
+
+    assign alu_outE = ({64{div_valid}} & alu_out_div)
                     | ({64{mult_valid}} & alu_out_mult)
-                    | ({64{~mult_valid & ~div_vaild}} & {32'b0, alu_out_not_mul_div})
-                    | ({64{ !(alu_controlE ^ `ALU_MTHI) }} & {src_aE, hilo[31:0]})
-                    | ({64{ !(alu_controlE ^ `ALU_MTLO) }} & {hilo[31:0], src_aE});
+                    | ({64{alu_mfhi}} & {src_aE, hilo[31:0]})
+                    | ({64{alu_mflo}} & {hilo[31:0], src_aE})
+                    | ({64{~mult_valid & ~div_valid & ~alu_mfhi & ~alu_mflo}} & {32'b0, alu_out_not_mul_div});
 
     assign overflowE = (alu_add || alu_sub) & (adder_cout ^ alu_out_not_mul_div[31]) & !(adder_a[31] ^ adder_b[31]);
 
