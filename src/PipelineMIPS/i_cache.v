@@ -3,6 +3,10 @@ module i_cache (
     
     //tlb
     input wire no_cache,
+
+    //debug rate
+    output wire i_cache_miss, i_cache_hit,
+
     //datapath
     input wire inst_en,
     input wire [31:0] pc_next,
@@ -108,6 +112,25 @@ module i_cache (
 
 
     //-------------debug-------------
+    reg enb_r;
+    always@(posedge clk) begin
+        enb_r <=    rst ? 0 : enb;
+    end
+    assign i_cache_hit = hit & enb_r;
+    assign i_cache_miss = ~hit & enb_r;
+    reg [31:0] i_hit;
+    always@(posedge clk) begin
+        i_hit <= rst ? 0 : 
+                i_cache_hit ? i_hit + 1 :
+                i_hit;
+    end
+    
+    reg [31:0] instr_cnt;
+    always@(posedge clk) begin
+        instr_cnt <= rst ? 0 :
+                    enb ? instr_cnt + 1:
+                    instr_cnt;
+    end
     //-------------debug-------------
 
 //FSM

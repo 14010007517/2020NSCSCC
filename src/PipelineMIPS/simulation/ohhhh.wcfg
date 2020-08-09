@@ -1706,11 +1706,107 @@
                <obj_property name="ElementShortName">rdata[31:0]</obj_property>
                <obj_property name="ObjectShortName">rdata[31:0]</obj_property>
             </wvobject>
-            <wvobject fp_name="/tb_top/soc_lite/u_cpu/d_cache/saved_rdata" type="array">
-               <obj_property name="ElementShortName">saved_rdata[31:0]</obj_property>
-               <obj_property name="ObjectShortName">saved_rdata[31:0]</obj_property>
-               <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
-               <obj_property name="UseCustomSignalColor">true</obj_property>
+            <wvobject fp_name="group731" type="group">
+               <obj_property name="label">D1</obj_property>
+               <obj_property name="DisplayName">label</obj_property>
+               <wvobject fp_name="/tb_top/soc_lite/u_cpu/d_cache/clk" type="logic">
+                  <obj_property name="ElementShortName">clk</obj_property>
+                  <obj_property name="ObjectShortName">clk</obj_property>
+               </wvobject>
+               <wvobject fp_name="/tb_top/soc_lite/u_cpu/d_cache/rst" type="logic">
+                  <obj_property name="ElementShortName">rst</obj_property>
+                  <obj_property name="ObjectShortName">rst</obj_property>
+               </wvobject>
+               <wvobject fp_name="/tb_top/soc_lite/u_cpu/d_cache/read" type="logic">
+                  <obj_property name="ElementShortName">read</obj_property>
+                  <obj_property name="ObjectShortName">read</obj_property>
+               </wvobject>
+               <wvobject fp_name="/tb_top/soc_lite/u_cpu/d_cache/write" type="logic">
+                  <obj_property name="ElementShortName">write</obj_property>
+                  <obj_property name="ObjectShortName">write</obj_property>
+               </wvobject>
+               <wvobject fp_name="/tb_top/soc_lite/u_cpu/d_cache/hit" type="logic">
+                  <obj_property name="ElementShortName">hit</obj_property>
+                  <obj_property name="ObjectShortName">hit</obj_property>
+                  <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+                  <obj_property name="UseCustomSignalColor">true</obj_property>
+               </wvobject>
+               <wvobject fp_name="/tb_top/soc_lite/u_cpu/d_cache/stall" type="logic">
+                  <obj_property name="ElementShortName">stall</obj_property>
+                  <obj_property name="ObjectShortName">stall</obj_property>
+                  <obj_property name="CustomSignalColor">#E0FFFF</obj_property>
+                  <obj_property name="UseCustomSignalColor">true</obj_property>
+               </wvobject>
+               <wvobject fp_name="/tb_top/soc_lite/u_cpu/d_cache/no_cache" type="logic">
+                  <obj_property name="ElementShortName">no_cache</obj_property>
+                  <obj_property name="ObjectShortName">no_cache</obj_property>
+                  <obj_property name="CustomSignalColor">#E0FFFF</obj_property>
+                  <obj_property name="UseCustomSignalColor">true</obj_property>
+               </wvobject>
+               <wvobject fp_name="/tb_top/soc_lite/u_cpu/d_cache/cache_lw" type="logic">
+                  <obj_property name="ElementShortName">cache_lw</obj_property>
+                  <obj_property name="ObjectShortName">cache_lw</obj_property>
+               </wvobject>
+               <wvobject fp_name="/tb_top/soc_lite/u_cpu/d_cache/cache_sw" type="logic">
+                  <obj_property name="ElementShortName">cache_sw</obj_property>
+                  <obj_property name="ObjectShortName">cache_sw</obj_property>
+               </wvobject>
+               <wvobject fp_name="/tb_top/soc_lite/u_cpu/d_cache/state" type="array">
+                  <obj_property name="ElementShortName">state[2:0]</obj_property>
+                  <obj_property name="ObjectShortName">state[2:0]</obj_property>
+                  <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
+                  <obj_property name="UseCustomSignalColor">true</obj_property>
+               </wvobject>
+               <wvobject fp_name="/tb_top/soc_lite/u_cpu/d_cache/read_req" type="logic">
+                  <obj_property name="ElementShortName">read_req</obj_property>
+                  <obj_property name="ObjectShortName">read_req</obj_property>
+                  <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
+                  <obj_property name="UseCustomSignalColor">true</obj_property>
+               </wvobject>
+               <wvobject fp_name="/tb_top/soc_lite/u_cpu/d_cache/write_req" type="logic">
+                  <obj_property name="ElementShortName">write_req</obj_property>
+                  <obj_property name="ObjectShortName">write_req</obj_property>
+                  <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
+                  <obj_property name="UseCustomSignalColor">true</obj_property>
+               </wvobject>
+               <wvobject fp_name="/tb_top/soc_lite/u_cpu/d_cache/cnt" type="array">
+                  <obj_property name="ElementShortName">cnt[2:0]</obj_property>
+                  <obj_property name="ObjectShortName">cnt[2:0]</obj_property>
+                  <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+                  <obj_property name="UseCustomSignalColor">true</obj_property>
+               </wvobject>
+               <wvobject fp_name="/tb_top/soc_lite/u_cpu/d_cache/offset" type="array">
+                  <obj_property name="ElementShortName">offset[2:0]</obj_property>
+                  <obj_property name="ObjectShortName">offset[2:0]</obj_property>
+                  <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+                  <obj_property name="UseCustomSignalColor">true</obj_property>
+               </wvobject>
+               <wvobject fp_name="/tb_top/soc_lite/u_cpu/d_cache/data_back" type="logic">
+                  <obj_property name="ElementShortName">data_back</obj_property>
+                  <obj_property name="ObjectShortName">data_back</obj_property>
+               </wvobject>
+               <wvobject fp_name="/tb_top/soc_lite/u_cpu/d_cache/data_go" type="logic">
+                  <obj_property name="ElementShortName">data_go</obj_property>
+                  <obj_property name="ObjectShortName">data_go</obj_property>
+               </wvobject>
+               <wvobject fp_name="/tb_top/soc_lite/u_cpu/d_cache/read_finish" type="logic">
+                  <obj_property name="ElementShortName">read_finish</obj_property>
+                  <obj_property name="ObjectShortName">read_finish</obj_property>
+               </wvobject>
+               <wvobject fp_name="/tb_top/soc_lite/u_cpu/d_cache/write_finish" type="logic">
+                  <obj_property name="ElementShortName">write_finish</obj_property>
+                  <obj_property name="ObjectShortName">write_finish</obj_property>
+               </wvobject>
+               <wvobject fp_name="/tb_top/soc_lite/u_cpu/d_cache/rdata" type="array">
+                  <obj_property name="ElementShortName">rdata[31:0]</obj_property>
+                  <obj_property name="ObjectShortName">rdata[31:0]</obj_property>
+               </wvobject>
+               <wvobject fp_name="/tb_top/soc_lite/u_cpu/d_cache/saved_rdata" type="array">
+                  <obj_property name="ElementShortName">saved_rdata[31:0]</obj_property>
+                  <obj_property name="ObjectShortName">saved_rdata[31:0]</obj_property>
+                  <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
+                  <obj_property name="UseCustomSignalColor">true</obj_property>
+               </wvobject>
             </wvobject>
          </wvobject>
          <wvobject fp_name="group1876" type="group">

@@ -1,6 +1,9 @@
 module d_cache (
     input wire clk, rst,
 
+    //debug rate
+    output wire d_cache_miss, d_cache_hit,
+
     //tlb
     input wire no_cache,
     //datapath
@@ -40,7 +43,7 @@ module d_cache (
     input wire wready,
 
     input wire bvalid,
-    output wire bready    
+    output wire bready   
 ); 
 
 //变量声明
@@ -143,6 +146,28 @@ module d_cache (
     wire write_finish;  //写事务结束
 
     //-------------------debug-----------------
+    //rate
+    reg [31:0] d_hit;
+    assign d_cache_hit = hit & enb_tag_ram_r;
+    assign d_cache_miss = ~hit & enb_tag_ram_r;
+    reg enb_tag_ram_r;
+    always@(posedge clk) begin
+        enb_tag_ram_r <= rst ? 0:
+                        enb_tag_ram;
+    end
+    always@(posedge clk) begin
+        d_hit <= rst ? 0 : 
+                d_cache_hit? d_hit + 1 :
+                d_hit;
+    end
+    
+    reg [31:0] storeload_cnt;
+    always@(posedge clk) begin
+        storeload_cnt <= rst ? 0 :
+                    enb_tag_ram ? storeload_cnt + 1:
+                    storeload_cnt;
+    end
+
     //-------------------debug-----------------
 //FSM
     reg [1:0] state;

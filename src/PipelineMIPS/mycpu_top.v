@@ -180,8 +180,21 @@ module mycpu_top (
 
     assign mult_branch = is_mult & datapath.branchM;
     assign mult_exception = is_mult & datapath.flush_exceptionM;
+
+     //debug rate
+    wire i_hit, d_hit, i_miss, d_miss;
+    hit_rate hit_rate0(
+        .clk(clk), .rst(rst),
+        .i_hit(i_hit),
+        .d_hit(d_hit),
+        .i_miss(i_miss),
+        .d_miss(d_miss),
+        .stallF(stallF)
+    );
     //------------------------------debug------------------------------
     
+   
+
     datapath datapath(
         .clk(clk), .rst(rst),
         .ext_int(ext_int),
@@ -233,6 +246,9 @@ module mycpu_top (
         //TLB
         .no_cache(no_cache_i),
         
+        //debug rate
+        .i_cache_hit(i_hit), .i_cache_miss(i_miss),
+
         //datapath
         .inst_en(inst_en),
         .pc_next(pc_next),
@@ -255,6 +271,9 @@ module mycpu_top (
 
     d_cache d_cache(
         .clk(clk), .rst(rst),
+
+        //debug rate
+        .d_cache_hit(d_hit), .d_cache_miss(d_miss),
 
         //TLB
         .no_cache(no_cache_d),

@@ -153,6 +153,31 @@ module datapath (
     assign debug_wb_rf_wen      = {4{reg_write_enM & ~stallW & ~flush_exceptionM}};
     assign debug_wb_rf_wnum     = datapath.reg_writeM;
     assign debug_wb_rf_wdata    = datapath.resultM;
+
+    // count
+    reg [31:0] jump_cnt;
+    reg [31:0] jump_fail_cnt;
+    always @(posedge clk) begin
+        jump_cnt <= rst ? 0:
+                jumpD & ~stallD ? jump_cnt + 1:
+                jump_cnt;
+        jump_fail_cnt <= rst ? 0:
+                        jump_conflictD & ~stallD ? jump_fail_cnt + 1:
+                        jump_fail_cnt;
+    end
+
+    // count rate
+    reg [31:0] B_cnt;
+    reg [31:0] b_fail_cnt;
+    always @(posedge clk) begin
+        B_cnt       <= rst ? 0: 
+                        branchD & ~stallD & ~flushD & ~flushE? B_cnt + 1:
+                        B_cnt;
+        b_fail_cnt  <= rst ? 0:
+                        ~succM & ~stallM ? b_fail_cnt + 1:
+                        b_fail_cnt;
+    end
+
 //-------------------------------------------------------------------
 //模块实例化
     main_decoder main_decoder0(
