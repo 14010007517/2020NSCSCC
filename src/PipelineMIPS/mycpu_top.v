@@ -119,6 +119,69 @@ module mycpu_top (
     wire d_bvalid           ;
     wire d_bready           ;
 
+  //------------------------------debug------------------------------
+    //I cache
+    wire i_hit_exception, i_hit_pc_error, i_hit_branch, i_hit_jump;
+    wire i_miss_exception, i_miss_pc_error, i_miss_branch, i_miss_jump;
+
+    wire i_miss, i_hit;
+    assign i_hit = (|i_cache.sel_mask);
+    assign i_miss = ~i_hit;
+
+    assign i_hit_exception = i_hit & datapath.flush_exceptionM;
+    assign i_hit_pc_error = i_hit & datapath.pc_errorF;
+    assign i_hit_branch = i_hit & datapath.flush_pred_failedM;
+    assign i_hit_jump = i_hit & datapath.flush_jump_confilctE;
+
+    assign i_miss_exception = i_miss & datapath.flush_exceptionM;
+    assign i_miss_pc_error = i_miss & datapath.pc_errorF;
+    assign i_miss_branch = i_miss & datapath.flush_pred_failedM;
+    assign i_miss_jump = i_miss & datapath.flush_jump_confilctE;
+
+    //D cache
+    wire d_lw_hit, d_lw_miss, d_lw_miss_dirty, d_lw_no_cache;
+    wire d_sw_hit, d_sw_miss, d_sw_miss_dirty, d_sw_no_cache;
+    wire d_sbh_hit, d_sbh_miss;
+
+    wire d_miss_exception;
+    
+    wire d_hit, d_miss;
+    wire d_read, d_write;
+    assign d_hit =  (|d_cache.sel_mask);
+    assign d_miss = ~d_hit;
+    assign d_read = datapath.mem_read_enM;
+    assign d_write = datapath.mem_write_enM;
+
+    assign d_lw_hit = d_read & d_hit;
+    assign d_lw_miss = d_read & d_miss & ~d_cache.dirty;
+    assign d_lw_miss_dirty = d_read & d_miss & d_cache.dirty;
+    assign d_lw_no_cache = d_read & no_cache_d;
+
+    assign d_sw_hit = d_write & d_hit;
+    assign d_sw_miss = d_write & d_miss & ~d_cache.dirty;
+    assign d_sw_miss_dirty = d_write & d_miss & d_cache.dirty;
+    assign d_sw_no_cache = d_write & no_cache_d;
+
+    assign d_sbh_hit = d_write & d_hit & (data_wen!=4'b1111);
+    assign d_sbh_miss = d_write & d_miss & (data_wen!=4'b1111);
+
+    assign d_miss_exception = (d_read | d_write) & d_miss & datapath.flush_exceptionM;
+    
+    //DIV, MULT
+    wire is_div, is_mult;
+    wire div_branch, div_exception;
+    wire mult_branch, mult_exception;
+
+	assign is_div = datapath.alu0.div_valid;
+    assign is_mult = datapath.alu0.mult_valid;
+
+    assign div_branch = is_div & datapath.branchM;
+    assign div_exception = is_div & datapath.flush_exceptionM;
+
+    assign mult_branch = is_mult & datapath.branchM;
+    assign mult_exception = is_mult & datapath.flush_exceptionM;
+    //------------------------------debug------------------------------
+    
     datapath datapath(
         .clk(clk), .rst(rst),
         .ext_int(ext_int),
