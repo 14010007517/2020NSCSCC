@@ -12,7 +12,6 @@ module mem_wb (
     output reg [31:0] alu_outW,
     output reg [4:0] reg_writeW,
     output reg reg_write_enW,
-    output reg [31:0] mem_rdataW,
     output reg [31:0] resultW
 );
     always @(posedge clk) begin
