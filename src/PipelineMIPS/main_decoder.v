@@ -4,32 +4,26 @@ module main_decoder(
     input clk, rst,
     input wire [31:0] instrD,
 
-	input wire stallE, stallM, stallW,
-	input wire flushE, flushM, flushW,
     //ID
     output wire sign_extD,          //立即数是否为符号扩展
 	output wire is_divD,is_multD,			//是否为除法指令
 	output wire [7:0] l_s_typeD,
 	output wire [1:0] mfhi_loD,
     //EX
-    output reg [1:0] reg_dstE,     	//写寄存器选择  00-> rd, 01-> rt, 10-> 写$ra
-    output reg alu_imm_selE,        //alu srcb选择 0->rd2E, 1->immE
-    output reg reg_write_enE,
-	output reg hilo_wenE,
-	output reg mem_read_enE,
-	output reg mem_write_enE,
+    output wire [1:0] reg_dstD,     	//写寄存器选择  00-> rd, 01-> rt, 10-> 写$ra
+    output wire alu_imm_selD,        //alu srcb选择 0->rd2E, 1->immE
+	output wire hilo_wenD,
 	//MEM
-	output reg mem_read_enM, mem_write_enM,
-	output reg reg_write_enM,		//写寄存器堆使能
-    output reg mem_to_regM,         //result选择 0->alu_out, 1->read_data
-	output reg hilo_to_regM,			// 00--alu_outM; 01--hilo_o; 10 11--rdataM;
-	output reg riM,
-	output reg breakM, syscallM, eretM, 
-	output reg cp0_wenM,
-	output reg cp0_to_regM
+	output wire mem_read_enD, mem_write_enD,
+	output wire reg_write_enD,		//写寄存器堆使能
+    output wire mem_to_regD,         //result选择 0->alu_out, 1->read_data
+	output wire hilo_to_regD,			// 00--alu_outM; 01--hilo_o; 10 11--rdataM;
+	output reg  riD,
+	output wire breakD, syscallD, eretD, 
+	output wire cp0_wenD,
+	output wire cp0_to_regD
     //WB
 );
-
 // declare
     wire [5:0] op_code;
 	wire [4:0] rs,rt;
@@ -40,22 +34,8 @@ module main_decoder(
 	assign rt = instrD[20:16];
 	assign funct = instrD[5:0];
 
-    wire [1:0] reg_dstD;
-    wire alu_imm_selD, reg_write_enD, mem_to_regD, mem_read_enD, mem_write_enD;
-    reg mem_to_regE;
-
 	reg [3:0] regfile_ctrl;
 	reg [2:0] mem_ctrl;
-	wire hilo_wenD, cp0_wenD;
-	reg cp0_wenE;
-	wire hilo_to_regD, cp0_to_regD;
-	reg hilo_to_regE, cp0_to_regE;
-
-	reg riD, riE;
-	wire 	breakD, syscallD;
-	reg 	breakE, syscallE;
-	wire 	eretD;
-	reg 	eretE;
 	
 	assign {reg_write_enD, reg_dstD, alu_imm_selD} = regfile_ctrl;
 	assign {mem_to_regD, mem_read_enD, mem_write_enD} = mem_ctrl;
@@ -203,87 +183,17 @@ module main_decoder(
 		endcase
 	end
 
-// ID-EX flow
-    always@(posedge clk) begin
-		if(rst | flushE) begin
-			reg_dstE		<= 0; 
-			alu_imm_selE	<= 0;
-			mem_read_enE	<= 0;
-			mem_write_enE	<= 0;
-			reg_write_enE	<= 0;
-			mem_to_regE		<= 0;
-			hilo_wenE		<= 0;
-			hilo_to_regE	<= 0;
-			riE				<= 0;
-			breakE			<= 0;
-			syscallE		<= 0;
-			eretE			<= 0;
-			cp0_wenE		<= 0;
-			cp0_to_regE		<= 0;
-		end
-		else if(~stallE)begin
-			reg_dstE		<= reg_dstD 		; 
-			alu_imm_selE	<= alu_imm_selD 	;
-			mem_read_enE	<= mem_read_enD		;
-			mem_write_enE	<= mem_write_enD	;
-			reg_write_enE	<= reg_write_enD 	;
-			mem_to_regE		<= mem_to_regD 		;
-			hilo_wenE		<= hilo_wenD		;
-			hilo_to_regE	<= hilo_to_regD		;
-			riE				<= riD				;
-			breakE			<= breakD			;
-			syscallE		<= syscallD			;
-			eretE			<= eretD			;
-			cp0_wenE		<= cp0_wenD			;
-			cp0_to_regE		<= cp0_to_regD		;
-		end
-    end
-
-// EX-MEM flow
-    always@(posedge clk) begin
-		if(rst | flushM) begin
-			mem_read_enM	<= 0;
-			mem_write_enM	<= 0;
-			reg_write_enM	<= 0;
-			mem_to_regM		<= 0;
-			hilo_to_regM	<= 0;
-			riM				<= 0;
-			breakM			<= 0;
-			syscallM		<= 0;
-			eretM			<= 0;
-			cp0_wenM		<= 0;
-			cp0_to_regM		<= 0;
-		end
-		else if(~stallM) begin
-			mem_read_enM	<= mem_read_enE		;
-			mem_write_enM	<= mem_write_enE	;
-			reg_write_enM	<= reg_write_enE 	;
-			mem_to_regM		<= mem_to_regE 		;
-			hilo_to_regM	<= hilo_to_regE		;
-			riM				<= riE				;
-			breakM			<= breakE			;
-			syscallM		<= syscallE			;
-			eretM			<= eretE			;
-			cp0_wenM		<= cp0_wenE			;
-			cp0_to_regM		<= cp0_to_regE		;
-		end
-    end
-
-// MEM-WB flop
-
-	//
-	
+//  lw, sw
 	wire instr_lw, instr_lh, instr_lhu, instr_lb, instr_lbu, instr_sw, instr_sh, instr_sb;
-    wire addr_W0, addr_B2, addr_B1, addr_B3;
 
 	assign l_s_typeD = {instr_lw, instr_lh, instr_lhu, instr_lb, instr_lbu, instr_sw, instr_sh, instr_sb};
 
-	assign instr_lw = ~(|(op_code ^ `EXE_LW));
-    assign instr_lb = ~(|(op_code ^ `EXE_LB));
-    assign instr_lh = ~(|(op_code ^ `EXE_LH));
-    assign instr_lbu = ~(|(op_code ^ `EXE_LBU));
-    assign instr_lhu = ~(|(op_code ^ `EXE_LHU));
-    assign instr_sw = ~(|(op_code ^ `EXE_SW)); 
-    assign instr_sh = ~(|(op_code ^ `EXE_SH));
-    assign instr_sb = ~(|(op_code ^ `EXE_SB));
+	assign instr_lw 	= ~(|(op_code ^ `EXE_LW));
+    assign instr_lb 	= ~(|(op_code ^ `EXE_LB));
+    assign instr_lh 	= ~(|(op_code ^ `EXE_LH));
+    assign instr_lbu 	= ~(|(op_code ^ `EXE_LBU));
+    assign instr_lhu 	= ~(|(op_code ^ `EXE_LHU));
+    assign instr_sw 	= ~(|(op_code ^ `EXE_SW)); 
+    assign instr_sh 	= ~(|(op_code ^ `EXE_SH));
+    assign instr_sb 	= ~(|(op_code ^ `EXE_SB));
 endmodule

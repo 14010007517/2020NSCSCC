@@ -146,6 +146,29 @@ module datapath (
     wire is_multD;
     wire [1:0] mfhi_loD, mfhi_loE, mfhi_loM;
 
+    wire [1:0] reg_dstD;
+    wire alu_imm_selD;
+    wire hilo_wenD;
+    wire mem_read_enD;
+    wire mem_write_enD;
+    wire reg_write_enD;
+    wire mem_to_regD;
+    wire hilo_to_regD;
+    wire riD;
+    wire breakD;
+    wire syscallD;
+    wire eretD;
+    wire cp0_wenD;
+    wire cp0_to_regD;
+
+    wire mem_to_regE;
+    wire hilo_to_regE;
+    wire riE;
+    wire breakE;
+    wire syscallE;
+    wire eretE;
+    wire cp0_wenE;
+    wire cp0_to_regE;
 
 // hazard
     wire stallD, stallE, stallW;
@@ -162,9 +185,7 @@ module datapath (
     main_decoder main_decoder0(
         .clk(clk), .rst(rst),
         .instrD(instrD),
-        
-        .stallE(stallE), .stallM(stallM), .stallW(stallW),
-        .flushE(flushE), .flushM(flushM), .flushW(flushW),
+
         //ID
         .sign_extD(sign_extD),
         .is_divD(is_divD),
@@ -172,26 +193,21 @@ module datapath (
         .l_s_typeD(l_s_typeD),
         .mfhi_loD(mfhi_loD),
         //EX
-        .reg_dstE(reg_dstE),
-        .alu_imm_selE(alu_imm_selE),
-        .reg_write_enE(reg_write_enE),
-        .hilo_wenE(hilo_wenE),
-        .mem_read_enE(mem_read_enE),
-        .mem_write_enE(mem_write_enE),
+        .reg_dstD(reg_dstD),
+        .alu_imm_selD(alu_imm_selD),
+        .reg_write_enD(reg_write_enD),
+        .hilo_wenD(hilo_wenD),
         //MEM
-        .mem_read_enM(mem_read_enM),
-        .mem_write_enM(mem_write_enM),
-        .reg_write_enM(reg_write_enM),
-        .mem_to_regM(mem_to_regM),
-        .hilo_to_regM(hilo_to_regM),
-        .riM(riM),
-        .breakM(breakM),
-        .syscallM(syscallM),
-        .eretM(eretM),
-        .cp0_wenM(cp0_wenM),
-        .cp0_to_regM(cp0_to_regM)
-
-        //WB
+        .mem_read_enD(mem_read_enD),
+        .mem_write_enD(mem_write_enD),
+        .mem_to_regD(mem_to_regD),
+        .hilo_to_regD(hilo_to_regD),
+        .riD(riD),
+        .breakD(breakD),
+        .syscallD(syscallD),
+        .eretD(eretD),
+        .cp0_wenD(cp0_wenD),
+        .cp0_to_regD(cp0_to_regD)
     );
     alu_decoder alu_decoder0(
         .instrD(instrD),
@@ -356,6 +372,7 @@ module datapath (
         .pcD(pcD),
         .rsD(rsD), .rd1D(rd1D), .rd2D(rd2D),
         .rtD(rtD), .rdD(rdD),
+        .reg_dstD(reg_dstD),
         .immD(immD),
         .pc_plus4D(pc_plus4D),
         .instrD(instrD),
@@ -371,9 +388,24 @@ module datapath (
         .l_s_typeD(l_s_typeD),
         .mfhi_loD(mfhi_loD),
         
+        .alu_imm_selD(alu_imm_selD),
+        .mem_read_enD(mem_read_enD),
+        .mem_write_enD(mem_write_enD),
+        .reg_write_enD(reg_write_enD),
+        .mem_to_regD(mem_to_regD),	
+        .hilo_wenD(hilo_wenD),	
+        .hilo_to_regD(hilo_to_regD),
+        .riD(riD),			
+        .breakD(breakD),		
+        .syscallD(syscallD),	
+        .eretD(eretD),		
+        .cp0_wenD(cp0_wenD),	
+        .cp0_to_regD(cp0_to_regD),	
+        
         .pcE(pcE),
         .rsE(rsE), .rd1E(rd1E), .rd2E(rd2E),
         .rtE(rtE), .rdE(rdE),
+        .reg_dstE(reg_dstE),
         .immE(immE),
         .pc_plus4E(pc_plus4E),
         .instrE(instrE),
@@ -387,7 +419,20 @@ module datapath (
         .jumpE(jumpE),
         .branch_judge_controlE(branch_judge_controlE),
         .l_s_typeE(l_s_typeE),
-        .mfhi_loE(mfhi_loE)
+        .mfhi_loE(mfhi_loE),
+        .alu_imm_selE(alu_imm_selE),
+        .mem_read_enE(mem_read_enE),
+        .mem_write_enE(mem_write_enE),
+        .reg_write_enE(reg_write_enE),
+        .mem_to_regE(mem_to_regE),	
+        .hilo_wenE(hilo_wenE),	
+        .hilo_to_regE(hilo_to_regE),
+        .riE(riE),			
+        .breakE(breakE),		
+        .syscallE(syscallE),	
+        .eretE(eretE),		
+        .cp0_wenE(cp0_wenE),	
+        .cp0_to_regE(cp0_to_regE)
     );
 //EX
     alu alu0(
@@ -470,6 +515,18 @@ module datapath (
         .l_s_typeE(l_s_typeE),
         .mfhi_loE(mfhi_loE),
 
+        .mem_read_enE(mem_read_enE),	
+        .mem_write_enE(mem_write_enE),
+        .reg_write_enE(reg_write_enE), 
+        .mem_to_regE(mem_to_regE), 	
+        .hilo_to_regE(hilo_to_regE),	
+        .riE(riE),			
+        .breakE(breakE),		
+        .syscallE(syscallE),		
+        .eretE(eretE),		
+        .cp0_wenE(cp0_wenE),		
+        .cp0_to_regE(cp0_to_regE),
+
         .pcM(pcM),
         .alu_outM(alu_outM),
         .rt_valueM(rt_valueM),
@@ -483,7 +540,19 @@ module datapath (
         .rdM(rdM),
         .actual_takeM(actual_takeM),
         .l_s_typeM(l_s_typeM),
-        .mfhi_loM(mfhi_loM)
+        .mfhi_loM(mfhi_loM),
+
+        .mem_read_enM(mem_read_enM),	
+        .mem_write_enM(mem_write_enM),
+        .reg_write_enM(reg_write_enM), 
+        .mem_to_regM(mem_to_regM), 	
+        .hilo_to_regM(hilo_to_regM),	
+        .riM(riM),			
+        .breakM(breakM),		
+        .syscallM(syscallM),		
+        .eretM(eretM),		
+        .cp0_wenM(cp0_wenM),		
+        .cp0_to_regM(cp0_to_regM)
     );
 //MEM
     assign mem_addrM = alu_outM;
@@ -492,7 +561,7 @@ module datapath (
     // 是否需要控制 mem_en
     mem_ctrl mem_ctrl0(
         .l_s_typeM(l_s_typeM),
-	    .addr(alu_outM[3:0]),
+	    .addr(alu_outM[1:0]),
 
         .data_wdataM(rt_valueM),    //原始的wdata
         .mem_wdataM(mem_wdataM),    //新的wdata

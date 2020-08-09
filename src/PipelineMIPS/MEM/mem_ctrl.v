@@ -2,7 +2,7 @@
 
 module mem_ctrl(
     input wire [7:0] l_s_typeM,
-    input wire [3:0] addr,
+    input wire [1:0] addr,
 
     input wire [31:0] data_wdataM,
     output wire [31:0] mem_wdataM,

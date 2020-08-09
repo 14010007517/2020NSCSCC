@@ -23,8 +23,8 @@ module hilo_reg(
 
    // 读hilo逻辑；
    wire mfhi, mflo;
-   assign mfhi = mfhi_loM[0];
-   assign mflo = mfhi_loM[1];
+   assign mfhi = mfhi_loM[1];
+   assign mflo = mfhi_loM[0];
 
    assign hilo_o = ({32{mfhi}} & hilo[63:32]) | ({32{mflo}} & hilo[31:0]);
 endmodule

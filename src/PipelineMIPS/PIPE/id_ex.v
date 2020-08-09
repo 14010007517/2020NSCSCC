@@ -19,6 +19,20 @@ module id_ex (
     input wire [4:0] branch_judge_controlD,
     input wire [7:0] l_s_typeD,
     input wire [1:0] mfhi_loD,
+    input wire [1:0] reg_dstD,		
+    input wire alu_imm_selD,	
+    input wire mem_read_enD,	
+    input wire mem_write_enD,	
+    input wire reg_write_enD,	
+    input wire mem_to_regD,		
+    input wire hilo_wenD,		
+    input wire hilo_to_regD,	
+    input wire riD,				
+    input wire breakD,			
+    input wire syscallD,		
+    input wire eretD,			
+    input wire cp0_wenD,		
+    input wire cp0_to_regD,	
 
     output reg [31:0] pcE,
     output reg [31:0] rd1E, rd2E,
@@ -36,30 +50,59 @@ module id_ex (
     output reg jumpE,
     output reg [4:0] branch_judge_controlE,
     output reg [7:0] l_s_typeE,
-    output reg [1:0] mfhi_loE
+    output reg [1:0] mfhi_loE,
+
+    output reg [1:0] reg_dstE,		
+    output reg alu_imm_selE,	
+    output reg mem_read_enE,	
+    output reg mem_write_enE,	
+    output reg reg_write_enE,	
+    output reg mem_to_regE,		
+    output reg hilo_wenE,		
+    output reg hilo_to_regE,	
+    output reg riE,				
+    output reg breakE,			
+    output reg syscallE,		
+    output reg eretE,			
+    output reg cp0_wenE,		
+    output reg cp0_to_regE		
 );
     always @(posedge clk) begin
         if(rst | flushE) begin
-            pcE                     <=      0 ;
-            rd1E                    <=      0 ;
-            rd2E                    <=      0 ;
-            rsE                     <=      0 ;
-            rtE                     <=      0 ;
-            rdE                     <=      0 ;
-            immE                    <=      0 ;
-            pc_plus4E               <=      0 ;
-            instrE                  <=      0 ;
-            pc_branchE              <=      0 ;
-            pred_takeE              <=      0 ;
-            branchE                 <=      0 ;
-            jump_conflictE          <=      0 ;
-            saE                     <=      0 ;
-            is_in_delayslot_iE      <=      0 ;
-            alu_controlE            <=      0 ;
-            jumpE                   <=      0 ;
-            branch_judge_controlE   <=      0 ;
-            l_s_typeE               <=      0 ;
-            mfhi_loE                <=      0 ;
+            pcE                     <=      0   ;
+            rd1E                    <=      0   ;
+            rd2E                    <=      0   ;
+            rsE                     <=      0   ;
+            rtE                     <=      0   ;
+            rdE                     <=      0   ;
+            immE                    <=      0   ;
+            pc_plus4E               <=      0   ;
+            instrE                  <=      0   ;
+            pc_branchE              <=      0   ;
+            pred_takeE              <=      0   ;
+            branchE                 <=      0   ;
+            jump_conflictE          <=      0   ;
+            saE                     <=      0   ;
+            is_in_delayslot_iE      <=      0   ;
+            alu_controlE            <=      0   ;
+            jumpE                   <=      0   ;
+            branch_judge_controlE   <=      0   ;
+            l_s_typeE               <=      0   ;
+            mfhi_loE                <=      0   ;
+            reg_dstE		        <=      0   ; 
+			alu_imm_selE	        <=      0   ;
+			mem_read_enE	        <=      0   ;
+			mem_write_enE	        <=      0   ;
+			reg_write_enE	        <=      0   ;
+			mem_to_regE		        <=      0   ;
+			hilo_wenE		        <=      0   ;
+			hilo_to_regE	        <=      0   ;
+			riE				        <=      0   ;
+			breakE			        <=      0   ;
+			syscallE		        <=      0   ;
+			eretE			        <=      0   ;
+			cp0_wenE		        <=      0   ;
+			cp0_to_regE		        <=      0   ;
         end 
         else if(~stallE) begin
             pcE                     <= pcD                  ;
@@ -82,6 +125,56 @@ module id_ex (
             branch_judge_controlE   <= branch_judge_controlD;
             l_s_typeE               <= l_s_typeD            ;
             mfhi_loE                <= mfhi_loD             ;
+            reg_dstE		        <= reg_dstD 		    ; 
+			alu_imm_selE	        <= alu_imm_selD 	    ;
+			mem_read_enE	        <= mem_read_enD		    ;
+			mem_write_enE	        <= mem_write_enD	    ;
+			reg_write_enE	        <= reg_write_enD 	    ;
+			mem_to_regE		        <= mem_to_regD 		    ;
+			hilo_wenE		        <= hilo_wenD		    ;
+			hilo_to_regE	        <= hilo_to_regD		    ;
+			riE				        <= riD				    ;
+			breakE			        <= breakD			    ;
+			syscallE		        <= syscallD			    ;
+			eretE			        <= eretD			    ;
+			cp0_wenE		        <= cp0_wenD			    ;
+			cp0_to_regE		        <= cp0_to_regD		    ;
         end
     end
+
+// // main_decoder 还未整合；
+//     always@(posedge clk) begin
+// 		if(rst | flushE) begin
+// 			reg_dstE		<= 0; 
+// 			alu_imm_selE	<= 0;
+// 			mem_read_enE	<= 0;
+// 			mem_write_enE	<= 0;
+// 			reg_write_enE	<= 0;
+// 			mem_to_regE		<= 0;
+// 			hilo_wenE		<= 0;
+// 			hilo_to_regE	<= 0;
+// 			riE				<= 0;
+// 			breakE			<= 0;
+// 			syscallE		<= 0;
+// 			eretE			<= 0;
+// 			cp0_wenE		<= 0;
+// 			cp0_to_regE		<= 0;
+// 		end
+// 		else if(~stallE)begin
+// 			reg_dstE		<= reg_dstD 		; 
+// 			alu_imm_selE	<= alu_imm_selD 	;
+// 			mem_read_enE	<= mem_read_enD		;
+// 			mem_write_enE	<= mem_write_enD	;
+// 			reg_write_enE	<= reg_write_enD 	;
+// 			mem_to_regE		<= mem_to_regD 		;
+// 			hilo_wenE		<= hilo_wenD		;
+// 			hilo_to_regE	<= hilo_to_regD		;
+// 			riE				<= riD				;
+// 			breakE			<= breakD			;
+// 			syscallE		<= syscallD			;
+// 			eretE			<= eretD			;
+// 			cp0_wenE		<= cp0_wenD			;
+// 			cp0_to_regE		<= cp0_to_regD		;
+// 		end
+//     end
 endmodule

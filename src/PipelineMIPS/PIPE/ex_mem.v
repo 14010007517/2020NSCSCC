@@ -15,6 +15,17 @@ module ex_mem (
     input wire actual_takeE,
     input wire [7:0] l_s_typeE,
     input wire [1:0] mfhi_loE,
+    input wire mem_read_enE, 	
+    input wire mem_write_enE,    
+    input wire reg_write_enE,     
+    input wire mem_to_regE,   	
+    input wire hilo_to_regE, 	
+    input wire riE,  			
+    input wire breakE,   		
+    input wire syscallE, 		
+    input wire eretE,    		
+    input wire cp0_wenE, 		
+    input wire cp0_to_regE,  	
 
     output reg [31:0] pcM,
     output reg [31:0] alu_outM,
@@ -29,8 +40,20 @@ module ex_mem (
     output reg [4:0] rdM,
     output reg actual_takeM,
     output reg [7:0] l_s_typeM,
-    output reg [1:0] mfhi_loM
+    output reg [1:0] mfhi_loM,
+    output reg mem_read_enM,	
+    output reg mem_write_enM,
+    output reg reg_write_enM, 
+    output reg mem_to_regM, 	
+    output reg hilo_to_regM,	
+    output reg riM,			
+    output reg breakM,		
+    output reg syscallM,		
+    output reg eretM,		
+    output reg cp0_wenM,		
+    output reg cp0_to_regM	
 );
+
     always @(posedge clk) begin
         if(rst | flushM) begin
             pcM                     <=              0;
@@ -47,22 +70,75 @@ module ex_mem (
             actual_takeM            <=              0;
             l_s_typeM               <=              0;
             mfhi_loM                <=              0;
+            mem_read_enM	        <=              0;
+			mem_write_enM	        <=              0;
+			reg_write_enM	        <=              0;
+			mem_to_regM		        <=              0;
+			hilo_to_regM	        <=              0;
+			riM				        <=              0;
+			breakM			        <=              0;
+			syscallM		        <=              0;
+			eretM			        <=              0;
+			cp0_wenM		        <=              0;
+			cp0_to_regM		        <=              0;
         end
         else if(~stallM) begin
-            pcM                     <=           pcE                ;
-            alu_outM                <=           alu_outE[31:0]     ;
-            rt_valueM               <=           rt_valueE          ;
-            reg_writeM              <=           reg_writeE         ;
-            instrM                  <=           instrE             ;
-            branchM                 <=           branchE            ;
-            pred_takeM              <=           pred_takeE         ;
-            pc_branchM              <=           pc_branchE         ;
-            overflowM               <=           overflowE          ;
-            is_in_delayslot_iM      <=           is_in_delayslot_iE ;
-            rdM                     <=           rdE                ;
-            actual_takeM            <=           actual_takeE       ;
-            l_s_typeM               <=           l_s_typeE          ;
-            mfhi_loM                <=           mfhi_loE           ;
+            pcM                     <=      pcE                 ;
+            alu_outM                <=      alu_outE[31:0]      ;
+            rt_valueM               <=      rt_valueE           ;
+            reg_writeM              <=      reg_writeE          ;
+            instrM                  <=      instrE              ;
+            branchM                 <=      branchE             ;
+            pred_takeM              <=      pred_takeE          ;
+            pc_branchM              <=      pc_branchE          ;
+            overflowM               <=      overflowE           ;
+            is_in_delayslot_iM      <=      is_in_delayslot_iE  ;
+            rdM                     <=      rdE                 ;
+            actual_takeM            <=      actual_takeE        ;
+            l_s_typeM               <=      l_s_typeE           ;
+            mfhi_loM                <=      mfhi_loE            ;
+            mem_read_enM	        <=      mem_read_enE		;
+            mem_write_enM	        <=      mem_write_enE	    ;
+            reg_write_enM	        <=      reg_write_enE 	    ;
+            mem_to_regM		        <=      mem_to_regE 		;
+            hilo_to_regM	        <=      hilo_to_regE		;
+            riM				        <=      riE				    ;
+            breakM			        <=      breakE			    ;
+            syscallM		        <=      syscallE			;
+            eretM			        <=      eretE			    ;
+            cp0_wenM		        <=      cp0_wenE			;
+            cp0_to_regM		        <=      cp0_to_regE		    ;
         end
     end
+
+
+    // // EX-MEM flow
+    // always@(posedge clk) begin
+	// 	if(rst | flushM) begin
+	// 		mem_read_enM	<= 0;
+	// 		mem_write_enM	<= 0;
+	// 		reg_write_enM	<= 0;
+	// 		mem_to_regM		<= 0;
+	// 		hilo_to_regM	<= 0;
+	// 		riM				<= 0;
+	// 		breakM			<= 0;
+	// 		syscallM		<= 0;
+	// 		eretM			<= 0;
+	// 		cp0_wenM		<= 0;
+	// 		cp0_to_regM		<= 0;
+	// 	end
+	// 	else if(~stallM) begin
+	// 		mem_read_enM	<= mem_read_enE		;
+	// 		mem_write_enM	<= mem_write_enE	;
+	// 		reg_write_enM	<= reg_write_enE 	;
+	// 		mem_to_regM		<= mem_to_regE 		;
+	// 		hilo_to_regM	<= hilo_to_regE		;
+	// 		riM				<= riE				;
+	// 		breakM			<= breakE			;
+	// 		syscallM		<= syscallE			;
+	// 		eretM			<= eretE			;
+	// 		cp0_wenM		<= cp0_wenE			;
+	// 		cp0_to_regM		<= cp0_to_regE		;
+	// 	end
+    // end
 endmodule
