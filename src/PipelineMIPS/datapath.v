@@ -654,7 +654,7 @@ module datapath (
         //mtc0 & mfc0
         .addr(rdM),
         .sel(instrM[2:0]),
-        .wen(cp0_wenM) & ~stallW),
+        .wen(cp0_wenM & ~stallW),
         .wdata(rt_valueM),
         .rdata(cp0_data_oW),
 
@@ -683,17 +683,6 @@ module datapath (
         .entry_lo1_W(entry_lo1_from_cp0),
         .index_W(index_from_cp0)
     );
-
-    assign EntryHi_from_cp0    <=  entry_hi_W      ;
-    assign PageMask_from_cp0   <=  page_mask_W     ;
-    assign EntryLo0_from_cp0   <=  entry_lo0_W     ;
-    assign EntryLo1_from_cp0   <=  entry_lo1_W     ;
-    assign Index_from_cp0      <=  index_W         ;
-    assign EntryHi_to_cp0      <=  entry_lo0_in    ;  
-    assign PageMask_to_cp0     <=  entry_lo1_in    ;
-    assign EntryLo0_to_cp0     <=  page_mask_in    ;
-    assign EntryLo1_to_cp0     <=  entry_hi_in     ;
-    assign Index_to_cp0        <=  index_in        ;
 
     mux4 #(32) mux4_mem_forward(alu_outM, 0, hilo_oM, cp0_data_oW, {(hilo_to_regM | cp0_to_regM), (mem_to_regM | cp0_to_regM)}, resultM_without_rdata);
     mux4 #(32) mux4_mem_to_reg(alu_outM, mem_ctrl_rdataM, hilo_oM, cp0_data_oW, {(hilo_to_regM | cp0_to_regM), (mem_to_regM | cp0_to_regM)}, resultM);

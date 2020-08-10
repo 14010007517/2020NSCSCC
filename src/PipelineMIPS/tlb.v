@@ -48,13 +48,13 @@ parameter TLB_LINE_NUM = 32, TAG_WIDTH = 20, OFFSET_WIDTH = 12;
 parameter LOG2_TLB_LINE_NUM = 5;
 
 //TLB
-reg [31:0] TLB_EntryHi  [`TLB_LINE_NUM-1:0]; //G位放在EntryHi的第12位
-reg [31:0] TLB_PageMask [`TLB_LINE_NUM-1:0];
-reg [31:0] TLB_EntryLo0 [`TLB_LINE_NUM-1:0];
-reg [31:0] TLB_EntryLo1 [`TLB_LINE_NUM-1:0];
+reg [31:0] TLB_EntryHi  [TLB_LINE_NUM-1:0]; //G位放在EntryHi的第12位
+reg [31:0] TLB_PageMask [TLB_LINE_NUM-1:0];
+reg [31:0] TLB_EntryLo0 [TLB_LINE_NUM-1:0];
+reg [31:0] TLB_EntryLo1 [TLB_LINE_NUM-1:0];
 
-wire [`TLB_LINE_NUM-1: 0] i_find_mask, d_find_mask; 
-wire [`LOG2_TLB_LINE_NUM-1: 0] d_find_index;
+wire [TLB_LINE_NUM-1: 0] i_find_mask, d_find_mask; 
+wire [LOG2_TLB_LINE_NUM-1: 0] d_find_index;
 
 wire inst_find;
 assign inst_find = |i_find_mask;
@@ -62,7 +62,7 @@ assign data_find = |d_find_mask;
 
 wire [31:0] i_tlb_entrylo, d_tlb_entrylo;        //从tlb中找到的项
 
-wire [`TAG_WIDTH-1: 0] i_tlb_pfn , d_tlb_pfn;
+wire [TAG_WIDTH-1: 0] i_tlb_pfn , d_tlb_pfn;
 wire [5:0]             i_tlb_flag, d_tlb_flag;
 assign i_tlb_pfn  = i_tlb_entrylo[`PFN_BITS];
 assign i_tlb_flag = i_tlb_entrylo[`FLAG_BITS];
@@ -70,26 +70,26 @@ assign d_tlb_pfn  = d_tlb_entrylo[`PFN_BITS];
 assign d_tlb_flag = d_tlb_entrylo[`FLAG_BITS];
 
 //inst
-wire [`TAG_WIDTH-1:0] inst_vpn, inst_pfn;
-wire [`OFFSET_WIDTH-1:0] inst_offset;
-assign inst_vpn    = inst_vaddr[31:`OFFSET_WIDTH];
-assign inst_offset = inst_vaddr[`OFFSET_WIDTH-1:0];
+wire [TAG_WIDTH-1:0] inst_vpn, inst_pfn;
+wire [OFFSET_WIDTH-1:0] inst_offset;
+assign inst_vpn    = inst_vaddr[31: OFFSET_WIDTH];
+assign inst_offset = inst_vaddr[OFFSET_WIDTH-1:0];
 
 wire inst_kseg01;
 assign inst_kseg01 = inst_vaddr[31:30]==2'b10 ? 1'b1 : 1'b0;
 
-assign inst_pfn = inst_kseg01 ? {3'b0, inst_vpn[`TAG_WIDTH-4:0]} : i_tlb_pfn;
+assign inst_pfn = inst_kseg01 ? {3'b0, inst_vpn[TAG_WIDTH-4:0]} : i_tlb_pfn;
 
 //data
-wire [`TAG_WIDTH-1:0] data_vpn, data_pfn;
-wire [`OFFSET_WIDTH-1:0] data_offset;
-assign data_vpn    = data_vaddr[31:`OFFSET_WIDTH];
-assign data_offset = data_vaddr[`OFFSET_WIDTH-1:0];
+wire [TAG_WIDTH-1:0] data_vpn, data_pfn;
+wire [OFFSET_WIDTH-1:0] data_offset;
+assign data_vpn    = data_vaddr[31:OFFSET_WIDTH];
+assign data_offset = data_vaddr[OFFSET_WIDTH-1:0];
 
 wire data_kseg01;
 assign data_kseg01 = data_vaddr[31:30]==2'b10 ? 1'b1 : 1'b0;
 
-assign data_pfn = data_kseg01 ? {3'b0, data_vpn[`TAG_WIDTH-4:0]} : d_tlb_pfn;
+assign data_pfn = data_kseg01 ? {3'b0, data_vpn[TAG_WIDTH-4:0]} : d_tlb_pfn;
 
 //--------------------------output---------------------------------
 //地址映射
@@ -111,14 +111,14 @@ assign data_V = d_tlb_flag[`V_BIT];
 assign data_D = d_tlb_flag[`D_BIT];
 
 //TLB指令
-wire [`LOG2_TLB_LINE_NUM-1:0] index;
-assign index = Index_in[`LOG2_TLB_LINE_NUM-1:0];
+wire [LOG2_TLB_LINE_NUM-1:0] index;
+assign index = Index_in[LOG2_TLB_LINE_NUM-1:0];
 
 assign EntryHi_out  = (TLBR) ? TLB_EntryHi [index] & 32'hffff_e0ff : 32'h0;
 assign PageMask_out = (TLBR) ? TLB_PageMask[index] : 32'h0;
 assign EntryLo0_out = (TLBR) ? TLB_EntryLo0[index] | {31'd0,TLB_EntryHi[index][`G_BIT]} : 32'h0; //如果TLB G位为1，则EntryLo的G位返回1
 assign EntryLo1_out = (TLBR) ? TLB_EntryLo1[index] | {31'd0,TLB_EntryHi[index][`G_BIT]} : 32'h0;
-assign Index_out    = (TLBP) ? data_find ? d_find_index : {1'b1,Index_in[30:0]};
+assign Index_out    = (TLBP) ? (data_find ? d_find_index : {1'b1,Index_in[30:0]}) : 32'b0;
 
     //TLBWI
 always @(posedge clk)
@@ -147,8 +147,8 @@ generate
 endgenerate
 
 wire inst_odd, data_odd;
-assign inst_odd = inst_vaddr[`OFFSET_WIDTH];
-assign data_odd = data_vaddr_probe[`OFFSET_WIDTH];
+assign inst_odd = inst_vaddr[OFFSET_WIDTH];
+assign data_odd = data_vaddr_probe[OFFSET_WIDTH];
 
 assign i_tlb_entrylo = 
 {32{i_find_mask[ 0]}} & ( ({32{~inst_odd}} & TLB_EntryLo0[ 0]) | ({32{ inst_odd}} & TLB_EntryLo1[ 0]) ) |
@@ -219,37 +219,37 @@ assign d_tlb_entrylo =
 {32{d_find_mask[31]}} & ( ({32{~data_odd}} & TLB_EntryLo0[31]) | ({32{ data_odd}} & TLB_EntryLo1[31]) );
 
 assign d_find_index=
-{5{d_find_mask[0 ]}} & 5'd0 ) |
-{5{d_find_mask[1 ]}} & 5'd1 ) |
-{5{d_find_mask[2 ]}} & 5'd2 ) |
-{5{d_find_mask[3 ]}} & 5'd3 ) |
-{5{d_find_mask[4 ]}} & 5'd4 ) |
-{5{d_find_mask[5 ]}} & 5'd5 ) |
-{5{d_find_mask[6 ]}} & 5'd6 ) |
-{5{d_find_mask[7 ]}} & 5'd7 ) |
-{5{d_find_mask[8 ]}} & 5'd8 ) |
-{5{d_find_mask[9 ]}} & 5'd9 ) |
-{5{d_find_mask[10]}} & 5'd10) |
-{5{d_find_mask[11]}} & 5'd11) |
-{5{d_find_mask[12]}} & 5'd12) |
-{5{d_find_mask[13]}} & 5'd13) |
-{5{d_find_mask[14]}} & 5'd14) |
-{5{d_find_mask[15]}} & 5'd15) |
-{5{d_find_mask[16]}} & 5'd16) |
-{5{d_find_mask[17]}} & 5'd17) |
-{5{d_find_mask[18]}} & 5'd18) |
-{5{d_find_mask[19]}} & 5'd19) |
-{5{d_find_mask[20]}} & 5'd20) |
-{5{d_find_mask[21]}} & 5'd21) |
-{5{d_find_mask[22]}} & 5'd22) |
-{5{d_find_mask[23]}} & 5'd23) |
-{5{d_find_mask[24]}} & 5'd24) |
-{5{d_find_mask[25]}} & 5'd25) |
-{5{d_find_mask[26]}} & 5'd26) |
-{5{d_find_mask[27]}} & 5'd27) |
-{5{d_find_mask[28]}} & 5'd28) |
-{5{d_find_mask[29]}} & 5'd29) |
-{5{d_find_mask[30]}} & 5'd30) |
-{5{d_find_mask[31]}} & 5'd31);
+({5{d_find_mask[0 ]}} & 5'd0 ) |
+({5{d_find_mask[1 ]}} & 5'd1 ) |
+({5{d_find_mask[2 ]}} & 5'd2 ) |
+({5{d_find_mask[3 ]}} & 5'd3 ) |
+({5{d_find_mask[4 ]}} & 5'd4 ) |
+({5{d_find_mask[5 ]}} & 5'd5 ) |
+({5{d_find_mask[6 ]}} & 5'd6 ) |
+({5{d_find_mask[7 ]}} & 5'd7 ) |
+({5{d_find_mask[8 ]}} & 5'd8 ) |
+({5{d_find_mask[9 ]}} & 5'd9 ) |
+({5{d_find_mask[10]}} & 5'd10) |
+({5{d_find_mask[11]}} & 5'd11) |
+({5{d_find_mask[12]}} & 5'd12) |
+({5{d_find_mask[13]}} & 5'd13) |
+({5{d_find_mask[14]}} & 5'd14) |
+({5{d_find_mask[15]}} & 5'd15) |
+({5{d_find_mask[16]}} & 5'd16) |
+({5{d_find_mask[17]}} & 5'd17) |
+({5{d_find_mask[18]}} & 5'd18) |
+({5{d_find_mask[19]}} & 5'd19) |
+({5{d_find_mask[20]}} & 5'd20) |
+({5{d_find_mask[21]}} & 5'd21) |
+({5{d_find_mask[22]}} & 5'd22) |
+({5{d_find_mask[23]}} & 5'd23) |
+({5{d_find_mask[24]}} & 5'd24) |
+({5{d_find_mask[25]}} & 5'd25) |
+({5{d_find_mask[26]}} & 5'd26) |
+({5{d_find_mask[27]}} & 5'd27) |
+({5{d_find_mask[28]}} & 5'd28) |
+({5{d_find_mask[29]}} & 5'd29) |
+({5{d_find_mask[30]}} & 5'd30) |
+({5{d_find_mask[31]}} & 5'd31);
 
 endmodule

@@ -61,7 +61,7 @@ module main_decoder(
 	assign mfhi_loD = {mfhi, mflo};
 
 	
-	assign mtc0 = ~(|(op_code ^ `EXE_ERET_MFTC_TLB)) & !(rs ^ `EXE_MTC0));
+	assign mtc0 = ~(|(op_code ^ `EXE_ERET_MFTC_TLB)) & !(rs ^ `EXE_MTC0);
 	assign cp0_wenD = mtc0 | TLBR;
 	assign cp0_to_regD = ~(|(op_code ^ `EXE_ERET_MFTC_TLB)) & ~(|(rs ^ `EXE_MFC0));
 	
