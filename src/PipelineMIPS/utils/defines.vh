@@ -107,29 +107,48 @@
 `define EXC_CODE_OV         5'h0c     
 
 //Exception type
-`define EXC_TYPE_INT        32'h0000_0001  
-`define EXC_TYPE_ADEL       32'h0000_0004  
-`define EXC_TYPE_ADES       32'h0000_0005  
-`define EXC_TYPE_SYS        32'h0000_0008  
-`define EXC_TYPE_BP         32'h0000_0009  
-`define EXC_TYPE_RI         32'h0000_000a  
-`define EXC_TYPE_OV         32'h0000_000c  
-`define EXC_TYPE_ERET       32'h0000_000e  
-`define EXC_TYPE_NOEXC      32'h0000_0000
+`define EXC_TYPE_INT        5'h00
+`define EXC_TYPE_ADEL       5'h04
+`define EXC_TYPE_ADES       5'h05
+`define EXC_TYPE_SYS        5'h08
+`define EXC_TYPE_BP         5'h09
+`define EXC_TYPE_RI         5'h0a
+`define EXC_TYPE_OV         5'h0c
+`define EXC_TYPE_ERET       5'hff   //自定义
+`define EXC_TYPE_NOEXC      4'hee   //自定义
 
 //CP0
-`define CP0_REG_BADVADDR    5'b01000       
-`define CP0_REG_COUNT    5'b01001       
-`define CP0_REG_COMPARE    5'b01011     
-`define CP0_REG_STATUS    5'b01100      
-`define CP0_REG_CAUSE    5'b01101       
-`define CP0_REG_EPC    5'b01110         
-`define CP0_REG_PRID    5'b01111        
-`define CP0_REG_CONFIG    5'b10000      
+`define CP0_INDEX       5'd0
+`define CP0_RANDOM      5'd1
+`define CP0_ENTRY_LO0   5'd2
+`define CP0_ENTRY_LO1   5'd3
+`define CP0_CONTEX      5'd4
+`define CP0_PAGE_MASK   5'd5
+`define CP0_WIRED       5'd6
 
-`define InterruptAssert 1'b1
-`define InterruptNotAssert 1'b0
-`define InDelaySlot 	1'b1
-`define NotInDelaySlot 	1'b0
+`define CP0_BADVADDR    5'd8    //read-only
+`define CP0_COUNT       5'd9    //
+`define CP0_ENTRY_HI    5'd10
+`define CP0_COMPARE     5'd11   //no use
+`define CP0_STATUS      5'd12   //
+`define CP0_CAUSE       5'd13   //
+`define CP0_EPC         5'd14   //
+`define CP0_PRID        5'd15   //sel=0
 
-`define ZeroWord        32'd0
+`define CP0_EBASE       5'd15   //sel=1
+`define CP0_CONFIG      5'd16   //sel=0
+`define CP0_CONFIG1     5'd16   //sel=1
+
+//cp0 status
+`define IE_BIT 0              //
+`define EXL_BIT 1
+`define BEV_BIT 22
+`define IM7_IM0_BITS  15:8
+`define IM1_IM0_BITS  9:8
+`define IM7_IM2_BITS  15:10
+//cp0 cause
+`define BD_BIT 31             //延迟槽
+`define TI_BIT 30             //计时器中断指示 //don't use
+`define IP1_IP0_BITS 9:8      //软件中断位
+`define IP7_IP2_BITS 15:10    //软件中断位
+`define EXC_CODE_BITS 6:2     //异常编码

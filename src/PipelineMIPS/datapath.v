@@ -116,7 +116,7 @@ module datapath (
     wire addrErrorLwM, addrErrorSwM;
     wire pcErrorM;
 
-    wire [31:0] except_typeM;
+    wire [4:0] except_typeM;
     wire [31:0] cp0_statusM;
     wire [31:0] cp0_causeM;
     wire [31:0] cp0_epcM;
@@ -138,7 +138,7 @@ module datapath (
     wire [4:0] reg_writeW;
     wire [31:0] resultW;
 
-    wire [31:0] cp0_statusW, cp0_causeW, cp0_epcW, cp0_data_oW;
+    wire [31:0] cp0_statusW, cp0_causeW, cp0_epcW, cp0_ebaseW, cp0_data_oW;
     
     wire [7:0] l_s_typeD, l_s_typeE, l_s_typeM;
     wire [3:0] addr_typeD, addr_typeE, addr_typeM;
@@ -590,7 +590,7 @@ module datapath (
     exception exception0(
         .rst(rst),
         .ri(riM), .break(breakM), .syscall(syscallM), .overflow(overflowM), .addrErrorSw(addrErrorSwM), .addrErrorLw(addrErrorLwM), .pcError(pcErrorM), .eretM(eretM),
-        .cp0_status(cp0_statusW), .cp0_cause(cp0_causeW), .cp0_epc(cp0_epcW),
+        .cp0_status(cp0_statusW), .cp0_cause(cp0_causeW), .cp0_epc(cp0_epcW), .cp0_ebase(cp0_ebaseW),
         .pcM(pcM),
         .alu_outM(alu_outM),
 
@@ -607,23 +607,24 @@ module datapath (
         .ext_int(ext_int),
         .stallW(stallW),
         
-        .en(flush_exceptionM),
+        //mtc0 & mfc0
+        .addr(rdM),
+        .sel(instrM[2:0]),
+        .wen(cp0_wenM & ~stallW),
+        .wdata(rt_valueM),
+        .rdata(cp0_data_oW),
 
-        .we_i(cp0_wenM & ~stallW),
-        .waddr_i(rdM),
-        .data_i(rt_valueM),
-        
-        .raddr_i(rdM),
-        .data_o(cp0_data_oW),
+        //异常处理
+        .flush_exception(flush_exceptionM),
+        .except_type(except_typeM),
+        .pcM(pcM),
+        .is_in_delayslot(is_in_delayslot_iM),
+        .badvaddr(badvaddrM),
 
-        .except_type_i(except_typeM),
-        .current_inst_addr_i(pcM),
-        .is_in_delayslot_i(is_in_delayslot_iM),
-        .badvaddr_i(badvaddrM),
-
-        .status_o(cp0_statusW),
-        .cause_o(cp0_causeW),
-        .epc_o(cp0_epcW)
+        .cp0_statusW(cp0_statusW),
+        .cp0_causeW(cp0_causeW),
+        .cp0_epcW(cp0_epcW),
+        .cp0_ebaseW(cp0_ebaseW)
     );
 
     mux4 #(32) mux4_mem_forward(alu_outM, 0, hilo_oM, cp0_data_oW, {(hilo_to_regM | cp0_to_regM), (mem_to_regM | cp0_to_regM)}, resultM_without_rdata);

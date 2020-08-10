@@ -3,11 +3,11 @@
 module exception(
    input rst,
    input ri, break, syscall, overflow, addrErrorSw, addrErrorLw, pcError, eretM,
-   input [31:0] cp0_status, cp0_cause, cp0_epc,
+   input [31:0] cp0_status, cp0_cause, cp0_epc, cp0_ebase,
    input [31:0] pcM,
    input [31:0] alu_outM,
 
-   output [31:0] except_type,
+   output [4:0] except_type,     //异常类型（同Cause CP0寄存器中的编码）
    output flush_exception,
    output [31:0] pc_exception,
    output pc_trap,
@@ -17,10 +17,10 @@ module exception(
    //INTERUPT
    wire int;
    //             //IE             //EXL            
-   assign int =   cp0_status[0] && ~cp0_status[1] && (
+   assign int =   cp0_status[`IE_BIT] && ~cp0_status[`EXL_BIT] && (
                      //IM                 //IP
-                  ( |(cp0_status[9:8] & cp0_cause[9:8]) ) ||        //soft interupt
-                  ( |(cp0_status[15:10] & cp0_cause[15:10]) )           //hard interupt
+                  ( |(cp0_status[`IM1_IM0_BITS] & cp0_cause[`IP1_IP0_BITS]) ) ||        //soft interupt
+                  ( |(cp0_status[`IM7_IM2_BITS] & cp0_cause[`IP7_IP2_BITS]) )           //hard interupt
    );
    // 全局中断开启,且没有例外在处理,识别软件中断或者硬件中断;
 
@@ -33,25 +33,24 @@ module exception(
                            (overflow)              ? `EXC_TYPE_OV :
                            (eretM)                 ? `EXC_TYPE_ERET :
                                                      `EXC_TYPE_NOEXC;
-   //interupt pc address
-   // assign pc_exception =      (except_type == `EXC_TYPE_NOEXC) ? `ZeroWord:
-   //                         (except_type == `EXC_TYPE_ERET)? cp0_epc :
-   //                         32'hbfc0_0380;
-   // assign pc_trap =        (except_type == `EXC_TYPE_NOEXC) ? 1'b0:
-   //                         1'b1;
-   // assign flush_exception =   (except_type == `EXC_TYPE_NOEXC) ? 1'b0:
-   //                         1'b1;
-   // assign badvaddrM =      (pcError) ? pcM : alu_outM;
 
-   // // 提高性能;
-    assign pc_exception    =  (int) | (addrErrorLw | pcError | addrErrorSw) | (ri) | (break) | (overflow) |(syscall) ? 32'hbfc0_0380 : 
-                              (eretM)  ?     cp0_epc :
-                              `ZeroWord;
+   wire BEV;
+   assign BEV = cp0_status[`BEV_BIT];
 
-    assign pc_trap         =  (int) | (addrErrorLw | pcError | addrErrorSw) | (ri) | (break) | (overflow) | (eretM) | (syscall);
+   wire tlb_refill;
+   assign tlb_refill = 1'b0;
 
-    assign flush_exception =  pc_trap;
+   wire [31:0] base, offset;
 
-    assign badvaddrM       =  (pcError) ? pcM : alu_outM       ;
+   assign base   = BEV ? 32'hbfc0_0200 : cp0_ebase;
+   assign offset = tlb_refill ? 32'b0 : 32'h180;
+
+   assign pc_exception = eretM ? cp0_epc : base + offset;
+
+   assign pc_trap         =  (int) | (addrErrorLw | pcError | addrErrorSw) | (ri) | (break) | (overflow) | (eretM) | (syscall);
+
+   assign flush_exception =  pc_trap;
+
+   assign badvaddrM       =  (pcError) ? pcM : alu_outM       ;
    
 endmodule
