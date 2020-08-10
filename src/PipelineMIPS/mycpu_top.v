@@ -55,16 +55,34 @@ module mycpu_top (
     assign clk = aclk;
     assign rst = ~aresetn;
 
-    //d_tlb - d_cache
-    wire no_cache_d         ;   //数据
-    wire no_cache_i         ;   //指令
+    //TLB
+    wire [31:0] pcF_paddr;
+    wire [31:0] data_paddr;
+    wire no_cache_i;
+    wire no_cache_d;
+        //TLB指令
+	wire TLBP;
+	wire TLBR;
+    wire TLBWI;
+    wire [31:0] EntryHi_from_cp0;
+	wire [31:0] PageMask_from_cp0;
+	wire [31:0] EntryLo0_from_cp0;
+	wire [31:0] EntryLo1_from_cp0;
+	wire [31:0] Index_from_cp0;
+	wire [31:0] EntryHi_to_cp0;
+	wire [31:0] PageMask_to_cp0;
+	wire [31:0] EntryLo0_to_cp0;
+	wire [31:0] EntryLo1_to_cp0;
+	wire [31:0] Index_to_cp0;
+        //异常
+    wire inst_tlb_refill, inst_tlb_invalid;
+    wire data_find;
+    wire data_V, data_D;
 
     //datapath - cache
     wire inst_en            ;
     wire [31:0] pcF         ;
-    wire [31:0] pcF_tmp     ;
     wire [31:0] pc_next     ;
-    wire [31:0] pc_next_tmp ;
     wire [31:0] inst_rdata  ; 
     wire i_cache_stall      ;
     wire stallF             ;
@@ -72,13 +90,11 @@ module mycpu_top (
 
     wire data_en            ;
     wire [31:0] data_addr   ;
-    wire [31:0] data_addr_tmp;
     wire [31:0] data_rdata  ;
     wire [3:0] data_wen     ;
     wire [31:0] data_wdata  ;
     wire d_cache_stall      ;
     wire [31:0] mem_addrE   ;
-    wire [31:0] mem_addrE_tmp;
     wire mem_read_enE       ;
     wire mem_write_enE      ;
 
@@ -123,25 +139,46 @@ module mycpu_top (
         .clk(clk), .rst(rst),
         .ext_int(ext_int),
 
+        //TLB
+        .TLBP(TLBP),
+        .TLBR(TLBR),
+        .TLBWI(TLBWI),
+
+        .EntryHi_from_cp0(EntryHi_from_cp0),
+        .PageMask_from_cp0(PageMask_from_cp0),
+        .EntryLo0_from_cp0(EntryLo0_from_cp0),
+        .EntryLo1_from_cp0(EntryLo1_from_cp0),
+        .Index_from_cp0(Index_from_cp0),
+
+        .EntryHi_to_cp0(EntryHi_to_cp0),
+        .PageMask_to_cp0(PageMask_to_cp0),
+        .EntryLo0_to_cp0(EntryLo0_to_cp0),
+        .EntryLo1_to_cp0(EntryLo1_to_cp0),
+        .Index_to_cp0(Index_to_cp0),
+            //异常
+        .inst_tlb_refill(inst_tlb_refill), .inst_tlb_invalid(inst_tlb_invalid),
+        .data_find(data_find),
+        .data_V(data_V), .data_D(data_D),
+
         //inst
-        .pcF(pcF_tmp),
-        .pc_next(pc_next_tmp),
+        .pcF(pcF),
+        .pc_next(pc_next),
         .inst_enF(inst_en),
         .instrF(inst_rdata),
         .i_cache_stall(i_cache_stall),
         .stallF(stallF),
-        .stallM(stallM),
 
         //data
         .mem_enM(data_en),              
-        .mem_addrM(data_addr_tmp),
+        .mem_addrM(data_addr),
         .mem_rdataM(data_rdata),
         .mem_wenM(data_wen),
         .mem_wdataM(data_wdata),
-        .d_cache_stall(d_cache_stall),
-        .mem_addrE(mem_addrE_tmp),
+        .mem_addrE(mem_addrE),
         .mem_read_enE(mem_read_enE),
         .mem_write_enE(mem_write_enE),
+        .d_cache_stall(d_cache_stall),
+        .stallM(stallM),
 
         .debug_wb_pc       (debug_wb_pc       ),  
         .debug_wb_rf_wen   (debug_wb_rf_wen   ),  
@@ -149,19 +186,38 @@ module mycpu_top (
         .debug_wb_rf_wdata (debug_wb_rf_wdata )  
     );
 
-    //简易的MMU
-    d_tlb d_tlb0(
-        .inst_vaddr(pcF_tmp),
-        .inst_vaddr2(pc_next_tmp),
-        .data_vaddr(data_addr_tmp),
-        .data_vaddr2(mem_addrE_tmp),
-
-        .inst_paddr(pcF),
-        .inst_paddr2(pc_next),
-        .data_paddr(data_addr),
-        .data_paddr2(mem_addrE),
+    //非简易的MMU
+    tlb tlb0(
+        //datapath
+        .inst_vaddr(pcF),
+        .data_vaddr(data_addr),
+        //cache
+        .inst_paddr(pcF_paddr),
+        .data_paddr(data_paddr),
+        .no_cache_i(no_cache_i),
         .no_cache_d(no_cache_d),
-        .no_cache_i(no_cache_i)
+        //异常
+        .inst_tlb_refill(inst_tlb_refill),
+        .inst_tlb_invalid(inst_tlb_invalid),
+        .data_find(data_find),
+        .data_V(data_V), .data_D(data_D),
+
+        //TLB指令
+        .TLBP(TLBP),
+        .TLBR(TLBR),
+        .TLBWI(TLBWI),
+        
+        .EntryHi_in(EntryHi_from_cp0),
+        .PageMask_in(PageMask_from_cp0),
+        .EntryLo0_in(EntryLo0_from_cp0),
+        .EntryLo1_in(EntryLo1_from_cp0),
+        .Index_in(Index_from_cp0),
+
+        .EntryHi_out(EntryHi_to_cp0),
+        .PageMask_out(PageMask_to_cp0),
+        .EntryLo0_out(EntryLo0_to_cp0),
+        .EntryLo1_out(EntryLo1_to_cp0),
+        .Index_out(Index_to_cp0)
     );
 
     i_cache i_cache(
@@ -172,9 +228,10 @@ module mycpu_top (
         
         //datapath
         .inst_en(inst_en),
-        .pc_next(pc_next),
-        .pcF(pcF),
+        .inst_vaddr(pcF),           //
+        .inst_paddr(pcF_paddr),     //
         .inst_rdata(inst_rdata),
+        .pc_next(pc_next),          //
         .stall(i_cache_stall),
         .stallF(stallF),
 
@@ -198,12 +255,13 @@ module mycpu_top (
 
         //datapath
         .data_en(data_en),
-        .data_addr(data_addr),
+        .data_vaddr(data_addr),     //datapath M阶段，未经tlb转换
+        .data_paddr(data_paddr),    //datapath M阶段，经过tlb转换
         .data_rdata(data_rdata),
         .data_wen(data_wen),
         .data_wdata(data_wdata),
         .stall(d_cache_stall),
-        .mem_addrE(mem_addrE),
+        .mem_addrE(mem_addrE),      //datapath E阶段，未经tlb转换
         .mem_read_enE(mem_read_enE),
         .mem_write_enE(mem_write_enE),
         .stallM(stallM),

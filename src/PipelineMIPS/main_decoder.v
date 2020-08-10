@@ -21,13 +21,18 @@ module main_decoder(
 	output reg  riD,
 	output wire breakD, syscallD, eretD, 
 	output wire cp0_wenD,
-	output wire cp0_to_regD
+	output wire cp0_to_regD,
+	output wire [2:0] tlb_typeD
     //WB
 );
 // declare
     wire [5:0] op_code;
 	wire [4:0] rs,rt;
 	wire [5:0] funct;
+	wire TLBWI, TLBP, TLBR;
+	wire mtc0;
+	wire mfhi;
+	wire mflo;
 
 	assign op_code = instrD[31:26];
 	assign rs = instrD[25:21];
@@ -42,29 +47,32 @@ module main_decoder(
 	
 	//一部分能够容易判断的信号
 	assign sign_extD = |(op_code[5:2] ^ 4'b0011);		//andi, xori, lui, ori为无符号拓展，其它为有符号拓展
+
 	assign hilo_wenD = ~(|( op_code ^ `EXE_R_TYPE )) 
 						& ( 	~(|(funct[5:2] ^ 4'b0110)) 			// div divu mult multu 	
 							| 	( ~(|(funct[5:2] ^ 4'b0100)) & funct[0]) //mthi mtlo
 						  );
 	assign hilo_to_regD = ~(|(op_code ^ `EXE_R_TYPE)) & (~(|(funct[5:2] ^ 4'b0100)) & ~funct[0]);
 														// 00--alu_outM; 01--hilo_o; 10 11--rdataM;
-	assign cp0_wenD = ~(|(op_code ^ `EXE_ERET_MFTC)) & ~(|(rs ^ `EXE_MTC0));
-	assign cp0_to_regD = ~(|(op_code ^ `EXE_ERET_MFTC)) & ~(|(rs ^ `EXE_MFC0));
+	assign is_divD = ~(|op_code) & ~(|(funct[5:1] ^ 5'b01101));	//opcode==0, funct==01101x
+	assign is_multD = (~(|op_code) & ~(|(funct[5:1] ^ 5'b01100))) | op_code == `EXE_MUL;
+	assign mfhi = !(op_code ^ `EXE_R_TYPE) & !(funct ^ `EXE_MFHI);
+	assign mflo = !(op_code ^ `EXE_R_TYPE) & !(funct ^ `EXE_MFLO);
+	assign mfhi_loD = {mfhi, mflo};
+
+	
+	assign mtc0 = ~(|(op_code ^ `EXE_ERET_MFTC_TLB)) & !(rs ^ `EXE_MTC0));
+	assign cp0_wenD = mtc0 | TLBR;
+	assign cp0_to_regD = ~(|(op_code ^ `EXE_ERET_MFTC_TLB)) & ~(|(rs ^ `EXE_MFC0));
 	
 	assign breakD = ~(|(op_code ^ `EXE_R_TYPE)) & ~(|(funct ^ `EXE_BREAK));
 	assign syscallD = ~(|(op_code ^ `EXE_R_TYPE)) & ~(|(funct ^ `EXE_SYSCALL));
-	assign eretD = ~(|(instrD ^ {`EXE_ERET_MFTC, `EXE_ERET}));
+	assign eretD = ~(|(instrD ^ {`EXE_ERET_MFTC_TLB, `EXE_ERET}));
 
-	assign is_divD = ~(|op_code) & ~(|(funct[5:1] ^ 5'b01101));	//opcode==0, funct==01101x
-	assign is_multD = (~(|op_code) & ~(|(funct[5:1] ^ 5'b01100))) | op_code == `EXE_MUL;
-	
-	
-	wire mfhi;
-	wire mflo;
-	assign mfhi = !(op_code ^ `EXE_R_TYPE) & !(funct ^ `EXE_MFHI);
-	assign mflo = !(op_code ^ `EXE_R_TYPE) & !(funct ^ `EXE_MFLO);
-
-	assign mfhi_loD = {mfhi, mflo};
+	assign TLBWI 	= !(op_code ^ `EXE_ERET_MFTC_TLB) 	& !(funct ^ `EXE_TLBWI	);
+	assign TLBP 	= !(op_code ^ `EXE_ERET_MFTC_TLB)   & !(funct ^ `EXE_TLBP	);
+	assign TLBR 	= !(op_code ^ `EXE_ERET_MFTC_TLB)   & !(funct ^ `EXE_TLBR	);
+	assign tlb_typeD = {TLBWI, TLBR, TLBP};
 
 	always @(*) begin
 		riD = 1'b0;
@@ -152,7 +160,7 @@ module main_decoder(
 				mem_ctrl  =  3'b0;
 			end
 
-			`EXE_ERET_MFTC:begin
+			`EXE_ERET_MFTC_TLB:begin
 				case(instrD[25:21])
 					`EXE_MTC0: begin
 						regfile_ctrl  =  4'b0_00_0;
@@ -162,8 +170,9 @@ module main_decoder(
 						regfile_ctrl  =  4'b1_01_0;
 						mem_ctrl  =  3'b0;
 					end
+
 					default: begin
-						riD  =  |(instrD[25:0] ^ `EXE_ERET);
+						riD  =  |(instrD[25:0] ^ `EXE_ERET) & |(instrD[25:0] ^ `EXE_TLBR) & |(instrD[25:0] ^ `EXE_TLBP) & |(instrD[25:0] ^ `EXE_TLBWI);
 						regfile_ctrl  =  4'b0_00_0;
 						mem_ctrl  =  3'b0;
 					end

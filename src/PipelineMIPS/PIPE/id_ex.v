@@ -33,6 +33,7 @@ module id_ex (
     input wire eretD,			
     input wire cp0_wenD,		
     input wire cp0_to_regD,	
+    input wire [2:0] tlb_typeD,
 
     output reg [31:0] pcE,
     output reg [31:0] rd1E, rd2E,
@@ -65,7 +66,9 @@ module id_ex (
     output reg syscallE,		
     output reg eretE,			
     output reg cp0_wenE,		
-    output reg cp0_to_regE		
+    output reg cp0_to_regE,
+    output reg [2:0] tlb_typeE
+
 );
     always @(posedge clk) begin
         if(rst | flushE) begin
@@ -103,6 +106,7 @@ module id_ex (
 			eretE			        <=      0   ;
 			cp0_wenE		        <=      0   ;
 			cp0_to_regE		        <=      0   ;
+            tlb_typeE               <=      0   ;
         end 
         else if(~stallE) begin
             pcE                     <= pcD                  ;
@@ -139,6 +143,7 @@ module id_ex (
 			eretE			        <= eretD			    ;
 			cp0_wenE		        <= cp0_wenD			    ;
 			cp0_to_regE		        <= cp0_to_regD		    ;
+            tlb_typeE               <= tlb_typeD            ;
         end
     end
 

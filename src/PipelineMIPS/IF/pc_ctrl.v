@@ -5,7 +5,7 @@ module pc_ctrl(
     input wire actual_takeM,
     input wire pred_takeD,
 
-    input wire pc_trapM,
+    input wire flush_exceptionM,
     input wire jumpD,
     input wire jump_conflictD,
     input wire jump_conflictE,
@@ -13,7 +13,7 @@ module pc_ctrl(
     output reg [2:0] pc_sel
 );
     always @(*) begin
-        if(pc_trapM)
+        if(flush_exceptionM)
             pc_sel = 3'b110;
         else if(branchM & ~succM & ~actual_takeM)
             pc_sel = 3'b101;
@@ -36,11 +36,11 @@ module pc_ctrl(
     //                  branchD & branchM & succM & pred_takeD) ? 2'b01:
     //                  2'b00;
 
-    // assign pc_sel2[0] = pc_trapM | jumpD & ~jump_conflictD & ~jump_conflictE;
-    // assign pc_sel2[1] = pc_trapM | jump_conflictE;
+    // assign pc_sel2[0] = flush_exceptionM | jumpD & ~jump_conflictD & ~jump_conflictE;
+    // assign pc_sel2[1] = flush_exceptionM | jump_conflictE;
 
     // always @(*) begin
-    //     if(pc_trapM)
+    //     if(flush_exceptionM)
     //         pc_sel2 = 2'b11;
     //     else if(jump_conflictE)
     //         pc_sel2 = 2'b10;

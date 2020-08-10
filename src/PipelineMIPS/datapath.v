@@ -16,11 +16,32 @@ module datapath (
     input wire [31:0] mem_rdataM,   //读数据
     output wire [3:0] mem_wenM,     //写使能
     output wire [31:0] mem_wdataM,  //写数据
-    input wire d_cache_stall,
     output wire [31:0] mem_addrE,
     output wire mem_read_enE,
     output wire mem_write_enE,
+    input wire d_cache_stall,
     output wire stallM,
+
+    // TLB
+    input wire TLBP,
+    input wire TLBR,
+    input wire TLBWI,
+    input wire [31:0] EntryHi_to_cp0,
+    input wire [31:0] PageMask_to_cp0,
+    input wire [31:0] EntryLo0_to_cp0,
+    input wire [31:0] EntryLo1_to_cp0,
+    input wire [31:0] Index_to_cp0,
+
+    output wire [31:0] EntryHi_from_cp0,
+    output wire [31:0] PageMask_from_cp0,
+    output wire [31:0] EntryLo0_from_cp0,
+    output wire [31:0] EntryLo1_from_cp0,
+    output wire [31:0] Index_from_cp0,
+
+        //异常
+    input wire inst_tlb_refill, inst_tlb_invalid,
+    input wire data_find,
+    input wire data_V, data_D,
 
     //debug
     output wire [31:0]  debug_wb_pc,      
@@ -114,6 +135,7 @@ module datapath (
     wire eretM;
     wire overflowM;
     wire addrErrorLwM, addrErrorSwM;
+    wire data_tlb_refill, data_tlb_invalid, data_tlb_modify;
     wire pcErrorM;
 
     wire [4:0] except_typeM;
@@ -123,7 +145,6 @@ module datapath (
 
     wire flush_exceptionM;
     wire [31:0] pc_exceptionM;
-    wire pc_trapM;
     wire [31:0] badvaddrM;
     wire is_in_delayslot_iM;
     wire [4:0] rdM;
@@ -160,6 +181,7 @@ module datapath (
     wire eretD;
     wire cp0_wenD;
     wire cp0_to_regD;
+	wire [2:0] tlb_typeD, tlb_typeE, tlb_typeM;
 
     wire mem_to_regE;
     wire hilo_to_regE;
@@ -207,7 +229,8 @@ module datapath (
         .syscallD(syscallD),
         .eretD(eretD),
         .cp0_wenD(cp0_wenD),
-        .cp0_to_regD(cp0_to_regD)
+        .cp0_to_regD(cp0_to_regD),
+        .tlb_typeD(tlb_typeD)
     );
     alu_decoder alu_decoder0(
         .instrD(instrD),
@@ -255,7 +278,7 @@ module datapath (
         .actual_takeM(actual_takeM),    //M阶段判断跳转
 
         //jump + exception
-        .pc_trapM(pc_trapM),            //M阶段异常
+        .flush_exceptionM(flush_exceptionM),            //M阶段异常
         .jumpD(jumpD),                  //D阶段是jump类指令
         .jump_conflictD(jump_conflictD),//D阶段jump数据冲突
         .jump_conflictE(jump_conflictE),//D阶段的jump冲突传到E阶段
@@ -387,6 +410,8 @@ module datapath (
         .branch_judge_controlD(branch_judge_controlD),
         .l_s_typeD(l_s_typeD),
         .mfhi_loD(mfhi_loD),
+        .tlb_typeD(tlb_typeD),
+
         
         .alu_imm_selD(alu_imm_selD),
         .mem_read_enD(mem_read_enD),
@@ -432,7 +457,8 @@ module datapath (
         .syscallE(syscallE),	
         .eretE(eretE),		
         .cp0_wenE(cp0_wenE),	
-        .cp0_to_regE(cp0_to_regE)
+        .cp0_to_regE(cp0_to_regE),
+        .tlb_typeE(tlb_typeE)
     );
 //EX
     alu alu0(
@@ -514,6 +540,8 @@ module datapath (
         .actual_takeE(actual_takeE),
         .l_s_typeE(l_s_typeE),
         .mfhi_loE(mfhi_loE),
+        .tlb_typeE(tlb_typeE),
+
 
         .mem_read_enE(mem_read_enE),	
         .mem_write_enE(mem_write_enE),
@@ -552,7 +580,8 @@ module datapath (
         .syscallM(syscallM),		
         .eretM(eretM),		
         .cp0_wenM(cp0_wenM),		
-        .cp0_to_regM(cp0_to_regM)
+        .cp0_to_regM(cp0_to_regM),
+        .tlb_typeM(tlb_typeM)
     );
 //MEM
     assign mem_addrM = alu_outM;
@@ -571,7 +600,12 @@ module datapath (
         .data_rdataM(mem_ctrl_rdataM),
 
         .addr_error_sw(addrErrorSwM),
-        .addr_error_lw(addrErrorLwM)
+        .addr_error_lw(addrErrorLwM),
+        .data_find(data_find),
+        .data_V(data_V), .data_D(data_D),
+        .data_tlb_refill(data_tlb_refill),
+        .data_tlb_invalid(data_tlb_invalid),
+        .data_tlb_modify(data_tlb_modify)
     );
 
     hilo_reg hilo0(
@@ -590,6 +624,15 @@ module datapath (
     exception exception0(
         .rst(rst),
         .ri(riM), .break(breakM), .syscall(syscallM), .overflow(overflowM), .addrErrorSw(addrErrorSwM), .addrErrorLw(addrErrorLwM), .pcError(pcErrorM), .eretM(eretM),
+        //tlb exception
+        .mem_read_enM(mem_read_enM),
+        .mem_write_enM(mem_write_enM),
+        .inst_tlb_refill(inst_tlb_refill),
+        .inst_tlb_invalid(inst_tlb_invalid),
+        .data_tlb_refill(data_tlb_refill),
+        .data_tlb_invalid(data_tlb_invalid),
+        .data_tlb_modify(data_tlb_modify),
+
         .cp0_status(cp0_statusW), .cp0_cause(cp0_causeW), .cp0_epc(cp0_epcW), .cp0_ebase(cp0_ebaseW),
         .pcM(pcM),
         .alu_outM(alu_outM),
@@ -597,9 +640,10 @@ module datapath (
         .except_type(except_typeM),
         .flush_exception(flush_exceptionM),
         .pc_exception(pc_exceptionM),
-        .pc_trap(pc_trapM),
         .badvaddrM(badvaddrM)
     );
+
+    assign {TLBWI, TLBR, TLBP} = tlb_typeM;
 
     cp0_reg cp0(
         .clk(clk),
@@ -610,9 +654,16 @@ module datapath (
         //mtc0 & mfc0
         .addr(rdM),
         .sel(instrM[2:0]),
-        .wen(cp0_wenM & ~stallW),
+        .wen(cp0_wenM) & ~stallW),
         .wdata(rt_valueM),
         .rdata(cp0_data_oW),
+
+        .tlb_typeM(tlb_typeM),
+        .entry_lo0_in(entry_lo0_to_cp0),
+        .entry_lo1_in(entry_lo1_to_cp0),
+        .page_mask_in(page_mask_to_cp0),
+        .entry_hi_in(entry_hi_to_cp0),
+        .index_in(index_to_cp0),
 
         //异常处理
         .flush_exception(flush_exceptionM),
@@ -624,8 +675,25 @@ module datapath (
         .cp0_statusW(cp0_statusW),
         .cp0_causeW(cp0_causeW),
         .cp0_epcW(cp0_epcW),
-        .cp0_ebaseW(cp0_ebaseW)
+        .cp0_ebaseW(cp0_ebaseW),
+
+        .entry_hi_W(entry_hi_from_cp0),
+        .page_mask_W(page_mask_from_cp0),
+        .entry_lo0_W(entry_lo0_from_cp0), 
+        .entry_lo1_W(entry_lo1_from_cp0),
+        .index_W(index_from_cp0)
     );
+
+    assign EntryHi_from_cp0    <=  entry_hi_W      ;
+    assign PageMask_from_cp0   <=  page_mask_W     ;
+    assign EntryLo0_from_cp0   <=  entry_lo0_W     ;
+    assign EntryLo1_from_cp0   <=  entry_lo1_W     ;
+    assign Index_from_cp0      <=  index_W         ;
+    assign EntryHi_to_cp0      <=  entry_lo0_in    ;  
+    assign PageMask_to_cp0     <=  entry_lo1_in    ;
+    assign EntryLo0_to_cp0     <=  page_mask_in    ;
+    assign EntryLo1_to_cp0     <=  entry_hi_in     ;
+    assign Index_to_cp0        <=  index_in        ;
 
     mux4 #(32) mux4_mem_forward(alu_outM, 0, hilo_oM, cp0_data_oW, {(hilo_to_regM | cp0_to_regM), (mem_to_regM | cp0_to_regM)}, resultM_without_rdata);
     mux4 #(32) mux4_mem_to_reg(alu_outM, mem_ctrl_rdataM, hilo_oM, cp0_data_oW, {(hilo_to_regM | cp0_to_regM), (mem_to_regM | cp0_to_regM)}, resultM);

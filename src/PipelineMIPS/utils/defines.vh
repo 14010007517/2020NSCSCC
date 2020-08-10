@@ -86,10 +86,15 @@
 `define EXE_TLTU 6'b110011
 `define EXE_TNE 6'b110110
 `define EXE_TNEI 5'b01110
+
    
 // `define EXE_ERET 32'b01000010000000000000000000011000
 `define EXE_ERET 26'b10000000000000000000011000
-`define EXE_ERET_MFTC 6'b010000
+`define EXE_ERET_MFTC_TLB 6'b010000
+`define EXE_TLBR    6'b000001
+`define EXE_TLBP    6'b001000
+`define EXE_TLBWI   6'b000010
+
 
 `define EXE_SYNC 6'b001111
 `define EXE_PREF 6'b110011
@@ -98,24 +103,21 @@
 `define EXE_MFC0 5'b00000
 
 //Exception code
-`define EXC_CODE_INT        5'h00     
-`define EXC_CODE_ADEL       5'h04     
-`define EXC_CODE_ADES       5'h05     
-`define EXC_CODE_SYS        5'h08     
-`define EXC_CODE_BP         5'h09     
-`define EXC_CODE_RI         5'h0a     
-`define EXC_CODE_OV         5'h0c     
+`define EXC_CODE_INT        5'h00
+`define EXC_CODE_MOD        5'h01
+`define EXC_CODE_TLBL       5'h02
+`define EXC_CODE_TLBS       5'h03
+`define EXC_CODE_ADEL       5'h04
+`define EXC_CODE_ADES       5'h05
+`define EXC_CODE_SYS        5'h08
+`define EXC_CODE_BP         5'h09
+`define EXC_CODE_RI         5'h0a
+`define EXC_CODE_CPU        5'h0b
+`define EXC_CODE_OV         5'h0c
+`define EXC_CODE_TR         5'h0d
 
-//Exception type
-`define EXC_TYPE_INT        5'h00
-`define EXC_TYPE_ADEL       5'h04
-`define EXC_TYPE_ADES       5'h05
-`define EXC_TYPE_SYS        5'h08
-`define EXC_TYPE_BP         5'h09
-`define EXC_TYPE_RI         5'h0a
-`define EXC_TYPE_OV         5'h0c
-`define EXC_TYPE_ERET       5'hff   //自定义
-`define EXC_TYPE_NOEXC      4'hee   //自定义
+`define EXC_CODE_ERET       5'hff   //自定义
+`define EXC_CODE_NOEXC      4'hee   //自定义
 
 //CP0
 `define CP0_INDEX       5'd0

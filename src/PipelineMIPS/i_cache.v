@@ -5,9 +5,10 @@ module i_cache (
     input wire no_cache,
     //datapath
     input wire inst_en,
-    input wire [31:0] pc_next,
-    input wire [31:0] pcF,
+    input wire [31:0] inst_vaddr,
+    input wire [31:0] inst_paddr,
     output wire [31:0] inst_rdata,
+    input wire [31:0] pc_next,
     output wire stall,
     input wire stallF,
 
@@ -36,10 +37,10 @@ module i_cache (
     wire [INDEX_WIDTH-1  : 0] index, index_next;
     wire [OFFSET_WIDTH-3 : 0] offset;   //字偏移
 
-    assign tag        = pcF     [31                         : INDEX_WIDTH+OFFSET_WIDTH ];
-    assign index      = pcF     [INDEX_WIDTH+OFFSET_WIDTH-1 : OFFSET_WIDTH             ];
-    assign index_next = pc_next [INDEX_WIDTH+OFFSET_WIDTH-1 : OFFSET_WIDTH             ];
-    assign offset     = pcF     [OFFSET_WIDTH-1             : 2                        ];
+    assign tag        = inst_paddr[31                         : INDEX_WIDTH+OFFSET_WIDTH ];
+    assign index      = inst_vaddr[INDEX_WIDTH+OFFSET_WIDTH-1 : OFFSET_WIDTH             ];
+    assign index_next = pc_next   [INDEX_WIDTH+OFFSET_WIDTH-1 : OFFSET_WIDTH             ];
+    assign offset     = inst_vaddr[OFFSET_WIDTH-1             : 2                        ];
 
     //cache ram
     //read
@@ -164,7 +165,7 @@ module i_cache (
     assign read_finish = addr_rcv & (rvalid & rready & rlast);
 
     //AXI signal
-    assign araddr = ~no_cache ? {tag, index}<<OFFSET_WIDTH : pcF; //将offset清0
+    assign araddr = ~no_cache ? {tag, index}<<OFFSET_WIDTH : inst_paddr; //将offset清0
     assign arlen = ~no_cache ? BLOCK_NUM-1 : 4'd0;
     assign arvalid = read_req & ~addr_rcv;
     assign rready = addr_rcv;

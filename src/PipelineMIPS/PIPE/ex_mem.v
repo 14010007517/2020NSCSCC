@@ -25,7 +25,8 @@ module ex_mem (
     input wire syscallE, 		
     input wire eretE,    		
     input wire cp0_wenE, 		
-    input wire cp0_to_regE,  	
+    input wire cp0_to_regE, 
+    input wire [2:0] tlb_typeE, 	
 
     output reg [31:0] pcM,
     output reg [31:0] alu_outM,
@@ -51,7 +52,8 @@ module ex_mem (
     output reg syscallM,		
     output reg eretM,		
     output reg cp0_wenM,		
-    output reg cp0_to_regM	
+    output reg cp0_to_regM,
+    output reg [2:0] tlb_typeM	
 );
 
     always @(posedge clk) begin
@@ -81,6 +83,7 @@ module ex_mem (
 			eretM			        <=              0;
 			cp0_wenM		        <=              0;
 			cp0_to_regM		        <=              0;
+            tlb_typeM               <=              0;
         end
         else if(~stallM) begin
             pcM                     <=      pcE                 ;
@@ -108,6 +111,7 @@ module ex_mem (
             eretM			        <=      eretE			    ;
             cp0_wenM		        <=      cp0_wenE			;
             cp0_to_regM		        <=      cp0_to_regE		    ;
+            tlb_typeM               <=      tlb_typeE           ;
         end
     end
 

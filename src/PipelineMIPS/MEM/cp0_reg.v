@@ -21,9 +21,23 @@ module cp0_reg(
       input wire is_in_delayslot,         //异常指令是否位于延迟槽
       input wire [31:0] badvaddr,         //最近一次导致发生地址错例外的虚地址(load/store, pc未对齐地址)
 
+      // tlb处理
+      input wire [2:0] tlb_typeM,                 //tlb写cp0使能
+      input wire [31:0] entry_lo0_in,
+      input wire [31:0] entry_lo1_in,
+      input wire [31:0] page_mask_in,
+      input wire [31:0] entry_hi_in,
+      input wire [31:0] index_in,
+
       //cp0寄存器输出
-      output wire [31:0] cp0_statusW, cp0_causeW, cp0_epcW, cp0_ebaseW
-   );
+      output wire [31:0] cp0_statusW, cp0_causeW, cp0_epcW, cp0_ebaseW,
+      output wire [31:0] entry_hi_W, 
+      output wire [31:0] page_mask_W,
+      output wire [31:0] entry_lo0_W,
+      output wire [31:0] entry_lo1_W,
+      output wire [31:0] index_W
+);
+
 
    //-----------------cp0寄存器-------------------
    reg [31:0] index_reg;
@@ -51,10 +65,16 @@ module cp0_reg(
    //cp0输出
    wire [31:0] cp0_statusW, cp0_causeW, cp0_epcW;
 
-   assign cp0_statusW = status_reg;
-   assign cp0_causeW  = cause_reg;
-   assign cp0_epcW    = epc_reg;
-   assign cp0_ebaseW  = ebase_reg;
+   assign cp0_statusW   =  status_reg;
+   assign cp0_causeW    =  cause_reg;
+   assign cp0_epcW      =  epc_reg;
+   assign cp0_ebaseW    =  ebase_reg;
+
+   assign entry_hi_W    =  entry_hi_reg;
+   assign page_mask_W   =  page_mask_reg;
+   assign entry_lo0_W   =  entry_lo0_reg;
+   assign entry_lo1_W   =  entry_lo1_reg;
+   assign index_W       =  index_reg;
 
    //other
    reg interval_flag;   //间隔一个时钟递增时钟计数器
@@ -150,11 +170,25 @@ module cp0_reg(
    end
 
    wire wen_badvaddr;
-   assign wen_badvaddr = (except_type==`EXC_TYPE_ADEL) || (except_type==`EXC_TYPE_ADES) ? 1'b1 : 1'b0;
-
+   assign wen_badvaddr = (except_type==`EXC_CODE_ADEL) || (except_type==`EXC_CODE_ADES) ||
+                         (except_type==`EXC_CODE_TLBL) || (except_type==`EXC_CODE_TLBS) ? 1'b1 : 1'b0;
    always @(posedge clk) begin
       if(wen_badvaddr)
          badvaddr_reg <= badvaddr;
+   end
+
+   wire tlbr, tlbp, tlbwi;
+   assign {tlbwi, tlbr, tlbp} = tlb_typeM;
+   always@(posedge clk) begin
+      if(tlbr) begin
+         entry_lo0_reg  <= entry_lo0_in;
+         entry_lo1_reg  <= entry_lo1_in;
+         page_mask_reg  <= page_mask_in;
+         entry_hi_reg   <= entry_hi_in ;
+      end
+      if(tlbp) begin
+         index_reg      <= index_in; 
+      end
    end
 
    assign w_prid = (addr == 5'd15 && sel==3'b0);

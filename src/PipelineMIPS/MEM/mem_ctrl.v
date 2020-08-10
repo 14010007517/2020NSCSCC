@@ -11,7 +11,11 @@ module mem_ctrl(
     input wire [31:0] mem_rdataM,
     output wire [31:0] data_rdataM,
 
-    output wire addr_error_sw, addr_error_lw
+    output wire addr_error_sw, addr_error_lw,
+
+    input wire data_find,
+    input wire data_V, data_D,
+    output wire data_tlb_refill, data_tlb_invalid, data_tlb_modify
 );
     wire instr_lw, instr_lh, instr_lhu, instr_lb, instr_lbu, instr_sw, instr_sh, instr_sb;
     wire addr_W0, addr_B2, addr_B1, addr_B3;
@@ -22,6 +26,10 @@ module mem_ctrl(
                         | (  instr_sh & ~(addr_W0 | addr_B2));
     assign addr_error_lw = (instr_lw & ~addr_W0)
                         | (( instr_lh | instr_lhu ) & ~(addr_W0 | addr_B2));
+
+    assign data_tlb_refill  = |l_s_typeM & ~data_find;
+    assign data_tlb_invalid = |l_s_typeM & data_find & ~data_V;
+    assign data_tlb_modify  = data_find & data_V & ~data_D & (instr_sw | instr_sh | instr_sb);
 
     assign addr_W0 = ~(|(addr[1:0] ^ 2'b00));
     assign addr_B2 = ~(|(addr[1:0] ^ 2'b10));

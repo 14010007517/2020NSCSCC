@@ -5,7 +5,8 @@ module d_cache (
     input wire no_cache,
     //datapath
     input wire data_en,
-    input wire [31:0] data_addr,
+    input wire [31:0] data_vaddr,
+    input wire [31:0] data_paddr,
     output wire [31:0] data_rdata,
     input wire [3:0] data_wen,
     input wire [31:0] data_wdata,
@@ -54,10 +55,10 @@ module d_cache (
     wire [INDEX_WIDTH-1  : 0] index, indexE;
     wire [OFFSET_WIDTH-3 : 0] offset; //字偏移
 
-    assign tag      = data_addr[31                         : INDEX_WIDTH+OFFSET_WIDTH ];
-    assign index    = data_addr[INDEX_WIDTH+OFFSET_WIDTH-1 : OFFSET_WIDTH             ];    
-    assign indexE   = mem_addrE[INDEX_WIDTH+OFFSET_WIDTH-1 : OFFSET_WIDTH             ];
-    assign offset   = data_addr[OFFSET_WIDTH-1             : 2                        ];
+    assign tag      = data_paddr[31                         : INDEX_WIDTH+OFFSET_WIDTH ];
+    assign index    = data_vaddr[INDEX_WIDTH+OFFSET_WIDTH-1 : OFFSET_WIDTH             ];    
+    assign indexE   = mem_addrE [INDEX_WIDTH+OFFSET_WIDTH-1 : OFFSET_WIDTH             ];
+    assign offset   = data_vaddr[OFFSET_WIDTH-1             : 2                        ];
 
     //read
     wire read, write;
@@ -171,7 +172,7 @@ module d_cache (
     reg collisionM;
     reg [31:0] data_wdata_r;
 
-    assign collisionE = mem_read_enE & write & hit & (mem_addrE == data_addr);
+    assign collisionE = mem_read_enE & write & hit & (mem_addrE == data_vaddr);
     always@(posedge clk) begin
         data_wdata_r <= rst ? 0 : data_wdata;
         collisionM <= rst ? 0 : collisionE;
@@ -231,7 +232,7 @@ module d_cache (
 
     //AXI signal
     //read
-    assign araddr = ~no_cache ? {tag, index}<<OFFSET_WIDTH: data_addr; //将offset清0
+    assign araddr = ~no_cache ? {tag, index}<<OFFSET_WIDTH: data_paddr; //将offset清0
     assign arlen = ~no_cache ? BLOCK_NUM-1 : 4'd0;
     assign arvalid = read_req & ~raddr_rcv;
     assign rready = raddr_rcv;
@@ -246,7 +247,7 @@ module d_cache (
         ), index} <<OFFSET_WIDTH;
 
 
-    assign awaddr = ~no_cache ? dirty_write_addr : data_addr;
+    assign awaddr = ~no_cache ? dirty_write_addr : data_paddr;
     assign awlen = ~no_cache ? BLOCK_NUM-1 : 4'd0;
     assign awsize = ~no_cache ? 4'b10 :
                                 data_wen==4'b1111 ? 4'b10:
