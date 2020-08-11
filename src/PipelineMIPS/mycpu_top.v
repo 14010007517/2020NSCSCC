@@ -64,11 +64,13 @@ module mycpu_top (
 	wire TLBP;
 	wire TLBR;
     wire TLBWI;
+    wire TLBWR;
     wire [31:0] EntryHi_from_cp0;
 	wire [31:0] PageMask_from_cp0;
 	wire [31:0] EntryLo0_from_cp0;
 	wire [31:0] EntryLo1_from_cp0;
 	wire [31:0] Index_from_cp0;
+	wire [31:0] Random_from_cp0;
 	wire [31:0] EntryHi_to_cp0;
 	wire [31:0] PageMask_to_cp0;
 	wire [31:0] EntryLo0_to_cp0;
@@ -145,6 +147,7 @@ module mycpu_top (
         .TLBP(TLBP),
         .TLBR(TLBR),
         .TLBWI(TLBWI),
+        .TLBWR(TLBWR),
 
         .EntryHi_from_cp0(EntryHi_from_cp0),
         .PageMask_from_cp0(PageMask_from_cp0),
@@ -216,12 +219,14 @@ module mycpu_top (
         .TLBP(TLBP),
         .TLBR(TLBR),
         .TLBWI(TLBWI),
+        .TLBWR(TLBWR),
         
         .EntryHi_in(EntryHi_from_cp0),
         .PageMask_in(PageMask_from_cp0),
         .EntryLo0_in(EntryLo0_from_cp0),
         .EntryLo1_in(EntryLo1_from_cp0),
         .Index_in(Index_from_cp0),
+        .Random_in(Random_from_cp0),
 
         .EntryHi_out(EntryHi_to_cp0),
         .PageMask_out(PageMask_to_cp0),

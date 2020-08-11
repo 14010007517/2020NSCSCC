@@ -22,14 +22,14 @@ module main_decoder(
 	output wire breakD, syscallD, eretD, 
 	output wire cp0_wenD,
 	output wire cp0_to_regD,
-	output wire [2:0] tlb_typeD
+	output wire [3:0] tlb_typeD
     //WB
 );
 // declare
     wire [5:0] op_code;
 	wire [4:0] rs,rt;
 	wire [5:0] funct;
-	wire TLBWI, TLBP, TLBR;
+	wire TLBWR, TLBWI, TLBP, TLBR;
 	wire mtc0;
 	wire mfhi;
 	wire mflo;
@@ -59,7 +59,6 @@ module main_decoder(
 	assign mfhi = !(op_code ^ `EXE_R_TYPE) & !(funct ^ `EXE_MFHI);
 	assign mflo = !(op_code ^ `EXE_R_TYPE) & !(funct ^ `EXE_MFLO);
 	assign mfhi_loD = {mfhi, mflo};
-
 	
 	assign mtc0 = ~(|(op_code ^ `EXE_COP0)) & ~|(rs ^ `EXE_MTC0);
 	assign cp0_wenD = mtc0;
@@ -72,7 +71,8 @@ module main_decoder(
 	assign TLBWI 	= !(op_code ^ `EXE_COP0) & !(funct ^ `EXE_TLBWI	);
 	assign TLBP 	= !(op_code ^ `EXE_COP0) & !(funct ^ `EXE_TLBP	);
 	assign TLBR 	= !(op_code ^ `EXE_COP0) & !(funct ^ `EXE_TLBR	);
-	assign tlb_typeD = {TLBWI, TLBR, TLBP};
+	assign TLBWR 	= !(op_code ^ `EXE_COP0) & !(funct ^ `EXE_TLBWR	);
+	assign tlb_typeD = {TLBWR, TLBWI, TLBR, TLBP};
 
 	always @(*) begin
 		riD = 1'b0;
@@ -172,7 +172,7 @@ module main_decoder(
 					end
 
 					default: begin
-						riD  =  |(funct ^ `EXE_ERET) & |(funct ^ `EXE_TLBR) & |(funct ^ `EXE_TLBP) & |(funct ^ `EXE_TLBWI);
+						riD  =  |(funct ^ `EXE_ERET) & |(funct ^ `EXE_TLBR) & |(funct ^ `EXE_TLBP) & |(funct ^ `EXE_TLBWI) & |(funct ^ `EXE_TLBWR);
 						regfile_ctrl  =  4'b0_00_0;
 						mem_ctrl  =  3'b0;
 					end

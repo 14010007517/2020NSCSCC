@@ -96,6 +96,7 @@
 `define EXE_TLBP    6'b001000
 `define EXE_TLBR    6'b000001
 `define EXE_TLBWI   6'b000010
+`define EXE_TLBWR   6'b000010
 
 `define EXE_SYNC 6'b001111
 `define EXE_PREF 6'b110011
@@ -124,7 +125,7 @@
 `define CP0_RANDOM      5'd1
 `define CP0_ENTRY_LO0   5'd2
 `define CP0_ENTRY_LO1   5'd3
-`define CP0_CONTEX      5'd4
+`define CP0_CONTEXT     5'd4
 `define CP0_PAGE_MASK   5'd5
 `define CP0_WIRED       5'd6
 
@@ -141,20 +142,54 @@
 `define CP0_CONFIG      5'd16   //sel=0
 `define CP0_CONFIG1     5'd16   //sel=1
 
-//cp0 status
-`define IE_BIT 0              //
-`define EXL_BIT 1
-`define BEV_BIT 22
+//status
+`define IE_BIT 0              //全局中断使能
+`define EXL_BIT 1             //异常优先级
+`define BEV_BIT 22            //
 `define IM7_IM0_BITS  15:8
 `define IM1_IM0_BITS  9:8
 `define IM7_IM2_BITS  15:10
-//cp0 cause
+
+`define CU_BITS 31:28   //4'b0001
+`define ERL_BIT 2       //没实现
+`define STATUS_INIT 32'h10400000;
+
+//cause
 `define BD_BIT 31             //延迟槽
 `define TI_BIT 30             //计时器中断指示 //don't use
+`define CE_BITS 29:28         //CpU异常时，协处理器编号 //don't use
+`define IV_BIT 23             //don't use
 `define IP1_IP0_BITS 9:8      //软件中断位
 `define IP7_IP2_BITS 15:10    //软件中断位
 `define EXC_CODE_BITS 6:2     //异常编码
+`define CAUSE_INIT 32'h0;
 
+//config
+`define M_BIT 31        //实现config1, 1
+`define BE_BIT 15       //小端, 0
+`define AT_BITS 14:13   //MIPS32, 0
+`define AR_BITS 14:13   //Release1, 0
+`define MT_BITS 9:7     //MMU type: standard TLB, 1
+`define CONFIG_INIT 32'h8000_0080
+    //R/W
+`define K23_BITS 30:28
+`define KU_BITS 27:25
+`define K0_BITS 2:0
+
+//config1(read only)
+// `define M_BIT 31         //实现config2, 0
+`define MMU_SIZE_BITS 30:25 //32-1
+`define IS_BITS 24:22       //128 cache line, encoding: 1
+`define IL_BITS 21:19       //8 bytes, encoding: 2
+`define IA_BITS 18:16       //4 way, encoding: 3
+`define DS_BITS 15:13       //128 cache line, encoding: 1
+`define DL_BITS 12:10       //8 bytes, encoding: 2
+`define DA_BITS 9 :7        //4 way, encoding: 3
+`define FP_BIT  0           //FPU implement, 0
+`define CONFIG1_INIT 32'hbe53_2980  //1 011111 001 010 011 001 010 011 000000 0
+
+//prid (read only)
+`define PRID_INIT 32'h004c_0102;
 
 //TLB
 //TLB Config
@@ -163,7 +198,12 @@
 `define OFFSET_WIDTH 12
 `define LOG2_TLB_LINE_NUM 5
 
+//index
 `define INDEX_BITS `LOG2_TLB_LINE_NUM-1:0
+//random
+`define RANDOM_BITS `LOG2_TLB_LINE_NUM-1:0
+//wired
+`define WIRED_BITS `LOG2_TLB_LINE_NUM-1:0
 
 //EntryHi
 `define VPN2_BITS 31:13
@@ -178,3 +218,7 @@
 `define V_BIT 1
 `define D_BIT 2
 `define C_BITS 5:3
+
+//context
+`define PTE_BASE_BITS 31:23
+`define BAD_VPN2_BITS 22:4

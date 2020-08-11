@@ -33,7 +33,7 @@ module id_ex (
     input wire eretD,			
     input wire cp0_wenD,		
     input wire cp0_to_regD,	
-    input wire [2:0] tlb_typeD,
+    input wire [3:0] tlb_typeD,
     input wire inst_tlb_refillD, inst_tlb_invalidD,
 
     output reg [31:0] pcE,
@@ -68,7 +68,7 @@ module id_ex (
     output reg eretE,			
     output reg cp0_wenE,		
     output reg cp0_to_regE,
-    output reg [2:0] tlb_typeE,
+    output reg [3:0] tlb_typeE,
     output reg inst_tlb_refillE, inst_tlb_invalidE
 );
     always @(posedge clk) begin

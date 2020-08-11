@@ -11,9 +11,9 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="316288600fs"></ZoomStartTime>
-      <ZoomEndTime time="316393601fs"></ZoomEndTime>
-      <Cursor1Time time="316335500fs"></Cursor1Time>
+      <ZoomStartTime time="394814500fs"></ZoomStartTime>
+      <ZoomEndTime time="394874001fs"></ZoomEndTime>
+      <Cursor1Time time="395048500fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="266"></NameColumnWidth>
@@ -1040,6 +1040,7 @@
    <wvobject fp_name="group276" type="group">
       <obj_property name="label">Hazard</obj_property>
       <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="group893" type="group">
          <obj_property name="label">no use</obj_property>
          <obj_property name="DisplayName">label</obj_property>
@@ -1164,6 +1165,18 @@
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hazard0/flush_exceptionM" type="logic">
             <obj_property name="ElementShortName">flush_exceptionM</obj_property>
             <obj_property name="ObjectShortName">flush_exceptionM</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/inst_en" type="logic">
+            <obj_property name="ElementShortName">inst_en</obj_property>
+            <obj_property name="ObjectShortName">inst_en</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/data_en" type="logic">
+            <obj_property name="ElementShortName">data_en</obj_property>
+            <obj_property name="ObjectShortName">data_en</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/inst_en_tmp" type="logic">
+            <obj_property name="ElementShortName">inst_en_tmp</obj_property>
+            <obj_property name="ObjectShortName">inst_en_tmp</obj_property>
          </wvobject>
       </wvobject>
       <wvobject fp_name="group870" type="group">
@@ -2583,7 +2596,6 @@
    <wvobject fp_name="group728" type="group">
       <obj_property name="label">TLB</obj_property>
       <obj_property name="DisplayName">label</obj_property>
-      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/clk" type="logic">
          <obj_property name="ElementShortName">clk</obj_property>
          <obj_property name="ObjectShortName">clk</obj_property>
@@ -2603,6 +2615,7 @@
       <wvobject fp_name="group729" type="group">
          <obj_property name="label">Trans</obj_property>
          <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="isExpanded"></obj_property>
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/inst_paddr" type="array">
             <obj_property name="ElementShortName">inst_paddr[31:0]</obj_property>
             <obj_property name="ObjectShortName">inst_paddr[31:0]</obj_property>

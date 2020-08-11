@@ -26,7 +26,7 @@ module ex_mem (
     input wire eretE,    		
     input wire cp0_wenE, 		
     input wire cp0_to_regE, 
-    input wire [2:0] tlb_typeE, 	
+    input wire [3:0] tlb_typeE, 	
     input wire inst_tlb_refillE, inst_tlb_invalidE,
 
     output reg [31:0] pcM,
@@ -54,7 +54,7 @@ module ex_mem (
     output reg eretM,		
     output reg cp0_wenM,		
     output reg cp0_to_regM,
-    output reg [2:0] tlb_typeM,
+    output reg [3:0] tlb_typeM,
     output reg inst_tlb_refillM, inst_tlb_invalidM
 );
 
@@ -120,35 +120,4 @@ module ex_mem (
             inst_tlb_invalidM       <=      inst_tlb_invalidE   ;
         end
     end
-
-
-    // // EX-MEM flow
-    // always@(posedge clk) begin
-	// 	if(rst | flushM) begin
-	// 		mem_read_enM	<= 0;
-	// 		mem_write_enM	<= 0;
-	// 		reg_write_enM	<= 0;
-	// 		mem_to_regM		<= 0;
-	// 		hilo_to_regM	<= 0;
-	// 		riM				<= 0;
-	// 		breakM			<= 0;
-	// 		syscallM		<= 0;
-	// 		eretM			<= 0;
-	// 		cp0_wenM		<= 0;
-	// 		cp0_to_regM		<= 0;
-	// 	end
-	// 	else if(~stallM) begin
-	// 		mem_read_enM	<= mem_read_enE		;
-	// 		mem_write_enM	<= mem_write_enE	;
-	// 		reg_write_enM	<= reg_write_enE 	;
-	// 		mem_to_regM		<= mem_to_regE 		;
-	// 		hilo_to_regM	<= hilo_to_regE		;
-	// 		riM				<= riE				;
-	// 		breakM			<= breakE			;
-	// 		syscallM		<= syscallE			;
-	// 		eretM			<= eretE			;
-	// 		cp0_wenM		<= cp0_wenE			;
-	// 		cp0_to_regM		<= cp0_to_regE		;
-	// 	end
-    // end
 endmodule

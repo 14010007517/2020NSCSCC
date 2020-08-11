@@ -23,9 +23,10 @@ module datapath (
     output wire stallM,
 
     // TLB
-    input wire TLBP,
-    input wire TLBR,
-    input wire TLBWI,
+    output wire TLBP,
+    output wire TLBR,
+    output wire TLBWI,
+    output wire TLBWR,
     input wire [31:0] EntryHi_to_cp0,
     input wire [31:0] PageMask_to_cp0,
     input wire [31:0] EntryLo0_to_cp0,
@@ -37,6 +38,7 @@ module datapath (
     output wire [31:0] EntryLo0_from_cp0,
     output wire [31:0] EntryLo1_from_cp0,
     output wire [31:0] Index_from_cp0,
+    output wire [31:0] Random_from_cp0,
 
         //异常
     input wire inst_tlb_refillF, inst_tlb_invalidF,
@@ -181,7 +183,7 @@ module datapath (
     wire eretD;
     wire cp0_wenD;
     wire cp0_to_regD;
-	wire [2:0] tlb_typeD, tlb_typeE, tlb_typeM;
+	wire [3:0] tlb_typeD, tlb_typeE, tlb_typeM;
 
     wire mem_to_regE;
     wire hilo_to_regE;
@@ -649,7 +651,7 @@ module datapath (
         .badvaddrM(badvaddrM)
     );
 
-    assign {TLBWI, TLBR, TLBP} = tlb_typeM;
+    assign {TLBWR, TLBWI, TLBR, TLBP} = tlb_typeM;
 
     cp0_reg cp0(
         .clk(clk),
@@ -688,7 +690,8 @@ module datapath (
         .page_mask_W(PageMask_from_cp0),
         .entry_lo0_W(EntryLo0_from_cp0), 
         .entry_lo1_W(EntryLo1_from_cp0),
-        .index_W(Index_from_cp0)
+        .index_W(Index_from_cp0),
+        .random_W(Random_from_cp0)
     );
 
     mux4 #(32) mux4_mem_forward(alu_outM, 0, hilo_oM, cp0_data_oW, {(hilo_to_regM | cp0_to_regM), (mem_to_regM | cp0_to_regM)}, resultM_without_rdata);

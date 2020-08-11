@@ -20,12 +20,14 @@ module tlb (
 	input  wire        TLBP,
 	input  wire        TLBR,
     input  wire        TLBWI,
+    input  wire        TLBWR,
     
     input  wire [31:0] EntryHi_in,
 	input  wire [31:0] PageMask_in,
 	input  wire [31:0] EntryLo0_in,
 	input  wire [31:0] EntryLo1_in,
 	input  wire [31:0] Index_in,
+    input  wire [31:0] Random_in,
 
 	output wire [31:0] EntryHi_out,
 	output wire [31:0] PageMask_out,
@@ -33,9 +35,6 @@ module tlb (
 	output wire [31:0] EntryLo1_out,
 	output wire [31:0] Index_out
 );
-
-//Parameter
-
 
 //TLB
 reg [31:0] TLB_EntryHi  [`TLB_LINE_NUM-1:0]; //G位放在EntryHi的第12位
@@ -106,7 +105,8 @@ assign data_tlb_invalid = data_kseg01 ? 1'b0 : (mem_read_enM | mem_write_enM) & 
 assign data_tlb_modify  = data_kseg01 ? 1'b0 : mem_write_enM & data_find & data_V & ~data_D;
 
 //TLB指令
-wire [`LOG2_TLB_LINE_NUM-1:0] index;
+wire [`LOG2_TLB_LINE_NUM-1:0] index, random_index;
+assign random_index = Random_in[`LOG2_TLB_LINE_NUM-1:0];
 assign index = Index_in[`LOG2_TLB_LINE_NUM-1:0];
 
 assign EntryHi_out  = (TLBR) ? TLB_EntryHi [index] & 32'hffff_e0ff : 32'h0;
@@ -129,12 +129,33 @@ begin
     end
     else if (TLBWI)
     begin
-        TLB_EntryHi [index][`VPN2_BITS] <= EntryHi_in[`VPN2_BITS];
+        TLB_EntryHi [index][`VPN2_BITS] <= EntryHi_in[`VPN2_BITS] & ~PageMask_in[`VPN2_BITS];
         TLB_EntryHi [index][`G_BIT]     <= EntryLo0_in[0] & EntryLo1_in[0];
         TLB_EntryHi [index][`ASID_BITS] <= EntryHi_in[`ASID_BITS];
         TLB_PageMask[index]             <= PageMask_in;
-        TLB_EntryLo0[index]             <= {EntryLo0_in[31:1], 1'b0};
-        TLB_EntryLo1[index]             <= {EntryLo1_in[31:1], 1'b0};
+        TLB_EntryLo0[index][`PFN_BITS]  <= EntryLo0_in[`PFN_BITS] & ~PageMask_in[`MASK_BITS];
+        TLB_EntryLo0[index][`C_BITS]    <= EntryLo0_in[`C_BITS];
+        TLB_EntryLo0[index][`D_BIT]     <= EntryLo0_in[`D_BIT];
+        TLB_EntryLo0[index][`V_BIT]     <= EntryLo0_in[`V_BIT];
+        TLB_EntryLo1[index][`PFN_BITS]  <= EntryLo1_in[`PFN_BITS] & ~PageMask_in[`MASK_BITS];
+        TLB_EntryLo1[index][`C_BITS]    <= EntryLo1_in[`C_BITS];
+        TLB_EntryLo1[index][`D_BIT]     <= EntryLo1_in[`D_BIT];
+        TLB_EntryLo1[index][`V_BIT]     <= EntryLo1_in[`V_BIT];
+    end
+    else if(TLBWR)
+    begin
+        TLB_EntryHi [random_index][`VPN2_BITS]  <= EntryHi_in[`VPN2_BITS] & ~PageMask_in[`VPN2_BITS];
+        TLB_EntryHi [random_index][`G_BIT]      <= EntryLo0_in[0] & EntryLo1_in[0];
+        TLB_EntryHi [random_index][`ASID_BITS]  <= EntryHi_in[`ASID_BITS];
+        TLB_PageMask[random_index]              <= PageMask_in;
+        TLB_EntryLo0[random_index][`PFN_BITS]   <= EntryLo0_in[`PFN_BITS] & ~PageMask_in[`MASK_BITS];
+        TLB_EntryLo0[random_index][`C_BITS]     <= EntryLo0_in[`C_BITS];
+        TLB_EntryLo0[random_index][`D_BIT]      <= EntryLo0_in[`D_BIT];
+        TLB_EntryLo0[random_index][`V_BIT]      <= EntryLo0_in[`V_BIT];
+        TLB_EntryLo1[random_index][`PFN_BITS]   <= EntryLo1_in[`PFN_BITS] & ~PageMask_in[`MASK_BITS];
+        TLB_EntryLo1[random_index][`C_BITS]     <= EntryLo1_in[`C_BITS];
+        TLB_EntryLo1[random_index][`D_BIT]      <= EntryLo1_in[`D_BIT];
+        TLB_EntryLo1[random_index][`V_BIT]      <= EntryLo1_in[`V_BIT];
     end
 end
 //------------------------------------------------------------------

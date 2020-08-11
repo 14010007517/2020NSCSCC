@@ -35,7 +35,8 @@ module cp0_reg(
       output wire [31:0] page_mask_W,
       output wire [31:0] entry_lo0_W,
       output wire [31:0] entry_lo1_W,
-      output wire [31:0] index_W
+      output wire [31:0] index_W,
+      output wire [31:0] random_W
 );
 
 
@@ -44,7 +45,7 @@ module cp0_reg(
    reg [31:0] random_reg;
    reg [31:0] entry_lo0_reg;
    reg [31:0] entry_lo1_reg;
-   reg [31:0] contex_reg;
+   reg [31:0] context_reg;
    reg [31:0] page_mask_reg;
    reg [31:0] wired_reg;
 
@@ -75,6 +76,8 @@ module cp0_reg(
    assign entry_lo0_W   =  entry_lo0_reg;
    assign entry_lo1_W   =  entry_lo1_reg;
    assign index_W       =  index_reg;
+   assign random_W      =  random_reg;
+
 
    //other
    reg interval_flag;   //间隔一个时钟递增时钟计数器
@@ -83,21 +86,22 @@ module cp0_reg(
    wire [31:0] pc_minus4;
    assign pc_minus4 = pcM - 4;
 
-   //mtc0 & mfc0 special register select
-   wire w_prid, w_ebase, w_config, w_config1;
-
    //always
    always @(posedge clk) begin
       if(rst) begin
          //cp0初始化
-         status_reg    <= 32'b000000000_1_000000_00000000_000000_0_0;  //BEV置为1
-         cause_reg     <= 32'b0_0_000000000000000_00000000_0_00000_00;
+         status_reg    <= `STATUS_INIT;  //BEV置为1
+         cause_reg     <= `CAUSE_INIT;
          count_reg     <= 32'b0;
 
-         prid_reg      <= 32'h004c_0102;
+         ebase_reg      <= 32'h8000_0000;
 
-         ebase_reg           <= 32'h8000_0000;
-         config_reg          <= 32'h0000_8000;  //
+         config_reg     <= `CONFIG_INIT;
+         config1_reg    <= `CONFIG1_INIT;
+         prid_reg       <= `PRID_INIT;
+
+         wired_reg      <= 32'b0;
+         random_reg     <= `TLB_LINE_NUM-1;
 
          //other
          interval_flag <= 1'b0;
@@ -133,14 +137,6 @@ module cp0_reg(
          end
          // mtc0
          else if(wen) begin
-            if(w_ebase) begin
-               ebase_reg[29:12] <= wdata[29:12];   //Excepton base
-            end
-            if(w_config) begin
-               config_reg[30:25] <= wdata[30:25];
-               config_reg[2:0] <= wdata[2:0];
-            end
-
             case (addr)
                `CP0_COUNT: begin
                   count_reg <= wdata;
@@ -161,6 +157,14 @@ module cp0_reg(
                   compare_reg <= wdata;
                   timer_int <= 1'b0;
                end
+               `CP0_CONFIG: begin   //不会写config1
+                  config_reg[`K23_BITS] <= wdata[`K23_BITS];
+                  config_reg[`KU_BITS ] <= wdata[`KU_BITS ];
+                  config_reg[`K0_BITS ] <= wdata[`K0_BITS ];
+               end
+               `CP0_WIRED: begin
+                  wired_reg[`WIRED_BITS] <= wdata[`WIRED_BITS];
+               end
                default: begin
                   /**/
                end
@@ -169,25 +173,39 @@ module cp0_reg(
       end
    end
 
-   wire wen_badvaddr;
-   assign wen_badvaddr = (except_type==`EXC_CODE_ADEL) || (except_type==`EXC_CODE_ADES) ||
+   //badvaddr
+   wire badvaddr_wen;
+   assign badvaddr_wen = (except_type==`EXC_CODE_ADEL) || (except_type==`EXC_CODE_ADES) ||
                          (except_type==`EXC_CODE_TLBL) || (except_type==`EXC_CODE_TLBS) ? 1'b1 : 1'b0;
    always @(posedge clk) begin
-      if(wen_badvaddr)
+      if(badvaddr_wen)
          badvaddr_reg <= badvaddr;
    end
 
+   //random: 在[wired_reg, tlb_line_num-1]之间循环
+   wire wired_wen;
+   assign wired_wen = wen & (addr == `CP0_WIRED);
+   always @(posedge clk) begin
+      if(random_reg==wired_reg | wired_wen) begin
+         random_reg <= `TLB_LINE_NUM-1;
+      end
+      else begin
+         random_reg <= random_reg-1;
+      end
+   end
+
+   //index, entry_hi/lo, page_mask
    wire mtc0_index, mtc0_entry_lo0, mtc0_entry_lo1, mtc0_entry_hi, mtc0_page_mask;
-
-   assign mtc0_index = wen & (addr == 5'd0);
-   assign mtc0_entry_hi = wen & (addr == 5'd10);
-   assign mtc0_entry_lo0 = wen & (addr == 5'd2);
-   assign mtc0_entry_lo1 = wen & (addr == 5'd3);
-   assign mtc0_page_mask = wen & (addr == 5'd5);
-
-   wire tlbr, tlbp, tlbwi;
-   assign {tlbwi, tlbr, tlbp} = tlb_typeM;
-
+      //1. mtc0写
+   assign mtc0_index     = wen & (addr == `CP0_INDEX);
+   assign mtc0_entry_hi  = wen & (addr == `CP0_ENTRY_HI);
+   assign mtc0_entry_lo0 = wen & (addr == `CP0_ENTRY_LO0);
+   assign mtc0_entry_lo1 = wen & (addr == `CP0_ENTRY_LO1);
+   assign mtc0_page_mask = wen & (addr == `CP0_PAGE_MASK);
+      //2. tlb指令写
+   wire tlbr, tlbp, tlbwi, tlbwr;
+   assign {tlbwr, tlbwi, tlbr, tlbp} = tlb_typeM;
+      //3. 异常更新 entry_hi
    wire tlb_exception;
    assign tlb_exception = ~|except_type[4:2] & |except_type[1:0]; //EXC_CODE_MOD, EXC_CODE_TLBL, EXC_CODE_TLBS
 
@@ -227,13 +245,19 @@ module cp0_reg(
       end
    end
 
+   //context
+   wire mtc0_context;
+   assign mtc0_context = wen & (addr == `CP0_CONTEXT);
+   always @(posedge clk) begin
+      if(rst)
+         context_reg <= 32'b0;
+      else if(mtc0_context)
+         context_reg[`PTE_BASE_BITS] <= context_reg[`PTE_BASE_BITS];
+      else if(tlb_exception)
+         context_reg[`BAD_VPN2_BITS] <= badvaddr[`BAD_VPN2_BITS];
+   end
 
-   assign w_prid = (addr == 5'd15 && sel==3'b0);
-   assign w_ebase = (addr == 5'd15 && sel==3'b1);
-   assign w_config = (addr == 5'd16 && sel==3'b0);
-   assign w_config1 = (addr == 5'd16 && sel==3'b1);
-
-   //read
+   //Read
    always @(*) begin
       case(addr)
          `CP0_INDEX    : begin
@@ -248,8 +272,8 @@ module cp0_reg(
          `CP0_ENTRY_LO1: begin
             rdata = entry_lo1_reg;
          end
-         `CP0_CONTEX   : begin
- 				rdata = contex_reg;            
+         `CP0_CONTEXT: begin
+            rdata <= context_reg;
          end
          `CP0_PAGE_MASK: begin
  				rdata = page_mask_reg;            
