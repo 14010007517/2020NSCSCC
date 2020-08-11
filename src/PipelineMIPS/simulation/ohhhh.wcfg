@@ -11,15 +11,19 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="313579500fs"></ZoomStartTime>
-      <ZoomEndTime time="315679501fs"></ZoomEndTime>
-      <Cursor1Time time="314077500fs"></Cursor1Time>
+      <ZoomStartTime time="316288600fs"></ZoomStartTime>
+      <ZoomEndTime time="316393601fs"></ZoomEndTime>
+      <Cursor1Time time="316335500fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="266"></NameColumnWidth>
       <ValueColumnWidth column_width="72"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="15" />
+   <wave_markers>
+      <marker time="315323800" label="" />
+      <marker time="362803000" label="" />
+   </wave_markers>
    <wvobject fp_name="/tb_top/resetn" type="logic">
       <obj_property name="ElementShortName">resetn</obj_property>
       <obj_property name="ObjectShortName">resetn</obj_property>
@@ -31,7 +35,6 @@
    <wvobject fp_name="group40" type="group">
       <obj_property name="label">DEBUG</obj_property>
       <obj_property name="DisplayName">label</obj_property>
-      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="/tb_top/cpu_clk" type="logic">
          <obj_property name="ElementShortName">cpu_clk</obj_property>
          <obj_property name="ObjectShortName">cpu_clk</obj_property>
@@ -1101,6 +1104,10 @@
             <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
             <obj_property name="UseCustomSignalColor">true</obj_property>
          </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hazard0/stall_ltypeD" type="logic">
+            <obj_property name="ElementShortName">stall_ltypeD</obj_property>
+            <obj_property name="ObjectShortName">stall_ltypeD</obj_property>
+         </wvobject>
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hazard0/div_stallE" type="logic">
             <obj_property name="ElementShortName">div_stallE</obj_property>
             <obj_property name="ObjectShortName">div_stallE</obj_property>
@@ -1162,7 +1169,6 @@
       <wvobject fp_name="group870" type="group">
          <obj_property name="label">Forward</obj_property>
          <obj_property name="DisplayName">label</obj_property>
-         <obj_property name="isExpanded"></obj_property>
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/hazard0/forward_aE" type="array">
             <obj_property name="ElementShortName">forward_aE[1:0]</obj_property>
             <obj_property name="ObjectShortName">forward_aE[1:0]</obj_property>
@@ -1425,7 +1431,6 @@
       <wvobject fp_name="group621" type="group">
          <obj_property name="label">Cache - Part</obj_property>
          <obj_property name="DisplayName">label</obj_property>
-         <obj_property name="isExpanded"></obj_property>
          <wvobject fp_name="group1146" type="group">
             <obj_property name="label">Instr</obj_property>
             <obj_property name="DisplayName">label</obj_property>
@@ -1552,7 +1557,6 @@
          <wvobject fp_name="group1876" type="group">
             <obj_property name="label">Detial</obj_property>
             <obj_property name="DisplayName">label</obj_property>
-            <obj_property name="isExpanded"></obj_property>
             <wvobject fp_name="/tb_top/soc_lite/u_cpu/d_cache/hit" type="logic">
                <obj_property name="ElementShortName">hit</obj_property>
                <obj_property name="ObjectShortName">hit</obj_property>
@@ -1609,7 +1613,6 @@
          <wvobject fp_name="group625" type="group">
             <obj_property name="label">RAM</obj_property>
             <obj_property name="DisplayName">label</obj_property>
-            <obj_property name="isExpanded"></obj_property>
             <wvobject fp_name="/tb_top/soc_lite/u_cpu/d_cache/mem_addrE" type="array">
                <obj_property name="ElementShortName">mem_addrE[31:0]</obj_property>
                <obj_property name="ObjectShortName">mem_addrE[31:0]</obj_property>
@@ -1741,17 +1744,32 @@
       <wvobject fp_name="group629" type="group">
          <obj_property name="label">Datapath</obj_property>
          <obj_property name="DisplayName">label</obj_property>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/d_cache/data_rdata" type="array">
-            <obj_property name="ElementShortName">data_rdata[31:0]</obj_property>
-            <obj_property name="ObjectShortName">data_rdata[31:0]</obj_property>
+         <obj_property name="isExpanded"></obj_property>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/d_cache/data_vaddr" type="array">
+            <obj_property name="ElementShortName">data_vaddr[31:0]</obj_property>
+            <obj_property name="ObjectShortName">data_vaddr[31:0]</obj_property>
+            <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/d_cache/data_paddr" type="array">
+            <obj_property name="ElementShortName">data_paddr[31:0]</obj_property>
+            <obj_property name="ObjectShortName">data_paddr[31:0]</obj_property>
+            <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
          </wvobject>
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/d_cache/data_wen" type="array">
             <obj_property name="ElementShortName">data_wen[3:0]</obj_property>
             <obj_property name="ObjectShortName">data_wen[3:0]</obj_property>
          </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/d_cache/data_rdata" type="array">
+            <obj_property name="ElementShortName">data_rdata[31:0]</obj_property>
+            <obj_property name="ObjectShortName">data_rdata[31:0]</obj_property>
+         </wvobject>
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/d_cache/data_wdata" type="array">
             <obj_property name="ElementShortName">data_wdata[31:0]</obj_property>
             <obj_property name="ObjectShortName">data_wdata[31:0]</obj_property>
+            <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
          </wvobject>
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/d_cache/mem_addrE" type="array">
             <obj_property name="ElementShortName">mem_addrE[31:0]</obj_property>
@@ -2341,7 +2359,6 @@
    <wvobject fp_name="group662" type="group">
       <obj_property name="label">CP0</obj_property>
       <obj_property name="DisplayName">label</obj_property>
-      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/cp0/clk" type="logic">
          <obj_property name="ElementShortName">clk</obj_property>
          <obj_property name="ObjectShortName">clk</obj_property>
@@ -2397,6 +2414,7 @@
       <wvobject fp_name="group639" type="group">
          <obj_property name="label">WEN</obj_property>
          <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="isExpanded"></obj_property>
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/cp0/mtc0_index" type="logic">
             <obj_property name="ElementShortName">mtc0_index</obj_property>
             <obj_property name="ObjectShortName">mtc0_index</obj_property>
@@ -2493,6 +2511,8 @@
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/cp0/entry_hi_reg" type="array">
             <obj_property name="ElementShortName">entry_hi_reg[31:0]</obj_property>
             <obj_property name="ObjectShortName">entry_hi_reg[31:0]</obj_property>
+            <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
          </wvobject>
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/cp0/compare_reg" type="array">
             <obj_property name="ElementShortName">compare_reg[31:0]</obj_property>
@@ -2563,6 +2583,7 @@
    <wvobject fp_name="group728" type="group">
       <obj_property name="label">TLB</obj_property>
       <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/clk" type="logic">
          <obj_property name="ElementShortName">clk</obj_property>
          <obj_property name="ObjectShortName">clk</obj_property>
@@ -2599,20 +2620,65 @@
             <obj_property name="ObjectShortName">no_cache_d</obj_property>
          </wvobject>
       </wvobject>
-      <wvobject fp_name="group730" type="group">
-         <obj_property name="label">Exception</obj_property>
+      <wvobject fp_name="group732" type="group">
+         <obj_property name="label">Find</obj_property>
          <obj_property name="DisplayName">label</obj_property>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/inst_tlb_refill" type="logic">
-            <obj_property name="ElementShortName">inst_tlb_refill</obj_property>
-            <obj_property name="ObjectShortName">inst_tlb_refill</obj_property>
+         <obj_property name="isExpanded"></obj_property>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/i_find_mask" type="array">
+            <obj_property name="ElementShortName">i_find_mask[31:0]</obj_property>
+            <obj_property name="ObjectShortName">i_find_mask[31:0]</obj_property>
          </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/inst_tlb_invalid" type="logic">
-            <obj_property name="ElementShortName">inst_tlb_invalid</obj_property>
-            <obj_property name="ObjectShortName">inst_tlb_invalid</obj_property>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/d_find_mask" type="array">
+            <obj_property name="ElementShortName">d_find_mask[31:0]</obj_property>
+            <obj_property name="ObjectShortName">d_find_mask[31:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/d_find_index" type="array">
+            <obj_property name="ElementShortName">d_find_index[4:0]</obj_property>
+            <obj_property name="ObjectShortName">d_find_index[4:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/inst_find" type="logic">
+            <obj_property name="ElementShortName">inst_find</obj_property>
+            <obj_property name="ObjectShortName">inst_find</obj_property>
+            <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
          </wvobject>
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/data_find" type="logic">
             <obj_property name="ElementShortName">data_find</obj_property>
             <obj_property name="ObjectShortName">data_find</obj_property>
+            <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/inst_odd" type="logic">
+            <obj_property name="ElementShortName">inst_odd</obj_property>
+            <obj_property name="ObjectShortName">inst_odd</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/data_odd" type="logic">
+            <obj_property name="ElementShortName">data_odd</obj_property>
+            <obj_property name="ObjectShortName">data_odd</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/i_tlb_entrylo" type="array">
+            <obj_property name="ElementShortName">i_tlb_entrylo[31:0]</obj_property>
+            <obj_property name="ObjectShortName">i_tlb_entrylo[31:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/d_tlb_entrylo" type="array">
+            <obj_property name="ElementShortName">d_tlb_entrylo[31:0]</obj_property>
+            <obj_property name="ObjectShortName">d_tlb_entrylo[31:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/i_tlb_pfn" type="array">
+            <obj_property name="ElementShortName">i_tlb_pfn[19:0]</obj_property>
+            <obj_property name="ObjectShortName">i_tlb_pfn[19:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/i_tlb_flag" type="array">
+            <obj_property name="ElementShortName">i_tlb_flag[5:0]</obj_property>
+            <obj_property name="ObjectShortName">i_tlb_flag[5:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/d_tlb_pfn" type="array">
+            <obj_property name="ElementShortName">d_tlb_pfn[19:0]</obj_property>
+            <obj_property name="ObjectShortName">d_tlb_pfn[19:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/d_tlb_flag" type="array">
+            <obj_property name="ElementShortName">d_tlb_flag[5:0]</obj_property>
+            <obj_property name="ObjectShortName">d_tlb_flag[5:0]</obj_property>
          </wvobject>
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/data_V" type="logic">
             <obj_property name="ElementShortName">data_V</obj_property>
@@ -2621,6 +2687,67 @@
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/data_D" type="logic">
             <obj_property name="ElementShortName">data_D</obj_property>
             <obj_property name="ObjectShortName">data_D</obj_property>
+         </wvobject>
+         <wvobject fp_name="group733" type="group">
+            <obj_property name="label">Other</obj_property>
+            <obj_property name="DisplayName">label</obj_property>
+            <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/inst_vpn" type="array">
+               <obj_property name="ElementShortName">inst_vpn[19:0]</obj_property>
+               <obj_property name="ObjectShortName">inst_vpn[19:0]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/inst_pfn" type="array">
+               <obj_property name="ElementShortName">inst_pfn[19:0]</obj_property>
+               <obj_property name="ObjectShortName">inst_pfn[19:0]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/inst_offset" type="array">
+               <obj_property name="ElementShortName">inst_offset[11:0]</obj_property>
+               <obj_property name="ObjectShortName">inst_offset[11:0]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/inst_kseg01" type="logic">
+               <obj_property name="ElementShortName">inst_kseg01</obj_property>
+               <obj_property name="ObjectShortName">inst_kseg01</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/data_vpn" type="array">
+               <obj_property name="ElementShortName">data_vpn[19:0]</obj_property>
+               <obj_property name="ObjectShortName">data_vpn[19:0]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/data_pfn" type="array">
+               <obj_property name="ElementShortName">data_pfn[19:0]</obj_property>
+               <obj_property name="ObjectShortName">data_pfn[19:0]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/data_offset" type="array">
+               <obj_property name="ElementShortName">data_offset[11:0]</obj_property>
+               <obj_property name="ObjectShortName">data_offset[11:0]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/data_kseg01" type="logic">
+               <obj_property name="ElementShortName">data_kseg01</obj_property>
+               <obj_property name="ObjectShortName">data_kseg01</obj_property>
+            </wvobject>
+         </wvobject>
+      </wvobject>
+      <wvobject fp_name="group730" type="group">
+         <obj_property name="label">Exception</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="isExpanded"></obj_property>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/inst_tlb_refill" type="logic">
+            <obj_property name="ElementShortName">inst_tlb_refill</obj_property>
+            <obj_property name="ObjectShortName">inst_tlb_refill</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/inst_tlb_invalid" type="logic">
+            <obj_property name="ElementShortName">inst_tlb_invalid</obj_property>
+            <obj_property name="ObjectShortName">inst_tlb_invalid</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/data_tlb_refill" type="logic">
+            <obj_property name="ElementShortName">data_tlb_refill</obj_property>
+            <obj_property name="ObjectShortName">data_tlb_refill</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/data_tlb_invalid" type="logic">
+            <obj_property name="ElementShortName">data_tlb_invalid</obj_property>
+            <obj_property name="ObjectShortName">data_tlb_invalid</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/data_tlb_modify" type="logic">
+            <obj_property name="ElementShortName">data_tlb_modify</obj_property>
+            <obj_property name="ObjectShortName">data_tlb_modify</obj_property>
          </wvobject>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/TLBP" type="logic">
@@ -2678,58 +2805,12 @@
       <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/index" type="array">
          <obj_property name="ElementShortName">index[4:0]</obj_property>
          <obj_property name="ObjectShortName">index[4:0]</obj_property>
+         <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/data_vaddr_probe" type="array">
          <obj_property name="ElementShortName">data_vaddr_probe[31:0]</obj_property>
          <obj_property name="ObjectShortName">data_vaddr_probe[31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="group732" type="group">
-         <obj_property name="label">Find</obj_property>
-         <obj_property name="DisplayName">label</obj_property>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/i_find_mask" type="array">
-            <obj_property name="ElementShortName">i_find_mask[31:0]</obj_property>
-            <obj_property name="ObjectShortName">i_find_mask[31:0]</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/d_find_mask" type="array">
-            <obj_property name="ElementShortName">d_find_mask[31:0]</obj_property>
-            <obj_property name="ObjectShortName">d_find_mask[31:0]</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/d_find_index" type="array">
-            <obj_property name="ElementShortName">d_find_index[4:0]</obj_property>
-            <obj_property name="ObjectShortName">d_find_index[4:0]</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/inst_find" type="logic">
-            <obj_property name="ElementShortName">inst_find</obj_property>
-            <obj_property name="ObjectShortName">inst_find</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/data_find" type="logic">
-            <obj_property name="ElementShortName">data_find</obj_property>
-            <obj_property name="ObjectShortName">data_find</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/i_tlb_entrylo" type="array">
-            <obj_property name="ElementShortName">i_tlb_entrylo[31:0]</obj_property>
-            <obj_property name="ObjectShortName">i_tlb_entrylo[31:0]</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/d_tlb_entrylo" type="array">
-            <obj_property name="ElementShortName">d_tlb_entrylo[31:0]</obj_property>
-            <obj_property name="ObjectShortName">d_tlb_entrylo[31:0]</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/i_tlb_pfn" type="array">
-            <obj_property name="ElementShortName">i_tlb_pfn[19:0]</obj_property>
-            <obj_property name="ObjectShortName">i_tlb_pfn[19:0]</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/d_tlb_pfn" type="array">
-            <obj_property name="ElementShortName">d_tlb_pfn[19:0]</obj_property>
-            <obj_property name="ObjectShortName">d_tlb_pfn[19:0]</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/i_tlb_flag" type="array">
-            <obj_property name="ElementShortName">i_tlb_flag[5:0]</obj_property>
-            <obj_property name="ObjectShortName">i_tlb_flag[5:0]</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/d_tlb_flag" type="array">
-            <obj_property name="ElementShortName">d_tlb_flag[5:0]</obj_property>
-            <obj_property name="ObjectShortName">d_tlb_flag[5:0]</obj_property>
-         </wvobject>
       </wvobject>
       <wvobject fp_name="group731" type="group">
          <obj_property name="label">TLB</obj_property>
@@ -2749,50 +2830,6 @@
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/TLB_EntryLo1" type="array">
             <obj_property name="ElementShortName">TLB_EntryLo1[31:0][31:0]</obj_property>
             <obj_property name="ObjectShortName">TLB_EntryLo1[31:0][31:0]</obj_property>
-         </wvobject>
-      </wvobject>
-      <wvobject fp_name="group733" type="group">
-         <obj_property name="label">Other</obj_property>
-         <obj_property name="DisplayName">label</obj_property>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/inst_vpn" type="array">
-            <obj_property name="ElementShortName">inst_vpn[19:0]</obj_property>
-            <obj_property name="ObjectShortName">inst_vpn[19:0]</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/inst_pfn" type="array">
-            <obj_property name="ElementShortName">inst_pfn[19:0]</obj_property>
-            <obj_property name="ObjectShortName">inst_pfn[19:0]</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/inst_offset" type="array">
-            <obj_property name="ElementShortName">inst_offset[11:0]</obj_property>
-            <obj_property name="ObjectShortName">inst_offset[11:0]</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/inst_kseg01" type="logic">
-            <obj_property name="ElementShortName">inst_kseg01</obj_property>
-            <obj_property name="ObjectShortName">inst_kseg01</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/data_vpn" type="array">
-            <obj_property name="ElementShortName">data_vpn[19:0]</obj_property>
-            <obj_property name="ObjectShortName">data_vpn[19:0]</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/data_pfn" type="array">
-            <obj_property name="ElementShortName">data_pfn[19:0]</obj_property>
-            <obj_property name="ObjectShortName">data_pfn[19:0]</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/data_offset" type="array">
-            <obj_property name="ElementShortName">data_offset[11:0]</obj_property>
-            <obj_property name="ObjectShortName">data_offset[11:0]</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/data_kseg01" type="logic">
-            <obj_property name="ElementShortName">data_kseg01</obj_property>
-            <obj_property name="ObjectShortName">data_kseg01</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/inst_odd" type="logic">
-            <obj_property name="ElementShortName">inst_odd</obj_property>
-            <obj_property name="ObjectShortName">inst_odd</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/data_odd" type="logic">
-            <obj_property name="ElementShortName">data_odd</obj_property>
-            <obj_property name="ObjectShortName">data_odd</obj_property>
          </wvobject>
       </wvobject>
    </wvobject>

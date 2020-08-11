@@ -135,6 +135,8 @@ module mycpu_top (
     wire d_bvalid           ;
     wire d_bready           ;
 
+    wire inst_en_tmp;
+
     datapath datapath(
         .clk(clk), .rst(rst),
         .ext_int(ext_int),
@@ -160,13 +162,12 @@ module mycpu_top (
         .data_tlb_refillM(data_tlb_refill),
         .data_tlb_invalidM(data_tlb_invalid),
         .data_tlb_modifyM(data_tlb_modify),
-        .mem_read_enM(mem_read_enM),
-        .mem_write_enM(mem_write_enM),
+        .mem_read_enM(mem_read_enM), .mem_write_enM(mem_write_enM),
 
         //inst
         .pcF(pcF),
         .pc_next(pc_next),
-        .inst_enF(inst_en),
+        .inst_enF(inst_en_tmp),
         .instrF(inst_rdata),
         .i_cache_stall(i_cache_stall),
         .stallF(stallF),
@@ -189,6 +190,7 @@ module mycpu_top (
         .debug_wb_rf_wdata (debug_wb_rf_wdata )  
     );
 
+    assign inst_en = inst_en_tmp & ~inst_tlb_refill & ~inst_tlb_invalid; //优化：tlb异常时，放弃取指
     //非简易的MMU
     tlb tlb0(
         .clk(clk), .rst(rst),
@@ -196,9 +198,8 @@ module mycpu_top (
         .inst_vaddr(pcF),
         .data_vaddr(data_addr),
 
-        .inst_en(inst_en),
-        .mem_read_enM(mem_read_enM),
-        .mem_write_enM(mem_write_enM),
+        .inst_en(inst_en_tmp),
+        .mem_read_enM(mem_read_enM), .mem_write_enM(mem_write_enM),
         //cache
         .inst_paddr(pcF_paddr),
         .data_paddr(data_paddr),

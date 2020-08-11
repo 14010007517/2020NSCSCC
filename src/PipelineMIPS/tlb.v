@@ -5,8 +5,7 @@ module tlb (
     input wire [31:0] inst_vaddr,
     input wire [31:0] data_vaddr,
     input wire inst_en,
-    input wire mem_read_enM,
-    input wire mem_write_enM,
+    input wire mem_read_enM, mem_write_enM,
 
     output wire [31:0] inst_paddr,
     output wire [31:0] data_paddr,

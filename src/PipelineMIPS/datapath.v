@@ -42,7 +42,6 @@ module datapath (
     input wire inst_tlb_refillF, inst_tlb_invalidF,
     input wire data_tlb_refillM, data_tlb_invalidM, data_tlb_modifyM,
     output wire mem_read_enM, mem_write_enM,
-
     //debug
     output wire [31:0]  debug_wb_pc,      
     output wire [3:0]   debug_wb_rf_wen,
