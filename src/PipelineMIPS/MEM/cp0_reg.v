@@ -188,6 +188,9 @@ module cp0_reg(
    wire tlbr, tlbp, tlbwi;
    assign {tlbwi, tlbr, tlbp} = tlb_typeM;
 
+   wire tlb_exception;
+   assign tlb_exception = ~|except_type[4:2] & |except_type[1:0]; //EXC_CODE_MOD, EXC_CODE_TLBL, EXC_CODE_TLBS
+
    always@(posedge clk) begin
       if(rst) begin
          index_reg <= 0;
@@ -213,7 +216,9 @@ module cp0_reg(
                                        mtc0_entry_lo1 ? wdata[`FLAG_BITS] : entry_lo1_reg[`FLAG_BITS];
 
          entry_hi_reg[`VPN2_BITS]   <= tlbr           ? entry_hi_in[`VPN2_BITS] :
-                                       mtc0_entry_hi  ? wdata[`VPN2_BITS] : entry_hi_reg[`VPN2_BITS];
+                                       mtc0_entry_hi  ? wdata[`VPN2_BITS] :
+                                       tlb_exception  ? badvaddr[`VPN2_BITS] : entry_hi_reg[`VPN2_BITS];
+         
          entry_hi_reg[`ASID_BITS]   <= tlbr           ? entry_hi_in[`ASID_BITS] :
                                        mtc0_entry_hi  ? wdata[`ASID_BITS] : entry_hi_reg[`ASID_BITS];
 

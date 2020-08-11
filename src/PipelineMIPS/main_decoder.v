@@ -61,17 +61,17 @@ module main_decoder(
 	assign mfhi_loD = {mfhi, mflo};
 
 	
-	assign mtc0 = ~(|(op_code ^ `EXE_COP0)) & !(rs ^ `EXE_MTC0);
-	assign cp0_wenD = mtc0 | TLBR;
+	assign mtc0 = ~(|(op_code ^ `EXE_COP0)) & ~|(rs ^ `EXE_MTC0);
+	assign cp0_wenD = mtc0;
 	assign cp0_to_regD = ~(|(op_code ^ `EXE_COP0)) & ~(|(rs ^ `EXE_MFC0));
 	
 	assign breakD = ~(|(op_code ^ `EXE_R_TYPE)) & ~(|(funct ^ `EXE_BREAK));
 	assign syscallD = ~(|(op_code ^ `EXE_R_TYPE)) & ~(|(funct ^ `EXE_SYSCALL));
-	assign eretD = ~(|(instrD ^ {`EXE_COP0, `EXE_ERET}));
+	assign eretD = ~|(op_code^`EXE_COP0) & ~|(funct^`EXE_ERET);
 
-	assign TLBWI 	= !(op_code ^ `EXE_COP0) 	& !(funct ^ `EXE_TLBWI	);
-	assign TLBP 	= !(op_code ^ `EXE_COP0)   & !(funct ^ `EXE_TLBP	);
-	assign TLBR 	= !(op_code ^ `EXE_COP0)   & !(funct ^ `EXE_TLBR	);
+	assign TLBWI 	= !(op_code ^ `EXE_COP0) & !(funct ^ `EXE_TLBWI	);
+	assign TLBP 	= !(op_code ^ `EXE_COP0) & !(funct ^ `EXE_TLBP	);
+	assign TLBR 	= !(op_code ^ `EXE_COP0) & !(funct ^ `EXE_TLBR	);
 	assign tlb_typeD = {TLBWI, TLBR, TLBP};
 
 	always @(*) begin
