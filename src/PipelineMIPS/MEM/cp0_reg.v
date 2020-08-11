@@ -101,7 +101,6 @@ module cp0_reg(
          prid_reg       <= `PRID_INIT;
 
          wired_reg      <= 32'b0;
-         random_reg     <= `TLB_LINE_NUM-1;
 
          //other
          interval_flag <= 1'b0;
@@ -186,7 +185,10 @@ module cp0_reg(
    wire wired_wen;
    assign wired_wen = wen & (addr == `CP0_WIRED);
    always @(posedge clk) begin
-      if(random_reg==wired_reg | wired_wen) begin
+      if(rst) begin
+         random_reg     <= `TLB_LINE_NUM-1;
+      end
+      else if(random_reg==wired_reg | wired_wen) begin
          random_reg <= `TLB_LINE_NUM-1;
       end
       else begin
