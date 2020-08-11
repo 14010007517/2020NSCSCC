@@ -27,9 +27,7 @@ module mem_ctrl(
     assign addr_error_lw = (instr_lw & ~addr_W0)
                         | (( instr_lh | instr_lhu ) & ~(addr_W0 | addr_B2));
 
-    assign data_tlb_refill  = |l_s_typeM & ~data_find;
-    assign data_tlb_invalid = |l_s_typeM & data_find & ~data_V;
-    assign data_tlb_modify  = data_find & data_V & ~data_D & (instr_sw | instr_sh | instr_sb);
+    
 
     assign addr_W0 = ~(|(addr[1:0] ^ 2'b00));
     assign addr_B2 = ~(|(addr[1:0] ^ 2'b10));

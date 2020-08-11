@@ -39,9 +39,9 @@ module datapath (
     output wire [31:0] Index_from_cp0,
 
         //异常
-    input wire inst_tlb_refill, inst_tlb_invalid,
-    input wire data_find,
-    input wire data_V, data_D,
+    input wire inst_tlb_refillF, inst_tlb_invalidF,
+    input wire data_tlb_refillM, data_tlb_invalidM, data_tlb_modifyM,
+    output wire mem_read_enM, mem_write_enM,
 
     //debug
     output wire [31:0]  debug_wb_pc,      
@@ -76,6 +76,7 @@ module datapath (
     wire [4:0] alu_controlD;
     wire [4:0] branch_judge_controlD;
     wire is_divD;
+    wire inst_tlb_refillD, inst_tlb_invalidD;
 //EX
     wire [31:0] pcE;
     wire [31:0] rd1E, rd2E, mem_wdataE;
@@ -105,13 +106,12 @@ module datapath (
     wire jumpE;
     wire actual_takeE;
     wire [4:0] branch_judge_controlE;
+    wire inst_tlb_refillE, inst_tlb_invalidE;
 //MEM
     wire [31:0] pcM;
     wire [31:0] alu_outM;
     wire [4:0] reg_writeM;
     wire [31:0] instrM;
-    wire mem_read_enM;
-    wire mem_write_enM;
     wire reg_write_enM;
     wire mem_to_regM;
     wire [31:0] resultM;
@@ -152,6 +152,7 @@ module datapath (
     wire mem_error_enM;
     wire cp0_wenM;
     wire [31:0] rt_valueM;
+    wire inst_tlb_refillM, inst_tlb_invalidM;
 //WB
     wire [31:0] pcW;
     wire reg_write_enW;
@@ -324,11 +325,15 @@ module datapath (
         .pc_plus4F(pc_plus4F),
         .instrF(instrF),
         .is_in_delayslot_iF(is_in_delayslot_iF),
+        .inst_tlb_refillF(inst_tlb_refillF & inst_enF),
+        .inst_tlb_invalidF(inst_tlb_invalidF & inst_enF),
         
         .pcD(pcD),
         .pc_plus4D(pc_plus4D),
         .instrD(instrD),
-        .is_in_delayslot_iD(is_in_delayslot_iD)
+        .is_in_delayslot_iD(is_in_delayslot_iD),
+        .inst_tlb_refillD(inst_tlb_refillD),
+        .inst_tlb_invalidD(inst_tlb_invalidD)
     );
 
     //use for debug
@@ -411,6 +416,8 @@ module datapath (
         .l_s_typeD(l_s_typeD),
         .mfhi_loD(mfhi_loD),
         .tlb_typeD(tlb_typeD),
+        .inst_tlb_refillD(inst_tlb_refillD),
+        .inst_tlb_invalidD(inst_tlb_invalidD),
 
         
         .alu_imm_selD(alu_imm_selD),
@@ -425,8 +432,7 @@ module datapath (
         .syscallD(syscallD),	
         .eretD(eretD),		
         .cp0_wenD(cp0_wenD),	
-        .cp0_to_regD(cp0_to_regD),	
-        
+        .cp0_to_regD(cp0_to_regD),	      
         .pcE(pcE),
         .rsE(rsE), .rd1E(rd1E), .rd2E(rd2E),
         .rtE(rtE), .rdE(rdE),
@@ -458,7 +464,9 @@ module datapath (
         .eretE(eretE),		
         .cp0_wenE(cp0_wenE),	
         .cp0_to_regE(cp0_to_regE),
-        .tlb_typeE(tlb_typeE)
+        .tlb_typeE(tlb_typeE),
+        .inst_tlb_refillE(inst_tlb_refillE),
+        .inst_tlb_invalidE(inst_tlb_invalidE)
     );
 //EX
     alu alu0(
@@ -541,6 +549,8 @@ module datapath (
         .l_s_typeE(l_s_typeE),
         .mfhi_loE(mfhi_loE),
         .tlb_typeE(tlb_typeE),
+        .inst_tlb_refillE(inst_tlb_refillE),
+        .inst_tlb_invalidE(inst_tlb_invalidE),
 
 
         .mem_read_enE(mem_read_enE),	
@@ -581,7 +591,9 @@ module datapath (
         .eretM(eretM),		
         .cp0_wenM(cp0_wenM),		
         .cp0_to_regM(cp0_to_regM),
-        .tlb_typeM(tlb_typeM)
+        .tlb_typeM(tlb_typeM),
+        .inst_tlb_refillM(inst_tlb_refillM),
+        .inst_tlb_invalidM(inst_tlb_invalidM)
     );
 //MEM
     assign mem_addrM = alu_outM;
@@ -600,12 +612,7 @@ module datapath (
         .data_rdataM(mem_ctrl_rdataM),
 
         .addr_error_sw(addrErrorSwM),
-        .addr_error_lw(addrErrorLwM),
-        .data_find(data_find),
-        .data_V(data_V), .data_D(data_D),
-        .data_tlb_refill(data_tlb_refill),
-        .data_tlb_invalid(data_tlb_invalid),
-        .data_tlb_modify(data_tlb_modify)
+        .addr_error_lw(addrErrorLwM)
     );
 
     hilo_reg hilo0(
@@ -627,11 +634,11 @@ module datapath (
         //tlb exception
         .mem_read_enM(mem_read_enM),
         .mem_write_enM(mem_write_enM),
-        .inst_tlb_refill(inst_tlb_refill),
-        .inst_tlb_invalid(inst_tlb_invalid),
-        .data_tlb_refill(data_tlb_refill),
-        .data_tlb_invalid(data_tlb_invalid),
-        .data_tlb_modify(data_tlb_modify),
+        .inst_tlb_refill(inst_tlb_refillM),
+        .inst_tlb_invalid(inst_tlb_invalidM),
+        .data_tlb_refill(data_tlb_refillM),
+        .data_tlb_invalid(data_tlb_invalidM),
+        .data_tlb_modify(data_tlb_modifyM),
 
         .cp0_status(cp0_statusW), .cp0_cause(cp0_causeW), .cp0_epc(cp0_epcW), .cp0_ebase(cp0_ebaseW),
         .pcM(pcM),

@@ -76,8 +76,8 @@ module mycpu_top (
 	wire [31:0] Index_to_cp0;
         //异常
     wire inst_tlb_refill, inst_tlb_invalid;
-    wire data_find;
-    wire data_V, data_D;
+    wire data_tlb_refill, data_tlb_invalid, data_tlb_modify;
+    wire mem_read_enM, mem_write_enM;
 
     //datapath - cache
     wire inst_en            ;
@@ -156,9 +156,12 @@ module mycpu_top (
         .EntryLo1_to_cp0(EntryLo1_to_cp0),
         .Index_to_cp0(Index_to_cp0),
             //异常
-        .inst_tlb_refill(inst_tlb_refill), .inst_tlb_invalid(inst_tlb_invalid),
-        .data_find(data_find),
-        .data_V(data_V), .data_D(data_D),
+        .inst_tlb_refillF(inst_tlb_refill), .inst_tlb_invalidF(inst_tlb_invalid),
+        .data_tlb_refillM(data_tlb_refill),
+        .data_tlb_invalidM(data_tlb_invalid),
+        .data_tlb_modifyM(data_tlb_modify),
+        .mem_read_enM(mem_read_enM),
+        .mem_write_enM(mem_write_enM),
 
         //inst
         .pcF(pcF),
@@ -192,6 +195,10 @@ module mycpu_top (
         //datapath
         .inst_vaddr(pcF),
         .data_vaddr(data_addr),
+
+        .inst_en(inst_en),
+        .mem_read_enM(mem_read_enM),
+        .mem_write_enM(mem_write_enM),
         //cache
         .inst_paddr(pcF_paddr),
         .data_paddr(data_paddr),
@@ -200,8 +207,9 @@ module mycpu_top (
         //异常
         .inst_tlb_refill(inst_tlb_refill),
         .inst_tlb_invalid(inst_tlb_invalid),
-        .data_find(data_find),
-        .data_V(data_V), .data_D(data_D),
+        .data_tlb_refill(data_tlb_refill),
+        .data_tlb_invalid(data_tlb_invalid),
+        .data_tlb_modify(data_tlb_modify),
 
         //TLB指令
         .TLBP(TLBP),

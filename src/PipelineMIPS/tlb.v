@@ -4,15 +4,18 @@ module tlb (
     input clk, rst,
     input wire [31:0] inst_vaddr,
     input wire [31:0] data_vaddr,
+    input wire inst_en,
+    input wire mem_read_enM,
+    input wire mem_write_enM,
 
     output wire [31:0] inst_paddr,
     output wire [31:0] data_paddr,
     output wire no_cache_i,
     output wire no_cache_d,
+    
     //异常
     output wire inst_tlb_refill, inst_tlb_invalid,
-    output wire data_find,
-    output wire data_V, data_D,
+    output wire data_tlb_refill, data_tlb_invalid, data_tlb_modify,
 
     //TLB指令
 	input  wire        TLBP,
@@ -44,7 +47,7 @@ reg [31:0] TLB_EntryLo1 [`TLB_LINE_NUM-1:0];
 wire [`TLB_LINE_NUM-1: 0] i_find_mask, d_find_mask; 
 wire [`LOG2_TLB_LINE_NUM-1: 0] d_find_index;
 
-wire inst_find;
+wire inst_find, data_find;
 assign inst_find = |i_find_mask;
 assign data_find = |d_find_mask;
 
@@ -91,12 +94,17 @@ assign no_cache_d = data_kseg01 ? (data_vaddr[31:29] == 3'b101 ? 1'b1 : 1'b0) :
 
 //异常
     //取指TLB异常
-assign inst_tlb_refill  = ~inst_find;
-assign inst_tlb_invalid = inst_find & ~i_tlb_flag[`V_BIT];
+assign inst_tlb_refill  = inst_kseg01 ? 1'b0 : (inst_en & ~inst_find);
+assign inst_tlb_invalid = inst_kseg01 ? 1'b0 : (inst_en & inst_find & ~i_tlb_flag[`V_BIT]);
 
-    //在datapath的mem_ctrl中判断异常
+    //load/store TLB异常
+wire data_V, data_D;
 assign data_V = d_tlb_flag[`V_BIT];
 assign data_D = d_tlb_flag[`D_BIT];
+
+assign data_tlb_refill  = data_kseg01 ? 1'b0 : (mem_read_enM | mem_write_enM) & ~data_find;
+assign data_tlb_invalid = data_kseg01 ? 1'b0 : (mem_read_enM | mem_write_enM) & data_find & ~data_V;
+assign data_tlb_modify  = data_kseg01 ? 1'b0 : mem_write_enM & data_find & data_V & ~data_D;
 
 //TLB指令
 wire [`LOG2_TLB_LINE_NUM-1:0] index;

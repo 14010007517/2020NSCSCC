@@ -64,7 +64,7 @@ module exception(
 
    assign pc_exception = eretM ? cp0_epc : base + offset;
 
-   assign flush_exception =  (int) | (addrErrorLw | pcError | addrErrorSw) | (ri) | (break) | (overflow) | (eretM) | (syscall);
+   assign flush_exception =  (int) | (addrErrorLw | pcError | addrErrorSw) | (tlb_mod | tlb_tlbl | tlb_tlbs) | (ri) | (break) | (overflow) | (eretM) | (syscall);
 
    assign badvaddrM       =  (pcError | inst_tlb_invalid | inst_tlb_refill) ? pcM : alu_outM;
    
