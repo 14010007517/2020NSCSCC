@@ -11,11 +11,7 @@ module mem_ctrl(
     input wire [31:0] mem_rdataM,
     output wire [31:0] data_rdataM,
 
-    output wire addr_error_sw, addr_error_lw,
-
-    input wire data_find,
-    input wire data_V, data_D,
-    output wire data_tlb_refill, data_tlb_invalid, data_tlb_modify
+    output wire addr_error_sw, addr_error_lw
 );
     wire instr_lw, instr_lh, instr_lhu, instr_lb, instr_lbu, instr_sw, instr_sh, instr_sb;
     wire addr_W0, addr_B2, addr_B1, addr_B3;

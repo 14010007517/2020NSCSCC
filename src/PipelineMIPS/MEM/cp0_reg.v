@@ -22,7 +22,7 @@ module cp0_reg(
       input wire [31:0] badvaddr,         //最近一次导致发生地址错例外的虚地址(load/store, pc未对齐地址)
 
       // tlb处理
-      input wire [2:0] tlb_typeM,                 //tlb写cp0使能
+      input wire [3:0] tlb_typeM,                 //tlb写cp0使能
       input wire [31:0] entry_lo0_in,
       input wire [31:0] entry_lo1_in,
       input wire [31:0] page_mask_in,
@@ -64,8 +64,6 @@ module cp0_reg(
    //-------------------------------------------
 
    //cp0输出
-   wire [31:0] cp0_statusW, cp0_causeW, cp0_epcW;
-
    assign cp0_statusW   =  status_reg;
    assign cp0_causeW    =  cause_reg;
    assign cp0_epcW      =  epc_reg;
@@ -275,7 +273,7 @@ module cp0_reg(
             rdata = entry_lo1_reg;
          end
          `CP0_CONTEXT: begin
-            rdata <= context_reg;
+            rdata = context_reg;
          end
          `CP0_PAGE_MASK: begin
  				rdata = page_mask_reg;            

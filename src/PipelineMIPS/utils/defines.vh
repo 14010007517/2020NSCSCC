@@ -118,7 +118,7 @@
 `define EXC_CODE_TR         5'h0d
 
 `define EXC_CODE_ERET       5'hff   //自定义
-`define EXC_CODE_NOEXC      4'hee   //自定义
+`define EXC_CODE_NOEXC      5'hee   //自定义
 
 //CP0
 `define CP0_INDEX       5'd0
