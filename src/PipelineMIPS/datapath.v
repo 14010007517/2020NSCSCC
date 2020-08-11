@@ -659,11 +659,11 @@ module datapath (
         .rdata(cp0_data_oW),
 
         .tlb_typeM(tlb_typeM),
-        .entry_lo0_in(entry_lo0_to_cp0),
-        .entry_lo1_in(entry_lo1_to_cp0),
-        .page_mask_in(page_mask_to_cp0),
-        .entry_hi_in(entry_hi_to_cp0),
-        .index_in(index_to_cp0),
+        .entry_lo0_in(EntryLo0_to_cp0),
+        .entry_lo1_in(EntryLo1_to_cp0),
+        .page_mask_in(PageMask_to_cp0),
+        .entry_hi_in(EntryHi_to_cp0),
+        .index_in(Index_to_cp0),
 
         //异常处理
         .flush_exception(flush_exceptionM),
@@ -672,16 +672,17 @@ module datapath (
         .is_in_delayslot(is_in_delayslot_iM),
         .badvaddr(badvaddrM),
 
+        //CP0输出
         .cp0_statusW(cp0_statusW),
         .cp0_causeW(cp0_causeW),
         .cp0_epcW(cp0_epcW),
         .cp0_ebaseW(cp0_ebaseW),
 
-        .entry_hi_W(entry_hi_from_cp0),
-        .page_mask_W(page_mask_from_cp0),
-        .entry_lo0_W(entry_lo0_from_cp0), 
-        .entry_lo1_W(entry_lo1_from_cp0),
-        .index_W(index_from_cp0)
+        .entry_hi_W(EntryHi_from_cp0),
+        .page_mask_W(PageMask_from_cp0),
+        .entry_lo0_W(EntryLo0_from_cp0), 
+        .entry_lo1_W(EntryLo1_from_cp0),
+        .index_W(Index_from_cp0)
     );
 
     mux4 #(32) mux4_mem_forward(alu_outM, 0, hilo_oM, cp0_data_oW, {(hilo_to_regM | cp0_to_regM), (mem_to_regM | cp0_to_regM)}, resultM_without_rdata);

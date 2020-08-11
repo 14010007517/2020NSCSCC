@@ -109,22 +109,25 @@ module inst_ascii_decoder(
                     default : ascii<= " ";
                 endcase
             end
-            6'b010000: begin 
-                if(instr==`EXE_ERET) begin
-                    ascii<="ERET";
-                end else begin 
-                    case (instr[25:21])
-                        5'b00100: ascii<="MTOC0";
-                        5'b00000: ascii<="MFC0";
-                    endcase
-                end
+            `EXE_COP0: begin 
+                case(instr[5:0])
+                    `EXE_ERET: ascii<="ERET";
+                    `EXE_TLBP: ascii<="TLBP";
+                    `EXE_TLBR: ascii<="TLBR";
+                    `EXE_TLBWI: ascii<="TLBWI";
+                    default: begin
+                        case (instr[25:21])
+                            5'b00100: ascii<="MTOC0";
+                            5'b00000: ascii<="MFC0";
+                        endcase
+                    end
+                endcase
+                
             end
             default: ascii<= "N-R";
        endcase
-    if(instr==`EXE_ERET)
-        ascii<= "ERET";
-    if(!instr)
-        ascii<= "NOP";
+       if(!instr)
+            ascii<= "NOP";
     end
 
 endmodule

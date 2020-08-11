@@ -177,19 +177,51 @@ module cp0_reg(
          badvaddr_reg <= badvaddr;
    end
 
+   wire mtc0_index, mtc0_entry_lo0, mtc0_entry_lo1, mtc0_entry_hi, mtc0_page_mask;
+
+   assign mtc0_index = wen & (addr == 5'd0);
+   assign mtc0_entry_hi = wen & (addr == 5'd10);
+   assign mtc0_entry_lo0 = wen & (addr == 5'd2);
+   assign mtc0_entry_lo1 = wen & (addr == 5'd3);
+   assign mtc0_page_mask = wen & (addr == 5'd5);
+
    wire tlbr, tlbp, tlbwi;
    assign {tlbwi, tlbr, tlbp} = tlb_typeM;
+
    always@(posedge clk) begin
-      if(tlbr) begin
-         entry_lo0_reg  <= entry_lo0_in;
-         entry_lo1_reg  <= entry_lo1_in;
-         page_mask_reg  <= page_mask_in;
-         entry_hi_reg   <= entry_hi_in ;
+      if(rst) begin
+         index_reg <= 0;
+         entry_lo0_reg <= 0;
+         entry_lo1_reg <= 0;
+         entry_hi_reg <= 0;
+         page_mask_reg <= 0;
       end
-      if(tlbp) begin
-         index_reg      <= index_in; 
+      else begin
+         index_reg[31]              <= tlbp           ? index_in[31] : index_reg[31];
+
+         index_reg[`INDEX_BITS]     <= tlbp           ? index_in[`INDEX_BITS] :
+                                       mtc0_index     ? wdata[`INDEX_BITS] : index_reg[`INDEX_BITS];
+
+         entry_lo0_reg[`PFN_BITS]   <= tlbr           ? entry_lo0_in[`PFN_BITS] :
+                                       mtc0_entry_lo0 ? wdata[`PFN_BITS] : entry_lo0_reg[`PFN_BITS];
+         entry_lo0_reg[`FLAG_BITS]  <= tlbr           ? entry_lo0_in[`FLAG_BITS] :
+                                       mtc0_entry_lo0 ? wdata[`FLAG_BITS] : entry_lo0_reg[`FLAG_BITS];
+
+         entry_lo1_reg[`PFN_BITS]   <= tlbr           ? entry_lo1_in[`PFN_BITS] :
+                                       mtc0_entry_lo1 ? wdata[`PFN_BITS] : entry_lo1_reg[`PFN_BITS];
+         entry_lo1_reg[`FLAG_BITS]  <= tlbr           ? entry_lo1_in[`FLAG_BITS] :
+                                       mtc0_entry_lo1 ? wdata[`FLAG_BITS] : entry_lo1_reg[`FLAG_BITS];
+
+         entry_hi_reg[`VPN2_BITS]   <= tlbr           ? entry_hi_in[`VPN2_BITS] :
+                                       mtc0_entry_hi  ? wdata[`VPN2_BITS] : entry_hi_reg[`VPN2_BITS];
+         entry_hi_reg[`ASID_BITS]   <= tlbr           ? entry_hi_in[`ASID_BITS] :
+                                       mtc0_entry_hi  ? wdata[`ASID_BITS] : entry_hi_reg[`ASID_BITS];
+
+         page_mask_reg[`MASK_BITS]  <= tlbr           ? page_mask_in[`MASK_BITS] :
+                                       mtc0_page_mask ? wdata[`MASK_BITS] : page_mask_reg[`MASK_BITS];
       end
    end
+
 
    assign w_prid = (addr == 5'd15 && sel==3'b0);
    assign w_ebase = (addr == 5'd15 && sel==3'b1);
@@ -197,58 +229,58 @@ module cp0_reg(
    assign w_config1 = (addr == 5'd16 && sel==3'b1);
 
    //read
-   always @(addr, sel) begin
+   always @(*) begin
       case(addr)
          `CP0_INDEX    : begin
-            rdata <= index_reg;
+            rdata = index_reg;
          end
          `CP0_RANDOM   : begin
-            rdata <= random_reg;
+            rdata = random_reg;
          end
          `CP0_ENTRY_LO0: begin
-            rdata <= entry_lo0_reg;
+            rdata = entry_lo0_reg;
          end
          `CP0_ENTRY_LO1: begin
-            rdata <= entry_lo1_reg;
+            rdata = entry_lo1_reg;
          end
          `CP0_CONTEX   : begin
- 				rdata <= contex_reg;            
+ 				rdata = contex_reg;            
          end
          `CP0_PAGE_MASK: begin
- 				rdata <= page_mask_reg;            
+ 				rdata = page_mask_reg;            
          end
          `CP0_WIRED    : begin
- 				rdata <= wired_reg;            
+ 				rdata = wired_reg;            
          end
          `CP0_BADVADDR : begin
- 				rdata <= badvaddr_reg;            
+ 				rdata = badvaddr_reg;            
          end
          `CP0_COUNT    : begin
- 				rdata <= count_reg;            
+ 				rdata = count_reg;            
          end
          `CP0_ENTRY_HI : begin
- 				rdata <= entry_hi_reg;            
+ 				rdata = entry_hi_reg;            
          end
          `CP0_COMPARE  : begin
- 				rdata <= compare_reg;            
+ 				rdata = compare_reg;            
          end
          `CP0_STATUS   : begin
- 				rdata <= status_reg;            
+ 				rdata = status_reg;            
          end
          `CP0_CAUSE    : begin
- 				rdata <= cause_reg;            
+ 				rdata = cause_reg;            
          end
          `CP0_EPC      : begin
- 				rdata <= epc_reg;            
+ 				rdata = epc_reg;            
          end
          `CP0_PRID     : begin
- 				rdata <= (sel==3'b000) ? prid_reg : ebase_reg;            
+ 				rdata = (sel==3'b000) ? prid_reg : ebase_reg;            
          end
          `CP0_CONFIG   : begin
- 				rdata <= (sel==3'b000) ? config_reg : config1_reg;         
+ 				rdata = (sel==3'b000) ? config_reg : config1_reg;         
          end
          default:
-            rdata <= 32'b0;
+            rdata = 32'b0;
       endcase
    end
 endmodule

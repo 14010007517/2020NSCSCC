@@ -88,19 +88,19 @@
 `define EXE_TNEI 5'b01110
 
    
-// `define EXE_ERET 32'b01000010000000000000000000011000
-`define EXE_ERET 26'b10000000000000000000011000
-`define EXE_ERET_MFTC_TLB 6'b010000
-`define EXE_TLBR    6'b000001
-`define EXE_TLBP    6'b001000
-`define EXE_TLBWI   6'b000010
+`define EXE_COP0    6'b010000
+`define EXE_MTC0 5'b00100
+`define EXE_MFC0 5'b00000
 
+`define EXE_ERET    6'b011000
+`define EXE_TLBP    6'b001000
+`define EXE_TLBR    6'b000001
+`define EXE_TLBWI   6'b000010
 
 `define EXE_SYNC 6'b001111
 `define EXE_PREF 6'b110011
 
-`define EXE_MTC0 5'b00100
-`define EXE_MFC0 5'b00000
+
 
 //Exception code
 `define EXC_CODE_INT        5'h00
@@ -154,3 +154,27 @@
 `define IP1_IP0_BITS 9:8      //软件中断位
 `define IP7_IP2_BITS 15:10    //软件中断位
 `define EXC_CODE_BITS 6:2     //异常编码
+
+
+//TLB
+//TLB Config
+`define TLB_LINE_NUM 32
+`define TAG_WIDTH 20
+`define OFFSET_WIDTH 12
+`define LOG2_TLB_LINE_NUM 5
+
+`define INDEX_BITS `LOG2_TLB_LINE_NUM-1:0
+
+//EntryHi
+`define VPN2_BITS 31:13
+`define ASID_BITS 7:0
+//G bit in TLB entry
+`define G_BIT 12
+//PageMask
+`define MASK_BITS 24:13
+//EntryLo
+`define PFN_BITS 25:6
+`define FLAG_BITS 5:0
+`define V_BIT 1
+`define D_BIT 2
+`define C_BITS 5:3

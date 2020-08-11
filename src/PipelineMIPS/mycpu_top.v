@@ -188,6 +188,7 @@ module mycpu_top (
 
     //非简易的MMU
     tlb tlb0(
+        .clk(clk), .rst(rst),
         //datapath
         .inst_vaddr(pcF),
         .data_vaddr(data_addr),
