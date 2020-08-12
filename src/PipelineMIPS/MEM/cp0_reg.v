@@ -98,7 +98,6 @@ module cp0_reg(
          case (addr)
             `CP0_COMPARE: begin 
                compare_reg <= wdata;
-               timer_int <= 1'b0;
             end
             `CP0_EBASE: begin
                ebase_reg <= wdata;
@@ -119,8 +118,10 @@ module cp0_reg(
    end
 
    //timer int
+   wire compare_wen;
+   assign compare_wen = wen & (addr == `CP0_COMPARE);
    always @(posedge clk) begin
-      if(rst) begin
+      if(rst | compare_wen) begin
          timer_int <= 1'b0;
       end
       else begin
