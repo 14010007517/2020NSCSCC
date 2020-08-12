@@ -154,6 +154,7 @@ module mycpu_top (
         .EntryLo0_from_cp0(EntryLo0_from_cp0),
         .EntryLo1_from_cp0(EntryLo1_from_cp0),
         .Index_from_cp0(Index_from_cp0),
+        .Random_from_cp0(Random_from_cp0),
 
         .EntryHi_to_cp0(EntryHi_to_cp0),
         .PageMask_to_cp0(PageMask_to_cp0),
