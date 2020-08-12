@@ -662,7 +662,7 @@ module datapath (
         //mtc0 & mfc0
         .addr(rdM),
         .sel(instrM[2:0]),
-        .wen(cp0_wenM & ~stallW),
+        .wen(cp0_wenM & ~stallW & ~flush_exceptionM),
         .wdata(rt_valueM),
         .rdata(cp0_data_oW),
 

@@ -84,89 +84,103 @@ module cp0_reg(
    wire [31:0] pc_minus4;
    assign pc_minus4 = pcM - 4;
 
-   //always
+   // mtc0 (只与mtc0有关，与异常，tlb指令无关)
    always @(posedge clk) begin
       if(rst) begin
-         //cp0初始化
-         status_reg    <= `STATUS_INIT;  //BEV置为1
-         cause_reg     <= `CAUSE_INIT;
-         count_reg     <= 32'b0;
-
-         ebase_reg      <= 32'h8000_0000;
-
          config_reg     <= `CONFIG_INIT;
          config1_reg    <= `CONFIG1_INIT;
          prid_reg       <= `PRID_INIT;
+         ebase_reg      <= 32'h8000_0000;
 
          wired_reg      <= 32'b0;
+      end
+      else if(wen) begin
+         case (addr)
+            `CP0_COMPARE: begin 
+               compare_reg <= wdata;
+               timer_int <= 1'b0;
+            end
+            `CP0_EBASE: begin
+               ebase_reg <= wdata;
+            end
+            `CP0_CONFIG: begin   //不会写config1
+               config_reg[`K23_BITS] <= wdata[`K23_BITS];
+               config_reg[`KU_BITS ] <= wdata[`KU_BITS ];
+               config_reg[`K0_BITS ] <= wdata[`K0_BITS ];
+            end
+            `CP0_WIRED: begin
+               wired_reg[`WIRED_BITS] <= wdata[`WIRED_BITS];
+            end
+            default: begin
+               /**/
+            end
+         endcase
+      end
+   end
 
-         //other
-         interval_flag <= 1'b0;
+   //timer int
+   always @(posedge clk) begin
+      if(rst) begin
          timer_int <= 1'b0;
       end
       else begin
-         //计时器加1
-         interval_flag           <=~interval_flag;
-         count_reg               <= interval_flag ?
-                                    count_reg + 1 :
-                                    count_reg;
-         
+         //计时器中断
+         timer_int <= (compare_reg != 32'b0) && (count_reg == compare_reg) ? 1'b1 : 1'b0;
+      end
+   end
+
+//与异常有关
+   //status
+   wire status_wen;
+   assign status_wen = wen & (addr == `CP0_STATUS);
+
+   always @(posedge clk) begin
+      if(rst) begin
+         status_reg    <= `STATUS_INIT;  //BEV置为1
+      end
+      else if(flush_exception) begin
+         status_reg[`EXL_BIT] <= &except_type ? //eret
+                                 1'b0 : 1'b1;   
+      end
+      else if(status_wen) begin
+         status_reg[`IE_BIT] <= wdata[`IE_BIT];
+         status_reg[`EXL_BIT] <= wdata[`EXL_BIT];
+         status_reg[`IM7_IM0_BITS] <= wdata[`IM7_IM0_BITS];
+         status_reg[`BEV_BIT] <= wdata[`BEV_BIT];
+      end
+   end
+
+   //cause
+   wire cause_wen;
+   assign cause_wen = wen & (addr == `CP0_CAUSE);
+
+   always @(posedge clk) begin
+      if(rst) begin
+         cause_reg     <= `CAUSE_INIT;
+      end
+      else if(flush_exception) begin
+         cause_reg[`BD_BIT] <= is_in_delayslot;
+         cause_reg[`EXC_CODE_BITS] <= except_type;
+      end
+      else if(cause_wen) begin
+         cause_reg[`IP1_IP0_BITS] <= wdata[`IP1_IP0_BITS];  //软件中断
+      end
+      else begin
          //外部中断
          cause_reg[`IP7_IP2_BITS] <= ~stallW ? ext_int : 0;
+      end
+   end
 
-         //计时器中断
-         if(compare_reg != 32'b0 && count_reg == compare_reg) begin
-            timer_int <= 1'b1;
-         end
+   //epc
+   wire epc_wen;
+   assign epc_wen = wen & (addr == `CP0_EPC);
 
-         //异常处理
-         if(flush_exception) begin
-            if(&except_type) begin //eret
-               status_reg[`EXL_BIT] <= 1'b0;
-            end
-            else begin
-               epc_reg <= is_in_delayslot ? pc_minus4 : pcM;
-               cause_reg[`BD_BIT] <= is_in_delayslot;
-
-               status_reg[`EXL_BIT] <= 1'b1;
-               cause_reg[`EXC_CODE_BITS] <= except_type;
-            end
-         end
-         // mtc0
-         else if(wen) begin
-            case (addr)
-               `CP0_COUNT: begin
-                  count_reg <= wdata;
-               end
-               `CP0_STATUS: begin
-                  status_reg[`IE_BIT] <= wdata[`IE_BIT];
-                  status_reg[`EXL_BIT] <= wdata[`EXL_BIT];
-                  status_reg[`IM7_IM0_BITS] <= wdata[`IM7_IM0_BITS];
-                  status_reg[`BEV_BIT] <= wdata[`BEV_BIT];
-               end
-               `CP0_CAUSE: begin 
-                  cause_reg[`IP1_IP0_BITS] <= wdata[`IP1_IP0_BITS];  //软件中断
-               end
-               `CP0_EPC: begin
-                  epc_reg <= wdata;
-               end
-               `CP0_COMPARE: begin 
-                  compare_reg <= wdata;
-                  timer_int <= 1'b0;
-               end
-               `CP0_CONFIG: begin   //不会写config1
-                  config_reg[`K23_BITS] <= wdata[`K23_BITS];
-                  config_reg[`KU_BITS ] <= wdata[`KU_BITS ];
-                  config_reg[`K0_BITS ] <= wdata[`K0_BITS ];
-               end
-               `CP0_WIRED: begin
-                  wired_reg[`WIRED_BITS] <= wdata[`WIRED_BITS];
-               end
-               default: begin
-                  /**/
-               end
-            endcase
-         end
+   always @(posedge clk) begin
+      if(flush_exception) begin
+         epc_reg <= is_in_delayslot ? pc_minus4 : pcM;
+      end
+      else if(epc_wen) begin
+         epc_reg <= wdata;
       end
    end
 
@@ -179,6 +193,28 @@ module cp0_reg(
          badvaddr_reg <= badvaddr;
    end
 
+//自增
+   //count
+   always @(posedge clk) begin
+      interval_flag <= rst ? 1'b0 : ~interval_flag;
+   end
+
+   wire count_wen;
+   assign count_wen = wen & (addr == `CP0_COUNT);
+   always @(posedge clk) begin
+      if(rst) begin
+         count_reg     <= 32'b0;
+      end
+      else if(count_wen) begin
+         count_reg <= wdata;
+      end
+      else begin
+         //计时器加1
+         count_reg <= interval_flag ? count_reg + 1 : count_reg;
+      end
+   end
+
+//TLB
    //random: 在[wired_reg, tlb_line_num-1]之间循环
    wire wired_wen;
    assign wired_wen = wen & (addr == `CP0_WIRED);
@@ -223,17 +259,17 @@ module cp0_reg(
          index_reg[`INDEX_BITS]     <= tlbp           ? index_in[`INDEX_BITS] :
                                        mtc0_index     ? wdata[`INDEX_BITS] : index_reg[`INDEX_BITS];
 
-         entry_lo0_reg[`PFN_BITS]   <= tlbr           ? entry_lo0_in[`PFN_BITS] :
+         entry_lo0_reg[`PFN_BITS]   <= tlbr           ? entry_lo0_in[`PFN_BITS] & ~page_mask_in[`MASK_BITS]:
                                        mtc0_entry_lo0 ? wdata[`PFN_BITS] : entry_lo0_reg[`PFN_BITS];
          entry_lo0_reg[`FLAG_BITS]  <= tlbr           ? entry_lo0_in[`FLAG_BITS] :
                                        mtc0_entry_lo0 ? wdata[`FLAG_BITS] : entry_lo0_reg[`FLAG_BITS];
 
-         entry_lo1_reg[`PFN_BITS]   <= tlbr           ? entry_lo1_in[`PFN_BITS] :
+         entry_lo1_reg[`PFN_BITS]   <= tlbr           ? entry_lo1_in[`PFN_BITS] & ~page_mask_in[`MASK_BITS]:
                                        mtc0_entry_lo1 ? wdata[`PFN_BITS] : entry_lo1_reg[`PFN_BITS];
          entry_lo1_reg[`FLAG_BITS]  <= tlbr           ? entry_lo1_in[`FLAG_BITS] :
                                        mtc0_entry_lo1 ? wdata[`FLAG_BITS] : entry_lo1_reg[`FLAG_BITS];
 
-         entry_hi_reg[`VPN2_BITS]   <= tlbr           ? entry_hi_in[`VPN2_BITS] :
+         entry_hi_reg[`VPN2_BITS]   <= tlbr           ? entry_hi_in[`VPN2_BITS] & ~page_mask_in[`MASK_BITS]:
                                        mtc0_entry_hi  ? wdata[`VPN2_BITS] :
                                        tlb_exception  ? badvaddr[`VPN2_BITS] : entry_hi_reg[`VPN2_BITS];
          
@@ -254,7 +290,7 @@ module cp0_reg(
       else if(mtc0_context)
          context_reg[`PTE_BASE_BITS] <= context_reg[`PTE_BASE_BITS];
       else if(tlb_exception)
-         context_reg[`BAD_VPN2_BITS] <= badvaddr[`BAD_VPN2_BITS];
+         context_reg[`BAD_VPN2_BITS] <= badvaddr[`VPN2_BITS];  //vaddr[31:13] -> context[22:4]
    end
 
    //Read

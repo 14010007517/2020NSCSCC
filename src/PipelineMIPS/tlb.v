@@ -109,12 +109,11 @@ wire [`LOG2_TLB_LINE_NUM-1:0] index, random_index;
 assign random_index = Random_in[`LOG2_TLB_LINE_NUM-1:0];
 assign index = Index_in[`LOG2_TLB_LINE_NUM-1:0];
 
-assign EntryHi_out  = (TLBR) ? TLB_EntryHi [index] & 32'hffff_e0ff : 32'h0;
-assign PageMask_out = (TLBR) ? TLB_PageMask[index] : 32'h0;
-assign EntryLo0_out = (TLBR) ? TLB_EntryLo0[index] | {31'd0,TLB_EntryHi[index][`G_BIT]} : 32'h0; //如果TLB G位为1，则EntryLo的G位返回1
-assign EntryLo1_out = (TLBR) ? TLB_EntryLo1[index] | {31'd0,TLB_EntryHi[index][`G_BIT]} : 32'h0;
-assign Index_out    = (TLBP) ? (data_find ? d_find_index : {1'b1,Index_in[30:0]}) : 32'b0;
-
+assign PageMask_out = (TLBR) ? TLB_PageMask[index] : 32'b0;
+assign EntryHi_out  = (TLBR) ? TLB_EntryHi [index] : 32'b0;
+assign EntryLo0_out = (TLBR) ? {TLB_EntryLo0[index][31:1], TLB_EntryHi[index][`G_BIT]} : 32'b0; //如果TLB G位为1，则EntryLo的G位返回1
+assign EntryLo1_out = (TLBR) ? {TLB_EntryLo1[index][31:1], TLB_EntryHi[index][`G_BIT]} : 32'b0;
+assign Index_out    = (TLBP) ? (data_find ? d_find_index : 32'h8000_0000) : 32'b0;
     //TLBWI
 integer tt;
 always @(posedge clk)
