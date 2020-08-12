@@ -1,6 +1,10 @@
 module datapath (
     input wire clk, rst,
     input wire [5:0] ext_int,
+
+    //ila debug
+    output wire [31:0] ila_cp0_causeW, ila_cp0_statusW,
+    output wire ila_flush_exceptionM,
     
     //inst
     output wire [31:0] pcF,
@@ -214,6 +218,10 @@ module datapath (
     assign debug_wb_rf_wen      = {4{reg_write_enM & ~stallW & ~flush_exceptionM}};
     assign debug_wb_rf_wnum     = datapath.reg_writeM;
     assign debug_wb_rf_wdata    = datapath.resultM;
+
+    assign ila_cp0_causeW       = cp0_causeW;
+    assign ila_cp0_statusW      = cp0_statusW;
+    assign ila_flush_exceptionM = flush_exceptionM;
 //-------------------------------------------------------------------
 //模块实例化
     main_decoder main_decoder0(

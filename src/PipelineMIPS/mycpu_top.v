@@ -146,9 +146,34 @@ module mycpu_top (
     wire [19:0] inst_pfn, data_pfn;
 
 
+//--------------------debug---------------------
+    wire [31:0] cp0_statusW, cp0_causeW;
+    wire flush_exceptionM;
+    wire tlb_instr = TLBP|TLBR|TLBWI|TLBWR;
+    ila_0 ila_00 (
+        .clk(clk), // input wire clk
+
+        .probe0(pcF), // input wire [31:0]  probe0  
+        .probe1(
+            {pcF_paddr[31:12],
+            cp0_causeW[12], cp0_causeW[6:0],
+            cp0_statusW[22], cp0_statusW[12], cp0_statusW[1:0]}
+        ), // input wire [31:0]  probe1 
+        .probe2(data_rdata), // input wire [31:0]  probe2 
+        .probe3(data_wdata), // input wire [31:0]  probe3 
+        .probe4({flush_exceptionM, stallF, stallM, tlb_instr}) // input wire [3:0]  probe4
+    );
+//--------------------debug---------------------
+
     datapath datapath(
         .clk(clk), .rst(rst),
         .ext_int(ext_int),
+
+        //debug
+        .ila_cp0_causeW(cp0_causeW),
+        .ila_cp0_statusW(cp0_statusW),
+        .ila_flush_exceptionM(flush_exceptionM),
+
 
         //TLB
         .TLBP(TLBP),
