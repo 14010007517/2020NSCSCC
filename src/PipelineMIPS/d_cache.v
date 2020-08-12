@@ -1,6 +1,9 @@
 module d_cache (
     input wire clk, rst,
 
+    //ila debug
+    output wire ila_hit,
+
     //cache指令
     input wire [6:0] cacheM,
     input wire [6:0] cacheE,
@@ -172,6 +175,7 @@ module d_cache (
     assign cache_hit_dirty = hit & dirty_bits_way[sel][index];
 
     //-------------------debug-----------------
+    assign ila_hit = hit;
     //-------------------debug-----------------
 //FSM
     reg [1:0] state;

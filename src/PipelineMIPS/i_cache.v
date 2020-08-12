@@ -1,6 +1,9 @@
 module i_cache (
     input wire clk, rst,
     
+    //ila debug
+    output wire ila_hit,
+
     //cache指令
     input wire [6:0] cacheE,
     input wire [6:0] cacheM,
@@ -131,6 +134,7 @@ module i_cache (
     assign HitInvalid = cacheM[4];
     assign HitInvalidE = cacheE[4];
     //-------------debug-------------
+    assign ila_hit = hit;
     //-------------debug-------------
 
 //FSM

@@ -1,5 +1,10 @@
 module arbitrater (
     input wire clk, rst,
+
+    //ila debug
+    output wire ila_ar_sel,
+    output wire ila_r_sel,
+
     //I CACHE
     input wire [31:0] i_araddr,
     input wire [3:0] i_arlen,
@@ -144,4 +149,10 @@ module arbitrater (
     assign d_awready = awready;
     assign d_wready  = wready;
     assign d_bvalid  = bvalid;
+
+
+    //-------------------debug-------------------
+    assign ila_ar_sel = ar_sel;
+    assign ila_r_sel = r_sel;
+    //-------------------debug-------------------
 endmodule

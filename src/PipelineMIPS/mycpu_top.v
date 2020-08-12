@@ -146,9 +146,41 @@ module mycpu_top (
     wire [19:0] inst_pfn, data_pfn;
 
 
+//--------------------debug---------------------
+    wire [31:0] cp0_statusW, cp0_causeW;
+    wire ila_ar_sel, ila_r_sel;
+    wire ila_hit_i, ila_hit_d;
+    wire flush_exceptionM;
+    wire tlb_instr = TLBP|TLBR|TLBWI|TLBWR;
+    ila_0 ila_00 (
+        .clk(clk), // input wire clk
+
+        .probe0(pcF), // input wire [31:0]  probe0  
+        .probe1(
+            {pcF_paddr[31:12],  //20
+            cp0_causeW[6:2], //5
+            cp0_statusW[22], cp0_statusW[1:0], //3
+            ila_ar_sel, //4
+            ila_r_sel,   
+            ila_hit_i,
+            ila_hit_d
+            }
+        ), // input wire [31:0]  probe1 
+        .probe2(araddr), // input wire [31:0]  probe2 
+        .probe3(rdata), // input wire [31:0]  probe3 
+        .probe4({flush_exceptionM, stallF, stallM, tlb_instr}) // input wire [3:0]  probe4
+    );
+//--------------------debug---------------------
+
     datapath datapath(
         .clk(clk), .rst(rst),
         .ext_int(ext_int),
+
+        //debug
+        .ila_cp0_causeW(cp0_causeW),
+        .ila_cp0_statusW(cp0_statusW),
+        .ila_flush_exceptionM(flush_exceptionM),
+
 
         //TLB
         .TLBP(TLBP),
@@ -253,6 +285,9 @@ module mycpu_top (
     i_cache i_cache(
         .clk(clk), .rst(rst),
 
+        //ila_debug
+        .ila_hit(ila_hit_i),
+
         //cache指令
         .cacheE(cacheE),
         .cacheM(cacheM),
@@ -286,6 +321,9 @@ module mycpu_top (
 
     d_cache d_cache(
         .clk(clk), .rst(rst),
+
+        //ila_debug
+        .ila_hit(ila_hit_d),
 
         //cache指令
         .cacheM(cacheM),
@@ -340,6 +378,10 @@ module mycpu_top (
     arbitrater arbitrater0(
         .clk(clk), 
         .rst(rst),
+
+        //ila debug
+        .ila_ar_sel(ila_ar_sel),
+        .ila_ar_sel(ila_r_sel),
     //I CACHE
         .i_araddr          (i_araddr ),
         .i_arlen           (i_arlen  ),
