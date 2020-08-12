@@ -95,6 +95,7 @@ module mycpu_top (
     wire [31:0] data_rdata  ;
     wire [3:0] data_wen     ;
     wire [31:0] data_wdata  ;
+    wire [2:0] load_type    ;
     wire d_cache_stall      ;
     wire [31:0] mem_addrE   ;
     wire mem_read_enE       ;
@@ -114,6 +115,7 @@ module mycpu_top (
     //d_cache - arbitrater
     wire [31:0] d_araddr    ;
     wire [3:0] d_arlen      ;
+    wire [2:0] d_arsize     ;
     wire d_arvalid          ;
     wire d_arready          ;
 
@@ -182,6 +184,7 @@ module mycpu_top (
         .mem_rdataM(data_rdata),
         .mem_wenM(data_wen),
         .mem_wdataM(data_wdata),
+        .load_type(load_type),
         .mem_addrE(mem_addrE),
         .mem_read_enE(mem_read_enE),
         .mem_write_enE(mem_write_enE),
@@ -276,6 +279,7 @@ module mycpu_top (
         .data_rdata(data_rdata),
         .data_wen(data_wen),
         .data_wdata(data_wdata),
+        .load_type(load_type),
         .stall(d_cache_stall),
         .mem_addrE(mem_addrE),      //datapath E阶段，未经tlb转换
         .mem_read_enE(mem_read_enE),
@@ -285,6 +289,7 @@ module mycpu_top (
         //arbitrater
         .araddr          (d_araddr ),
         .arlen           (d_arlen  ),
+        .arsize          (d_arsize ),
         .arvalid         (d_arvalid),
         .arready         (d_arready),
 
@@ -326,6 +331,7 @@ module mycpu_top (
     //D CACHE
         .d_araddr          (d_araddr ),
         .d_arlen           (d_arlen  ),
+        .d_arsize          (d_arsize ),
         .d_arvalid         (d_arvalid),
         .d_arready         (d_arready),
 

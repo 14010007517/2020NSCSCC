@@ -10,6 +10,7 @@ module d_cache (
     output wire [31:0] data_rdata,
     input wire [3:0] data_wen,
     input wire [31:0] data_wdata,
+    input wire [2:0] load_type,    //lw, lh, lb
     output wire stall,
     input wire [31:0] mem_addrE,
     input wire mem_read_enE,
@@ -19,6 +20,7 @@ module d_cache (
     //arbitrater
     output wire [31:0] araddr,
     output wire [3:0] arlen,
+    output wire [2:0] arsize,
     output wire arvalid,
     input wire arready,
 
@@ -234,6 +236,10 @@ module d_cache (
     //read
     assign araddr = ~no_cache ? {tag, index}<<OFFSET_WIDTH: data_paddr; //将offset清0
     assign arlen = ~no_cache ? BLOCK_NUM-1 : 4'd0;
+    assign arsize = ~no_cache ? 3'b010 :
+                    load_type[0] ? 3'b000 : //lb
+                    load_type[1] ? 3'b001 : 3'b010; //lh, lw
+
     assign arvalid = read_req & ~raddr_rcv;
     assign rready = raddr_rcv;
     //write

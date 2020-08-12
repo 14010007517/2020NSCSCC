@@ -14,6 +14,7 @@ module arbitrater (
     //D CACHE
     input wire [31:0] d_araddr,
     input wire [3:0] d_arlen,
+    input wire [2:0] d_arsize,
     input wire d_arvalid,
     output wire d_arready,
 
@@ -80,7 +81,6 @@ module arbitrater (
 );
 
     wire ar_sel;     //0-> i_cache, 1-> d_cache
-    // reg [1:0] r_sel;      //2'b00-> no, 2'b01-> i_cache, 2'b10-> d_cache
 
     reg [31:0] i_rdata_r, d_rdata_r;
 
@@ -88,47 +88,18 @@ module arbitrater (
     assign ar_sel = ~i_arvalid & d_arvalid ? 1'b1 : 1'b0;   //优先i_cache
 
     //r
-    // always @(posedge clk) begin
-    //     if(rvalid && rid==4'b0000) begin
-    //         r_sel <= 2'b01;
-    //         i_rdata_r <= rdata;
-    //     end
-    //     else if(rvalid && rid==4'b0001) begin
-    //         r_sel <= 2'b10;
-    //         d_rdata_r <= rdata;
-    //     end
-    //     else if(~rvalid) begin
-    //         r_sel <= 2'b00;
-    //         i_rdata_r <= rst ? 32'b0 : i_rdata_r;
-    //         d_rdata_r <= rst ? 32'b0 : d_rdata_r;
-    //     end
-    // end
-
-    // reg data_read_finish, inst_read_finish;
-    // always @(posedge clk) begin
-    //     inst_read_finish <= rst                                      ? 1'b0:
-    //                         rid==4'b0000 && rvalid && rready && rlast ? 1'b1 : 1'b0;
-    //     data_read_finish <= rst                                      ? 1'b0:
-    //                         rid==4'b0001 && rvalid && rready && rlast ? 1'b1 : 1'b0;
-    // end
     wire r_sel;     //0-> i_cache, 1-> d_cache
     assign r_sel = rid[0];
 
     //I CACHE
     assign i_arready = arready & ~ar_sel;
 
-    // assign i_rdata = i_rdata_r;
-    // assign i_rlast = rlast && (r_sel==2'b01) && !inst_read_finish ? 1'b1 : 1'b0;
-    // assign i_rvalid = rvalid && (r_sel==2'b01) && !inst_read_finish ? 1'b1 : 1'b0;
     assign i_rdata = ~r_sel ? rdata : 32'b0;
     assign i_rlast = ~r_sel ? rlast : 1'b0;
     assign i_rvalid = ~r_sel ? rvalid : 1'b0;
     //D CACHE
     assign d_arready = arready & ar_sel;
 
-    // assign d_rdata = d_rdata_r;
-    // assign d_rlast = rlast && (r_sel==2'b10) && !data_read_finish ? 1'b1 : 1'b0;
-    // assign d_rvalid = rvalid && (r_sel==2'b10) && !data_read_finish ? 1'b1 : 1'b0;
     assign d_rdata = r_sel ? rdata : 32'b0;
     assign d_rlast = r_sel ? rlast : 1'b0;
     assign d_rvalid = r_sel ? rvalid : 1'b0;
@@ -137,7 +108,7 @@ module arbitrater (
     assign arid = {3'b0, ar_sel};
     assign araddr = ar_sel ? d_araddr : i_araddr;
     assign arlen = ar_sel ? d_arlen : i_arlen;
-    assign arsize  = 2'b10;         //读一个字
+    assign arsize  = ar_sel ? d_arsize : 2'b10;         //读一个字
     assign arburst = 2'b10;         //Incrementing burst
     assign arlock  = 2'd0;
     assign arcache = 4'd0;

@@ -16,6 +16,7 @@ module datapath (
     input wire [31:0] mem_rdataM,   //读数据
     output wire [3:0] mem_wenM,     //写使能
     output wire [31:0] mem_wdataM,  //写数据
+    output wire [2:0] load_type,
     output wire [31:0] mem_addrE,
     output wire mem_read_enE,
     output wire mem_write_enE,
@@ -599,7 +600,7 @@ module datapath (
 //MEM
     assign mem_addrM = alu_outM;
     assign mem_enM = (mem_read_enM | mem_write_enM) & ~flush_exceptionM;
-
+    assign load_type = {l_s_typeM[7:6], l_s_typeM[4]};  //lw, lh, lb
     // 是否需要控制 mem_en
     mem_ctrl mem_ctrl0(
         .l_s_typeM(l_s_typeM),
