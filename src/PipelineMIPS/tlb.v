@@ -153,6 +153,14 @@ wire [`LOG2_TLB_LINE_NUM-1: 0] index1, index2;
 assign index1 = find_index1;
 assign index2 = TLBR ? Index_in[`INDEX_BITS] : find_index2_r;
 
+wire [31:0] EntryLo0_read1;
+wire [31:0] EntryLo1_read1;
+
+wire [31:0] EntryHi_read2;
+wire [31:0] PageMask_read2;
+wire [31:0] EntryLo0_read2;
+wire [31:0] EntryLo1_read2;
+
 assign EntryLo0_read1 = TLB_EntryLo0[index1];
 assign EntryLo1_read1 = TLB_EntryLo1[index1];
 
@@ -203,7 +211,7 @@ assign data_oddE = data_vaddr[`OFFSET_WIDTH];
 
 wire data_kseg01E;
 reg data_kseg01M;
-wire data_kseg1E
+wire data_kseg1E;
 reg data_kseg1M;
 assign data_kseg01E = data_vaddr[31:30]==2'b10 ? 1'b1 : 1'b0;
 assign data_kseg1E = data_vaddr[31:29]==3'b101 ? 1'b1 : 1'b0;
@@ -216,6 +224,7 @@ assign data_vpnE = data_vaddr[31:`OFFSET_WIDTH];
 assign data_pfn = data_kseg01M? {3'b0, data_vpnM[`TAG_WIDTH-4:0]} :
                  ~data_oddM   ? EntryLo0_read2[`PFN_BITS] : EntryLo1_read2[`PFN_BITS];
 
+wire [5:0] data_flag;
 assign data_flag = ~data_oddM ? EntryLo0_read2[`FLAG_BITS] : EntryLo1_read2[`FLAG_BITS];
 
 assign no_cache_d = data_kseg01M ? (data_kseg1M ? 1'b1 : 1'b0) :
@@ -235,6 +244,7 @@ assign inst_vpn = inst_vaddr[31:`OFFSET_WIDTH];
 assign inst_pfn = inst_kseg01? {3'b0, inst_vpn[`TAG_WIDTH-4:0]} :
                  ~inst_odd   ? EntryLo0_read1[`PFN_BITS] : EntryLo1_read1[`PFN_BITS];
 
+wire [5:0] inst_flag;
 assign inst_flag = ~inst_odd ? EntryLo0_read1[`FLAG_BITS] : EntryLo1_read1[`FLAG_BITS];
 
 assign no_cache_i = inst_kseg01 ? (inst_kseg1 ? 1'b1 : 1'b0) :
