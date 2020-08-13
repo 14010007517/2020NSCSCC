@@ -39,7 +39,7 @@ module i_cache (
     wire [OFFSET_WIDTH-3 : 0] offset;   //字偏移
 
     wire [31:0] inst_paddr;
-    assign inst_paddr = {inst_pfn, index, offset};
+    assign inst_paddr = {inst_pfn, inst_vaddr[INDEX_WIDTH+OFFSET_WIDTH-1 : 0]};
     
     assign tag        = inst_pfn;
     assign index      = inst_vaddr[INDEX_WIDTH+OFFSET_WIDTH-1 : OFFSET_WIDTH             ];

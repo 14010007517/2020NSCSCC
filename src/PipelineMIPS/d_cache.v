@@ -58,7 +58,7 @@ module d_cache (
     wire [INDEX_WIDTH-1  : 0] index, indexE;
     wire [OFFSET_WIDTH-3 : 0] offset; //字偏移
     wire [31:0] data_paddr;
-    assign data_paddr = {data_pfn, index, offset};
+    assign data_paddr = {data_pfn, data_vaddr[INDEX_WIDTH+OFFSET_WIDTH-1 :0]};
 
     // assign tag      = data_paddr[31                         : INDEX_WIDTH+OFFSET_WIDTH ];
     assign tag      = data_pfn                                                          ;

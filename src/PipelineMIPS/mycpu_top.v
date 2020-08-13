@@ -207,7 +207,7 @@ module mycpu_top (
         .stallM(stallM), .flushM(flushM),
         //datapath
         .inst_vaddr(pcF),
-        .data_vaddr(data_addr),
+        .data_vaddr(mem_addrE),
 
         .inst_en(inst_en_tmp),
         .mem_read_enM(mem_read_enM), .mem_write_enM(mem_write_enM),
