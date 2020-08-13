@@ -603,7 +603,7 @@ module datapath (
 //MEM
     assign mem_addrM = alu_outM;
     assign mem_enM = (mem_read_enM | mem_write_enM) & ~flush_exceptionM;
-    assign load_type = {l_s_typeM[7:6], l_s_typeM[4]};  //lw, lh, lb
+    assign load_type = {l_s_typeM[7], l_s_typeM[6]|l_s_typeM[5], l_s_typeM[4]|l_s_typeM[3]};  //lw, lh(u), lb(u)
     // 是否需要控制 mem_en
     mem_ctrl mem_ctrl0(
         .l_s_typeM(l_s_typeM),

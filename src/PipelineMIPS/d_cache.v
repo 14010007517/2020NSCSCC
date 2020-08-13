@@ -11,7 +11,7 @@ module d_cache (
     output wire [31:0] data_rdata,
     input wire [3:0] data_wen,
     input wire [31:0] data_wdata,
-    input wire [2:0] load_type,    //lw, lh, lb
+    input wire [2:0] load_type,    //lw, lh(u), lb(u)
     output wire stall,
     input wire [31:0] mem_addrE,
     input wire mem_read_enE,
