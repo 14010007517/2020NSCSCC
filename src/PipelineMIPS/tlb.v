@@ -62,8 +62,10 @@ assign vaddr1 = inst_vaddr;
 assign vaddr2 = TLBP ? EntryHi_in : data_vaddr;
 
 wire [`TLB_LINE_NUM-1: 0] find_mask1, find_mask2;
-wire [`LOG2_TLB_LINE_NUM-1:0] find_index1, find_index2, find_index2_r;
-wire find1, find2, find2_r;
+wire [`LOG2_TLB_LINE_NUM-1:0] find_index1, find_index2;
+reg [`LOG2_TLB_LINE_NUM-1:0] find_index2_r;
+wire find1, find2;
+reg find2_r;
 assign find1 = |find_mask1;
 assign find2 = |find_mask2;
 
@@ -195,15 +197,19 @@ end
 
 //--------------------------output---------------------------------
 /*data地址映射*/
-wire data_oddE, data_oddM;
+wire data_oddE; 
+reg data_oddM;
 assign data_oddE = data_vaddr[`OFFSET_WIDTH];
 
-wire data_kseg01E, data_kseg01M;
-wire data_kseg1E, data_kseg1M;
+wire data_kseg01E;
+reg data_kseg01M;
+wire data_kseg1E
+reg data_kseg1M;
 assign data_kseg01E = data_vaddr[31:30]==2'b10 ? 1'b1 : 1'b0;
 assign data_kseg1E = data_vaddr[31:29]==3'b101 ? 1'b1 : 1'b0;
 
-wire data_vpnE, data_vpnM;
+wire [`TAG_WIDTH-1:0] data_vpnE;
+reg [`TAG_WIDTH-1:0] data_vpnM;
 assign data_vpnE = data_vaddr[31:`OFFSET_WIDTH];
 
 //M阶段的data的物理页号
@@ -223,15 +229,15 @@ wire inst_kseg01, inst_kseg1;
 assign inst_kseg01 = inst_vaddr[31:30]==2'b10 ? 1'b1 : 1'b0;
 assign inst_kseg1 = inst_vaddr[31:29]==3'b101 ? 1'b1 : 1'b0;
 
-wire inst_vpn;
+wire [`TAG_WIDTH-1:0] inst_vpn;
 assign inst_vpn = inst_vaddr[31:`OFFSET_WIDTH];
 
-assign inst_pfn = inst_kseg01M? {3'b0, inst_vpn[`TAG_WIDTH-4:0]} :
-                 ~inst_oddM   ? EntryLo0_read1[`PFN_BITS] : EntryLo1_read1[`PFN_BITS];
+assign inst_pfn = inst_kseg01? {3'b0, inst_vpn[`TAG_WIDTH-4:0]} :
+                 ~inst_odd   ? EntryLo0_read1[`PFN_BITS] : EntryLo1_read1[`PFN_BITS];
 
-assign inst_flag = ~inst_oddM ? EntryLo0_read1[`FLAG_BITS] : EntryLo1_read1[`FLAG_BITS];
+assign inst_flag = ~inst_odd ? EntryLo0_read1[`FLAG_BITS] : EntryLo1_read1[`FLAG_BITS];
 
-assign no_cache_i = inst_kseg01M ? (inst_kseg1M ? 1'b1 : 1'b0) :
+assign no_cache_i = inst_kseg01 ? (inst_kseg1 ? 1'b1 : 1'b0) :
                     inst_flag[`C_BITS]==3'b010 ? 1'b1 : 1'b0;
 
 /*TLB指令*/
