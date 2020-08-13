@@ -109,6 +109,7 @@ module datapath (
     wire actual_takeE;
     wire [4:0] branch_judge_controlE;
     wire inst_tlb_refillE, inst_tlb_invalidE;
+    wire [31:0] adder_resultE;
 //MEM
     wire [31:0] pcM;
     wire [31:0] alu_outM;
@@ -488,10 +489,11 @@ module datapath (
         .div_stallE(div_stallE),
         .mult_stallE(mult_stallE),
         .alu_outE(alu_outE),
-        .overflowE(overflowE)
+        .overflowE(overflowE),
+        .adder_result(adder_resultE)
     );
 
-    assign mem_addrE = alu_outE[31:0];
+    assign mem_addrE = adder_resultE;
 
     //mux write reg
     mux4 #(5) mux4_reg_dst(rdE, rtE, 5'd31, 5'b0, reg_dstE, reg_writeE);

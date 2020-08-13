@@ -16,7 +16,8 @@ module alu (
     output wire div_stallE,
     output wire mult_stallE,
     output wire [63:0] alu_outE,
-    output wire overflowE
+    output wire overflowE,
+    output wire [31:0] adder_result
 );
     wire [63:0] alu_out_div, alu_out_mult;
     wire mult_sign;
@@ -104,7 +105,6 @@ module alu (
     wire [31:0] adder_a;
     wire [31:0] adder_b;
     wire        adder_cin;
-    wire [31:0] adder_result;
     wire        adder_cout;
     wire [63:0] sr64_sa_result, sr64_result;
 
