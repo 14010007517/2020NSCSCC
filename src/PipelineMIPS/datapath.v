@@ -24,6 +24,7 @@ module datapath (
     output wire stallM,
 
     // TLB
+    output wire flushM,
     output wire TLBP,
     output wire TLBR,
     output wire TLBWI,
@@ -198,7 +199,7 @@ module datapath (
 
 // hazard
     wire stallD, stallE, stallW;
-    wire flushF, flushD, flushE, flushM, flushW;
+    wire flushF, flushD, flushE, flushW;
     wire [1:0] forward_aE, forward_bE;
 
 //--------------------debug---------------------

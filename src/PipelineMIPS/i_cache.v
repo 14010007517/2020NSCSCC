@@ -6,7 +6,8 @@ module i_cache (
     //datapath
     input wire inst_en,
     input wire [31:0] inst_vaddr,
-    input wire [31:0] inst_paddr,
+    // input wire [31:0] inst_paddr,
+    input wire [19:0] inst_pfn,
     output wire [31:0] inst_rdata,
     input wire [31:0] pc_next,
     output wire stall,
@@ -37,7 +38,10 @@ module i_cache (
     wire [INDEX_WIDTH-1  : 0] index, index_next;
     wire [OFFSET_WIDTH-3 : 0] offset;   //字偏移
 
-    assign tag        = inst_paddr[31                         : INDEX_WIDTH+OFFSET_WIDTH ];
+    wire [31:0] inst_paddr;
+    assign inst_paddr = {inst_pfn, index, offset};
+    
+    assign tag        = inst_pfn;
     assign index      = inst_vaddr[INDEX_WIDTH+OFFSET_WIDTH-1 : OFFSET_WIDTH             ];
     assign index_next = pc_next   [INDEX_WIDTH+OFFSET_WIDTH-1 : OFFSET_WIDTH             ];
     assign offset     = inst_vaddr[OFFSET_WIDTH-1             : 2                        ];

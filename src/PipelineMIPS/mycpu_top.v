@@ -60,6 +60,7 @@ module mycpu_top (
     wire [31:0] data_paddr;
     wire no_cache_i;
     wire no_cache_d;
+    wire flushM;
         //TLB指令
 	wire TLBP;
 	wire TLBR;
@@ -140,6 +141,8 @@ module mycpu_top (
     wire d_bready           ;
 
     wire inst_en_tmp;
+    wire [19:0] inst_pfn, data_pfn;
+
 
     datapath datapath(
         .clk(clk), .rst(rst),
@@ -201,6 +204,7 @@ module mycpu_top (
     //非简易的MMU
     tlb tlb0(
         .clk(clk), .rst(rst),
+        .stallM(stallM), .flushM(flushM),
         //datapath
         .inst_vaddr(pcF),
         .data_vaddr(data_addr),
@@ -208,8 +212,11 @@ module mycpu_top (
         .inst_en(inst_en_tmp),
         .mem_read_enM(mem_read_enM), .mem_write_enM(mem_write_enM),
         //cache
-        .inst_paddr(pcF_paddr),
-        .data_paddr(data_paddr),
+        
+        // .inst_paddr(pcF_paddr),
+        // .data_paddr(data_paddr),
+        .inst_pfn(inst_pfn),
+        .data_pfn(data_pfn),
         .no_cache_i(no_cache_i),
         .no_cache_d(no_cache_d),
         //异常
@@ -248,7 +255,8 @@ module mycpu_top (
         //datapath
         .inst_en(inst_en),
         .inst_vaddr(pcF),           //
-        .inst_paddr(pcF_paddr),     //
+        // .inst_paddr(pcF_paddr),     //
+        .inst_pfn(inst_pfn),
         .inst_rdata(inst_rdata),
         .pc_next(pc_next),          //
         .stall(i_cache_stall),
@@ -275,7 +283,8 @@ module mycpu_top (
         //datapath
         .data_en(data_en),
         .data_vaddr(data_addr),     //datapath M阶段，未经tlb转换
-        .data_paddr(data_paddr),    //datapath M阶段，经过tlb转换
+        .data_pfn(data_pfn),        //datapath M阶段，经过tlb转换
+        // .data_paddr(data_paddr),    //datapath M阶段，经过tlb转换
         .data_rdata(data_rdata),
         .data_wen(data_wen),
         .data_wdata(data_wdata),

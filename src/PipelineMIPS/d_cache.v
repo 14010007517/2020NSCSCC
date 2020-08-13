@@ -6,7 +6,8 @@ module d_cache (
     //datapath
     input wire data_en,
     input wire [31:0] data_vaddr,
-    input wire [31:0] data_paddr,
+    // input wire [31:0] data_paddr,
+    input wire [19:0] data_pfn,
     output wire [31:0] data_rdata,
     input wire [3:0] data_wen,
     input wire [31:0] data_wdata,
@@ -56,8 +57,11 @@ module d_cache (
     wire [TAG_WIDTH-1    : 0] tag;
     wire [INDEX_WIDTH-1  : 0] index, indexE;
     wire [OFFSET_WIDTH-3 : 0] offset; //字偏移
+    wire [31:0] data_paddr;
+    assign data_paddr = {data_pfn, index, offset};
 
-    assign tag      = data_paddr[31                         : INDEX_WIDTH+OFFSET_WIDTH ];
+    // assign tag      = data_paddr[31                         : INDEX_WIDTH+OFFSET_WIDTH ];
+    assign tag      = data_pfn                                                          ;
     assign index    = data_vaddr[INDEX_WIDTH+OFFSET_WIDTH-1 : OFFSET_WIDTH             ];    
     assign indexE   = mem_addrE [INDEX_WIDTH+OFFSET_WIDTH-1 : OFFSET_WIDTH             ];
     assign offset   = data_vaddr[OFFSET_WIDTH-1             : 2                        ];
