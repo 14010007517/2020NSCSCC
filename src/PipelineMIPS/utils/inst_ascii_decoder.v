@@ -102,7 +102,7 @@ module inst_ascii_decoder(
             `EXE_SW: ascii<= "SW";
             `EXE_LL: ascii<= "LL";
             `EXE_SC: ascii<= "SC";
-            `EXE_BRANCHS: begin 
+            `EXE_REGIMM: begin 
                 case (instr[20:16])
                     `EXE_BGEZ: ascii<= "BGEZ";
                     `EXE_BGEZAL: ascii<= "BGEZAL";

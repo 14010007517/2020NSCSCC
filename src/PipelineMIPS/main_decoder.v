@@ -112,6 +112,10 @@ module main_decoder(
 						regfile_ctrl  =  4'b1_10_0;	//先不考虑jalr rs, rd的情况，即默认跳转31号寄存器；
 						mem_ctrl  =  3'b0;
 					end
+					`EXE_TEQ ,`EXE_TNE ,`EXE_TGE ,`EXE_TGEU,`EXE_TLT ,`EXE_TLTU: begin
+						regfile_ctrl  =  4'b0_00_0;
+						mem_ctrl = 3'b0;
+					end
 					default: begin
 						riD  =  1'b1;
 						regfile_ctrl  =  4'b1_00_0;
@@ -135,14 +139,18 @@ module main_decoder(
 				mem_ctrl  =  3'b0;
 			end
 
-			`EXE_BRANCHS: begin
-				case(rt[4:1])
-					4'b1000: begin
+			`EXE_REGIMM: begin
+				case(rt)
+					`EXE_BGTZAL, `EXE_BLTZAL: begin
 						regfile_ctrl  =  4'b1_10_0;
 						mem_ctrl  =  3'b0;
 					end
-					4'b0000: begin
+					`EXE_BGTZ, `EXE_BLTZ: begin
 						regfile_ctrl  =  4'b0_00_0;
+						mem_ctrl  =  3'b0;
+					end
+					`EXE_TEQI, `EXE_TNEI, `EXE_TGEI, `EXE_TGEI, `EXE_TLTI, `EXE_TLTIU: begin
+						regfile_ctrl  =  4'b0_00_1;
 						mem_ctrl  =  3'b0;
 					end
 					default:begin

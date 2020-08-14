@@ -70,7 +70,7 @@ module alu_decoder(
 			`EXE_ORI: alu_controlD <= `ALU_OR;
 				//memory
 			// `EXE_LW, `EXE_LB, `EXE_LBU, `EXE_LH, `EXE_LHU, `EXE_SW, `EXE_SB, `EXE_SH,
-			// `EXE_LL:
+			// `EXE_LL, `EXE_LWL, `EXELWR, `EXESWL, `EXESWR:
 			// 			alu_controlD <= `ALU_ADDU;
 			`EXE_SC:	alu_controlD <= `ALU_SC;
 
@@ -94,15 +94,33 @@ module alu_decoder(
             //     alu_controlD <= `ALU_LEZ;
             // `EXE_BNE:
             //     alu_controlD <= `ALU_NEQ;
-            // `EXE_BRANCHS:   //bltz, bltzal, bgez, bgezal
-            //     case(rt)
-            //         `EXE_BLTZ, `EXE_BLTZAL:      
-            //             alu_controlD <= `ALU_LTZ;
-            //         `EXE_BGEZ, `EXE_BGEZAL: 
-            //             alu_controlD <= `ALU_GEZ;
-            //         default:
-            //             alu_controlD <= `ALU_DONOTHING; 
-            //     endcase	
+            `EXE_REGIMM:   //bltz, bltzal, bgez, bgezal
+                case(rt)
+                    // `EXE_BLTZ, `EXE_BLTZAL:      
+                    //     alu_controlD <= `ALU_LTZ;
+                    // `EXE_BGEZ, `EXE_BGEZAL: 
+                    //     alu_controlD <= `ALU_GEZ;
+					`EXE_TEQI, `EXE_TEQ: begin
+						alu_controlD <= `ALU_TEQ;
+					end
+					`EXE_TNEI, `EXE_TNE: begin
+						alu_controlD <= `ALU_TNE;
+					end
+					`EXE_TGEI, `EXE_TGEI: begin
+						alu_controlD <= `ALU_TGE;
+					end
+					`EXE_TGEIU, `EXE_TGEU: begin
+						alu_controlD <= `ALU_TGEU;
+					end
+					`EXE_TLTI, `EXE_TLT: begin
+						alu_controlD <= `ALU_TLT;
+					end
+					`EXE_TLTIU, `EXE_TLTU: begin
+						alu_controlD <= `ALU_TLTU;
+					end
+                    default:
+                        alu_controlD <= `ALU_DONOTHING; 
+                endcase	
 			//J type
 			// `EXE_J:		alu_controlD <= `ALU_DONOTHING;
 			// `EXE_JAL:	alu_controlD <= `ALU_DONOTHING;
@@ -122,7 +140,7 @@ module alu_decoder(
                 branch_judge_controlD <= `ALU_LEZ;
             `EXE_BNE:
                 branch_judge_controlD <= `ALU_NEQ;
-            `EXE_BRANCHS:   //bltz, bltzal, bgez, bgezal
+            `EXE_REGIMM:   //bltz, bltzal, bgez, bgezal
                 case(rt)
                     `EXE_BLTZ, `EXE_BLTZAL:      
                         branch_judge_controlD <= `ALU_LTZ;

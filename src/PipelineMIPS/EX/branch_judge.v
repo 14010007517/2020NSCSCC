@@ -4,9 +4,10 @@ module branch_judge (
 
     output reg actual_takeE
 );
+    
     always @(*) begin
         case(branch_judge_controlE)
-            `ALU_EQ:        actual_takeE = ~(|(src_aE ^ src_bE));
+            `ALU_EQ:        actual_takeE = !(src_aE ^ src_bE);
             `ALU_NEQ:       actual_takeE = |(src_aE ^ src_bE);
             `ALU_GTZ:       actual_takeE = ~src_aE[31] & (|src_aE);
             `ALU_GEZ:       actual_takeE = ~src_aE[31];
