@@ -141,11 +141,11 @@ module main_decoder(
 
 			`EXE_REGIMM: begin
 				case(rt)
-					`EXE_BGTZAL, `EXE_BLTZAL: begin
+					`EXE_BGEZAL, `EXE_BLTZAL: begin
 						regfile_ctrl  =  4'b1_10_0;
 						mem_ctrl  =  3'b0;
 					end
-					`EXE_BGTZ, `EXE_BLTZ: begin
+					`EXE_BGEZ, `EXE_BLTZ: begin
 						regfile_ctrl  =  4'b0_00_0;
 						mem_ctrl  =  3'b0;
 					end

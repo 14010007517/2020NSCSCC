@@ -119,6 +119,13 @@ module alu (
 
     assign alu_sc = !(alu_controlE ^ `ALU_SC);
 
+    assign alu_teq       = !(alu_controlE ^ `ALU_TEQ);
+    assign alu_tne       = !(alu_controlE ^ `ALU_TNE);
+    assign alu_tge       = !(alu_controlE ^ `ALU_TGE);
+    assign alu_tgeu      = !(alu_controlE ^ `ALU_TGEU);
+    assign alu_tlt       = !(alu_controlE ^ `ALU_TLT);
+    assign alu_tltu      = !(alu_controlE ^ `ALU_TLTU);
+
     assign and_result    = src_aE & src_bE;
     assign or_result     = src_aE | src_bE;
     assign nor_result    = ~or_result;
@@ -208,8 +215,8 @@ module alu (
                     
                     |   ({32{alu_donothing}} & donothing_result);
 
-    assign trap_resultE =    alu_teq  & !(adder_result ^ 0)
-                        |   alu_tne  &  (adder_result ^ 0) 
+    assign trap_resultE =   alu_teq  & !(adder_result ^ 0)
+                        |   alu_tne  & |(adder_result ^ 0) 
                         |   alu_tge  &  ~slt_result[0] 
                         |   alu_tgeu &  ~sltu_result[0] 
                         |   alu_tlt  &  slt_result[0] 

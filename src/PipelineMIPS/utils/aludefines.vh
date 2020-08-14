@@ -40,4 +40,9 @@
 `define ALU_MSUB_MULT       6'b10_0100
 `define ALU_MSUBU_MULT      6'b10_0101
 `define ALU_SC              6'b10_0110
-
+`define ALU_TEQ             6'b10_0111
+`define ALU_TGE             6'b10_1000
+`define ALU_TGEU            6'b10_1001
+`define ALU_TLT             6'b10_1010
+`define ALU_TLTU            6'b10_1011
+`define ALU_TNE             6'b10_1100

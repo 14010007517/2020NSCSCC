@@ -60,7 +60,7 @@ module alu_decoder(
 
 					`EXE_TEQ: 		alu_controlD <= `ALU_TEQ;
 					`EXE_TNE: 		alu_controlD <= `ALU_TNE;
-					`EXE_TGEI: 		alu_controlD <= `ALU_TGE;
+					`EXE_TGE: 		alu_controlD <= `ALU_TGE;
 					`EXE_TGEU: 		alu_controlD <= `ALU_TGEU;
 					`EXE_TLT: 		alu_controlD <= `ALU_TLT;
 					`EXE_TLTU: 		alu_controlD <= `ALU_TLTU;

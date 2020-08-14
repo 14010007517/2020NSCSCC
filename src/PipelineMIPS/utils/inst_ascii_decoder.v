@@ -72,6 +72,13 @@ module inst_ascii_decoder(
                         `EXE_SYSCALL: ascii<= "SYSC";
                         `EXE_BREAK: ascii<= "BREAK";
                         `EXE_SYNC: ascii<= "SYNC";
+
+                        `EXE_TEQ:  ascii<= "TEQ";
+                        `EXE_TNE:  ascii<= "TNE";
+                        `EXE_TGE:  ascii<= "TGE";
+                        `EXE_TGEU:  ascii<= "TGEU";
+                        `EXE_TLT:  ascii<= "TLT";
+                        `EXE_TLTU: ascii<= "TLTU";
                     endcase
                 end
             `EXE_ANDI: ascii<= "ANDI";
@@ -102,13 +109,23 @@ module inst_ascii_decoder(
             `EXE_SW: ascii<= "SW";
             `EXE_LL: ascii<= "LL";
             `EXE_SC: ascii<= "SC";
+            `EXE_LWL: ascii<= "LWL";
+            `EXE_LWR: ascii<= "LWR";
+            `EXE_SWL: ascii<= "SWL";
+            `EXE_SWR: ascii<= "SWR";
+            
             `EXE_REGIMM: begin 
                 case (instr[20:16])
                     `EXE_BGEZ: ascii<= "BGEZ";
                     `EXE_BGEZAL: ascii<= "BGEZAL";
                     `EXE_BLTZ: ascii<= "BLTZ";
                     `EXE_BLTZAL: ascii<= "BLTZAL";
-                    default : ascii<= " ";
+                    `EXE_TEQI:  ascii<= "TEQI";
+                    `EXE_TNEI:  ascii<= "TNEI";
+                    `EXE_TGEI:  ascii<= "TGEIU";
+                    `EXE_TGEIU:  ascii<= "TGEI";
+                    `EXE_TLTI:  ascii<= "TLTI";
+                    `EXE_TLTIU: ascii<= "TLTIU";
                 endcase
             end
             `EXE_COP0: begin 
