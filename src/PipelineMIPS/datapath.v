@@ -167,7 +167,7 @@ module datapath (
 
     wire [31:0] cp0_statusW, cp0_causeW, cp0_epcW, cp0_ebaseW, cp0_data_oW;
     
-    wire [9:0] l_s_typeD, l_s_typeE, l_s_typeM;
+    wire [13:0] l_s_typeD, l_s_typeE, l_s_typeM;
     wire [3:0] addr_typeD, addr_typeE, addr_typeM;
     wire mult_stallE;
     wire is_multD;

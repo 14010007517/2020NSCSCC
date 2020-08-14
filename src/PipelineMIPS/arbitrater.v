@@ -116,9 +116,6 @@ module arbitrater (
     assign arvalid = ar_sel ? d_arvalid : i_arvalid;
                         //         
     //r
-    // assign rready = r_sel==2'b01 ? i_rready :
-    //                 r_sel==2'b10 ? d_rready :
-    //                 1'b0;
     assign rready = ~r_sel ? i_rready : d_rready;
                         //            
 

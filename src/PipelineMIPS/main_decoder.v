@@ -7,7 +7,7 @@ module main_decoder(
     //ID
     output wire sign_extD,          //立即数是否为符号扩展
 	output wire is_divD, is_multD,			//是否为除法指令
-	output wire [9:0] l_s_typeD,
+	output wire [13:0] l_s_typeD,
 	output wire [1:0] mfhi_loD,
     //EX
     output wire [1:0] reg_dstD,     	//写寄存器选择  00-> rd, 01-> rt, 10-> 写$ra
@@ -154,11 +154,13 @@ module main_decoder(
 			end
 			
 	// 访存指令
-			`EXE_LW, `EXE_LB, `EXE_LBU, `EXE_LH, `EXE_LHU, `EXE_LL: begin
+			`EXE_LW, `EXE_LB, `EXE_LBU, `EXE_LH, `EXE_LHU, `EXE_LL,
+			`EXE_LWL, `EXE_LWR: begin
 				regfile_ctrl  =  4'b1_01_1;
 				mem_ctrl  =  3'b1_1_0;
 			end
-			`EXE_SW, `EXE_SB, `EXE_SH: begin
+			`EXE_SW, `EXE_SB, `EXE_SH,
+			`EXE_SWL, `EXE_SWR: begin
 				regfile_ctrl  =  4'b0_00_1;
 				mem_ctrl  =  3'b0_0_1;
 			end
@@ -227,8 +229,8 @@ module main_decoder(
 	end
 
 //  lw, sw
-	wire instr_lw, instr_lh, instr_lhu, instr_lb, instr_lbu, instr_sw, instr_sh, instr_sb;
-	assign l_s_typeD = {instr_ll, instr_sc, instr_lw, instr_lh, instr_lhu, instr_lb, instr_lbu, instr_sw, instr_sh, instr_sb};
+	wire instr_lwl, instr_lwr, instr_swl, instr_swr, instr_ll, instr_sc, instr_lw, instr_lh, instr_lhu, instr_lb, instr_lbu, instr_sw, instr_sh, instr_sb;
+	assign l_s_typeD = {instr_lwl, instr_lwr, instr_swl, instr_swr, instr_ll, instr_sc, instr_lw, instr_lh, instr_lhu, instr_lb, instr_lbu, instr_sw, instr_sh, instr_sb};
 
 	assign instr_lw 	= !(op_code ^ `EXE_LW);
     assign instr_lb 	= !(op_code ^ `EXE_LB);
@@ -238,7 +240,12 @@ module main_decoder(
     assign instr_sw 	= !(op_code ^ `EXE_SW); 
     assign instr_sh 	= !(op_code ^ `EXE_SH);
     assign instr_sb 	= !(op_code ^ `EXE_SB);
+
 	assign instr_ll 	= !(op_code ^ `EXE_LL);
 	assign instr_sc 	= !(op_code ^ `EXE_SC);
-
+	
+	assign instr_lwl	= !(op_code ^ `EXE_LWL);
+	assign instr_lwr	= !(op_code ^ `EXE_LWR);
+	assign instr_swl	= !(op_code ^ `EXE_SWL);
+	assign instr_swr	= !(op_code ^ `EXE_SWR);
 endmodule

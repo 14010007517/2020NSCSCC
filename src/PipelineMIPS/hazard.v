@@ -4,7 +4,7 @@ module hazard (
     input wire d_cache_stall,
     input wire div_stallE,
     input wire mult_stallE,
-    input wire [9:0] l_s_typeE,
+    input wire [13:0] l_s_typeE,
 
     input wire flush_jump_confilctE, flush_pred_failedM, flush_exceptionM,
 
@@ -24,7 +24,7 @@ module hazard (
                         rtE != 0 && reg_write_enW && (rtE == reg_writeW) ? 2'b10 :
                         2'b00;
     wire stall_ltypeD; // 将lw读出的数据，在mem阶段不进行前推；若产生冲突： ID：add； EXE：lw，则暂停一个周期，产生一个空泡，在wb阶段前推
-    assign stall_ltypeD = (|(l_s_typeE[7:3]) | l_s_typeE[9]) & ((rsD != 0 && reg_write_enE && (rsD == reg_writeE)) || 
+    assign stall_ltypeD = (|(l_s_typeE[7:3]) | l_s_typeE[9] | (|l_s_typeE[13:12])) & ((rsD != 0 && reg_write_enE && (rsD == reg_writeE)) || 
                                                (rtD != 0 && reg_write_enE && (rtD == reg_writeE))
                                               ) & ~flush_exceptionM & ~flush_pred_failedM; //若M阶段产生分支预测失败，则D阶段指令无需执行，故不用暂停
     
