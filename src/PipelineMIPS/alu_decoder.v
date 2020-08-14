@@ -65,6 +65,7 @@ module alu_decoder(
 					`EXE_TLT: 		alu_controlD <= `ALU_TLT;
 					`EXE_TLTU: 		alu_controlD <= `ALU_TLTU;
 					
+					// `EXE_MOVN, `EXE_MOVZ
 					default:    	alu_controlD <= `ALU_DONOTHING;
 				endcase
 			//I type

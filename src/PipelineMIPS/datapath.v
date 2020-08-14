@@ -80,6 +80,7 @@ module datapath (
     wire [4:0] branch_judge_controlD;
     wire is_divD;
     wire inst_tlb_refillD, inst_tlb_invalidD;
+    wire movzD, movnD, movzE, movnE;
 //EX
     wire [31:0] pcE;
     wire [31:0] rd1E, rd2E, mem_wdataE;
@@ -237,7 +238,9 @@ module datapath (
         .eretD(eretD),
         .cp0_wenD(cp0_wenD),
         .cp0_to_regD(cp0_to_regD),
-        .tlb_typeD(tlb_typeD)
+        .tlb_typeD(tlb_typeD),
+        .movnD(movnD),
+        .movzD(movzD)
     );
     alu_decoder alu_decoder0(
         .instrD(instrD),
@@ -432,6 +435,8 @@ module datapath (
         .tlb_typeD(tlb_typeD),
         .inst_tlb_refillD(inst_tlb_refillD),
         .inst_tlb_invalidD(inst_tlb_invalidD),
+        .movnD(movnD),
+        .movzD(movzD),
 
         
         .alu_imm_selD(alu_imm_selD),
@@ -480,7 +485,9 @@ module datapath (
         .cp0_to_regE(cp0_to_regE),
         .tlb_typeE(tlb_typeE),
         .inst_tlb_refillE(inst_tlb_refillE),
-        .inst_tlb_invalidE(inst_tlb_invalidE)
+        .inst_tlb_invalidE(inst_tlb_invalidE),
+        .movnE(movnE),
+        .movzE(movzE)
     );
 //EX
     alu alu0(
@@ -578,7 +585,7 @@ module datapath (
 
         .mem_read_enE(mem_read_enE),	
         .mem_write_enE(mem_write_enE),
-        .reg_write_enE(reg_write_enE), 
+        .reg_write_enE(reg_write_enE & ~(movnE & rt_valueE == 0 | movzE & rt_valueE != 0), 
         .mem_to_regE(mem_to_regE), 	
         .hilo_to_regE(hilo_to_regE),	
         .riE(riE),			

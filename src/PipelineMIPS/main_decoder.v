@@ -22,7 +22,8 @@ module main_decoder(
 	output wire breakD, syscallD, eretD, 
 	output wire cp0_wenD,
 	output wire cp0_to_regD,
-	output wire [3:0] tlb_typeD
+	output wire [3:0] tlb_typeD,
+	output wire movzD, movnD
     //WB
 );
 // declare
@@ -86,6 +87,9 @@ module main_decoder(
 	assign maddu	= !(op_code ^ `EXE_SEPECIAL2) & !(funct ^ `EXE_MADDU);
 	assign msub		= !(op_code ^ `EXE_SEPECIAL2) & !(funct ^ `EXE_MSUB	);
 	assign msubu	= !(op_code ^ `EXE_SEPECIAL2) & !(funct ^ `EXE_MSUBU);
+	
+	assign movzD 	= !(op_code ^ `EXE_R_TYPE) 	& !(funct ^ `EXE_MOVZ);
+	assign movnD 	= !(op_code ^ `EXE_R_TYPE) 	& !(funct ^ `EXE_MOVN);
 
 	always @(*) begin
 		riD = 1'b0;
@@ -96,7 +100,8 @@ module main_decoder(
 					`EXE_ADD,`EXE_ADDU,`EXE_SUB,`EXE_SUBU,`EXE_SLTU,`EXE_SLT ,
 					`EXE_AND,`EXE_NOR, `EXE_OR, `EXE_XOR,
 					`EXE_SLLV, `EXE_SLL, `EXE_SRAV, `EXE_SRA, `EXE_SRLV, `EXE_SRL,
-					`EXE_MFHI, `EXE_MFLO: begin
+					`EXE_MFHI, `EXE_MFLO,
+					`EXE_MOVZ, `EXE_MOVN: begin
 						regfile_ctrl 	 =  4'b1_00_0;
 						mem_ctrl 		 =  3'b0;
 					end
