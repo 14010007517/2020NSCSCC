@@ -204,7 +204,7 @@
 `define CONFIG1_INIT 32'hbe53_2980  //1 011111 001 010 011 001 010 011 000000 0
 
 //prid (read only)
-`define PRID_INIT 32'h004c_0102;
+`define PRID_INIT  32'h00004220;
 
 //TLB
 //TLB Config
