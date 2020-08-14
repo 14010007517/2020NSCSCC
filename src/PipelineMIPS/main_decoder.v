@@ -146,11 +146,20 @@ module main_decoder(
 
 			`EXE_REGIMM: begin
 				case(rt)
+<<<<<<< Updated upstream
 					`EXE_BGEZAL, `EXE_BLTZAL: begin
 						regfile_ctrl  =  4'b1_10_0;
 						mem_ctrl  =  3'b0;
 					end
 					`EXE_BGEZ, `EXE_BLTZ: begin
+=======
+					`EXE_BGTZAL, `EXE_BLTZAL, `EXE_BGEZALL, `EXE_BLTZALL: begin
+						regfile_ctrl  =  4'b1_10_0;
+						mem_ctrl  =  3'b0;
+					end
+					`EXE_BGTZ, `EXE_BLTZ,
+					`EXE_BGEZL, `EXE_BLTZL : begin
+>>>>>>> Stashed changes
 						regfile_ctrl  =  4'b0_00_0;
 						mem_ctrl  =  3'b0;
 					end
@@ -229,7 +238,8 @@ module main_decoder(
 				endcase
 			end
 
-			`EXE_CACHE, `EXE_PREF: begin
+			`EXE_CACHE, `EXE_PREF,
+ 			`EXE_BEQL, `EXE_BGTZL, `EXE_BLEZL, `EXE_BNEL:begin
 				regfile_ctrl  =  4'b0;
 				mem_ctrl  =  3'b0;
 			end

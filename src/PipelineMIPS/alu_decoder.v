@@ -129,19 +129,19 @@ module alu_decoder(
 	// branch_judge控制信号
 	always @(*) begin
 		case(op_code)
-			`EXE_BEQ:
+			`EXE_BEQ, `EXE_BEQL:
                 branch_judge_controlD <= `ALU_EQ;
-            `EXE_BGTZ:
+            `EXE_BGTZ, `EXE_BGTZL:
                 branch_judge_controlD <= `ALU_GTZ;
-            `EXE_BLEZ:   
+            `EXE_BLEZ, `EXE_BLEZL:   
                 branch_judge_controlD <= `ALU_LEZ;
-            `EXE_BNE:
+            `EXE_BNE, `EXE_BNEL:
                 branch_judge_controlD <= `ALU_NEQ;
             `EXE_REGIMM:   //bltz, bltzal, bgez, bgezal
                 case(rt)
-                    `EXE_BLTZ, `EXE_BLTZAL:      
+                    `EXE_BLTZ, `EXE_BLTZAL, `EXE_BLTZALL, `EXE_BLTZL:      
                         branch_judge_controlD <= `ALU_LTZ;
-                    `EXE_BGEZ, `EXE_BGEZAL: 
+                    `EXE_BGEZ, `EXE_BGEZAL, `EXE_BGEZALL, `EXE_BGEZL: 
                         branch_judge_controlD <= `ALU_GEZ;
                     default:
                         branch_judge_controlD <= `ALU_DONOTHING; 

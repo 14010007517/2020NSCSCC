@@ -7,6 +7,7 @@ module hazard (
     input wire [13:0] l_s_typeE,
 
     input wire flush_jump_confilctE, flush_pred_failedM, flush_exceptionM,
+    input wire branchL_M,
 
     input wire [4:0] rsE, rsD,
     input wire [4:0] rtE, rtD,
@@ -42,6 +43,6 @@ module hazard (
     assign flushF = 1'b0;
     assign flushD = flush_exceptionM;
     assign flushE = flush_exceptionM | (flush_pred_failedM & ~longest_stall) | (stall_ltypeD & ~longest_stall);     
-    assign flushM = flush_exceptionM;
+    assign flushM = flush_exceptionM | (flush_pred_failedM & branchL_M);
     assign flushW = 1'b0;
 endmodule

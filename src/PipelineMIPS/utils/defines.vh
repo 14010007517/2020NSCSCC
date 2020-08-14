@@ -52,10 +52,20 @@
 `define EXE_BGTZ    6'b000111
 `define EXE_BNE     6'b000101
 `define EXE_BLEZ    6'b000110
+`define EXE_BEQL    6'b010100
+`define EXE_BGTZL   6'b010111
+`define EXE_BLEZL   6'b010110
+`define EXE_BNEL    6'b010101
+
 `define EXE_BLTZ    5'b00000
 `define EXE_BLTZAL  5'b10000
 `define EXE_BGEZAL  5'b10001
 `define EXE_BGEZ    5'b00001
+`define EXE_BGEZALL 5'b10011
+`define EXE_BGEZL   5'b00011
+`define EXE_BLTZALL 5'b10010
+`define EXE_BLTZL   5'b00010
+
 //load/store
 `define EXE_LB      6'b100000
 `define EXE_LBU     6'b100100
