@@ -13,7 +13,7 @@ module ex_mem (
     input wire is_in_delayslot_iE,
     input wire [4:0] rdE,
     input wire actual_takeE,
-    input wire [7:0] l_s_typeE,
+    input wire [9:0] l_s_typeE,
     input wire [1:0] mfhi_loE,
     input wire mem_read_enE, 	
     input wire mem_write_enE,    
@@ -28,6 +28,7 @@ module ex_mem (
     input wire cp0_to_regE, 
     input wire [3:0] tlb_typeE, 	
     input wire inst_tlb_refillE, inst_tlb_invalidE,
+    input wire [31:0] mem_addrE,
 
     output reg [31:0] pcM,
     output reg [31:0] alu_outM,
@@ -41,7 +42,7 @@ module ex_mem (
     output reg is_in_delayslot_iM,
     output reg [4:0] rdM,
     output reg actual_takeM,
-    output reg [7:0] l_s_typeM,
+    output reg [9:0] l_s_typeM,
     output reg [1:0] mfhi_loM,
     output reg mem_read_enM,	
     output reg mem_write_enM,
@@ -55,7 +56,8 @@ module ex_mem (
     output reg cp0_wenM,		
     output reg cp0_to_regM,
     output reg [3:0] tlb_typeM,
-    output reg inst_tlb_refillM, inst_tlb_invalidM
+    output reg inst_tlb_refillM, inst_tlb_invalidM,
+    output reg [31:0] mem_addrM
 );
 
     always @(posedge clk) begin
@@ -88,6 +90,7 @@ module ex_mem (
             tlb_typeM               <=              0;
             inst_tlb_refillM        <=              0;
             inst_tlb_invalidM       <=              0;
+            mem_addrM               <=              0;
         end
         else if(~stallM) begin
             pcM                     <=      pcE                 ;
@@ -118,6 +121,7 @@ module ex_mem (
             tlb_typeM               <=      tlb_typeE           ;
             inst_tlb_refillM        <=      inst_tlb_refillE    ;
             inst_tlb_invalidM       <=      inst_tlb_invalidE   ;
+            mem_addrM               <=      mem_addrE           ;
         end
     end
 endmodule

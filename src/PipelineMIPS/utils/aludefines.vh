@@ -39,4 +39,5 @@
 `define ALU_MADDU_MULT      6'b10_0011
 `define ALU_MSUB_MULT       6'b10_0100
 `define ALU_MSUBU_MULT      6'b10_0101
+`define ALU_SC              6'b10_0110
 

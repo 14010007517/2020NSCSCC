@@ -12,6 +12,7 @@ module alu (
     input wire stallD,
     input wire is_divD,
     input wire is_multD,
+    input wire LLbit,
 
     output wire div_stallE,
     output wire mult_stallE,
@@ -52,6 +53,7 @@ module alu (
 
     wire alu_clo, alu_clz;
     wire alu_madd, alu_maddu, alu_msub, alu_msubu, alu_madd_msub;
+    wire alu_sc;
 
     wire [31:0] and_result          ;
     wire [31:0] or_result           ;
@@ -75,9 +77,10 @@ module alu (
     wire [31:0] donothing_result    ;
 
     wire [31:0] clzo_result         ;
+    wire [31:0] sc_result           ;
 
     wire [63:0] madd_result         ; //madd, maddu
-    wire [63:0] msub_result        ; //msub, msubu
+    wire [63:0] msub_result         ; //msub, msubu
     wire [63:0] madd_sub_result     ;
 
     assign alu_and       = !(alu_controlE ^ `ALU_AND      );
@@ -111,6 +114,8 @@ module alu (
 
     assign alu_mthi = !(alu_controlE ^ `ALU_MTHI);
     assign alu_mtlo = !(alu_controlE ^ `ALU_MTLO);
+
+    assign alu_sc = !(alu_controlE ^ `ALU_SC);
 
     assign and_result    = src_aE & src_bE;
     assign or_result     = src_aE | src_bE;
@@ -170,6 +175,7 @@ module alu (
                 clzo_a[ 4] ? 27 : clzo_a[ 3] ? 28 : clzo_a[ 2] ? 29 : 
                 clzo_a[ 1] ? 30 : clzo_a[ 0] ? 31 : 32;
     
+    assign sc_result = {31'b0, LLbit};
     assign madd_result = hilo + alu_out_mult;
     assign msub_result = hilo - alu_out_mult;
     assign madd_sub_result = alu_madd | alu_maddu ? madd_result : msub_result;
@@ -187,12 +193,13 @@ module alu (
                     
                     ({32{alu_sll        }} & sll_result     )       |
                     ({32{alu_sll_sa     }} & sll_sa_result  )       |
-                    ({32{alu_sra    | alu_srl    }} & sr_result      )       |
-                    ({32{alu_sra_sa | alu_srl_sa }} & sr_sa_result   )       |
+                    ({32{alu_sra    | alu_srl    }} & sr_result      )|
+                    ({32{alu_sra_sa | alu_srl_sa }} & sr_sa_result   )|
                     
                     ({32{alu_lui        }} & lui_result)            |
                     ({32{alu_clo | alu_clz}} & clzo_result)         |
-                    ({32{alu_donothing  }} & donothing_result)      ;
+                    ({32{alu_sc         }} & sc_result)                      |
+                    ({32{alu_donothing}} & donothing_result);
 
     //divide
 	assign div_sign = (alu_controlE == `ALU_SIGNED_DIV);

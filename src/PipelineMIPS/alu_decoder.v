@@ -69,8 +69,10 @@ module alu_decoder(
 			`EXE_LUI: 	alu_controlD <= `ALU_LUI;
 			`EXE_ORI: alu_controlD <= `ALU_OR;
 				//memory
-			`EXE_LW, `EXE_LB, `EXE_LBU, `EXE_LH, `EXE_LHU, `EXE_SW, `EXE_SB, `EXE_SH:
+			`EXE_LW, `EXE_LB, `EXE_LBU, `EXE_LH, `EXE_LHU, `EXE_SW, `EXE_SB, `EXE_SH,
+			`EXE_LL:
 						alu_controlD <= `ALU_ADDU;
+			`EXE_SC:	alu_controlD <= `ALU_SC;
 
 			`EXE_SEPECIAL2:
 				case(funct)

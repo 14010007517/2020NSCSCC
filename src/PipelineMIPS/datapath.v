@@ -110,6 +110,7 @@ module datapath (
     wire [4:0] branch_judge_controlE;
     wire inst_tlb_refillE, inst_tlb_invalidE;
     wire [31:0] adder_resultE;
+    wire llE, scE, LLbit;
 //MEM
     wire [31:0] pcM;
     wire [31:0] alu_outM;
@@ -156,6 +157,7 @@ module datapath (
     wire cp0_wenM;
     wire [31:0] rt_valueM;
     wire inst_tlb_refillM, inst_tlb_invalidM;
+    wire scM;
 //WB
     wire [31:0] pcW;
     wire reg_write_enW;
@@ -165,7 +167,7 @@ module datapath (
 
     wire [31:0] cp0_statusW, cp0_causeW, cp0_epcW, cp0_ebaseW, cp0_data_oW;
     
-    wire [7:0] l_s_typeD, l_s_typeE, l_s_typeM;
+    wire [9:0] l_s_typeD, l_s_typeE, l_s_typeM;
     wire [3:0] addr_typeD, addr_typeE, addr_typeM;
     wire mult_stallE;
     wire is_multD;
@@ -369,6 +371,14 @@ module datapath (
         .rd1(rd1D), .rd2(rd2D)
     );
 
+    LLbit LLbit0(
+		.clk(clk),
+		.rst(rst),
+		.flush(flush_exceptionM),
+        .llE(llE),  //ll在E阶段写
+		.LLbit(LLbit)
+    );
+
     branch_predict branch_predict0(
         .clk(clk), .rst(rst),
         .instrD(instrD),
@@ -485,6 +495,7 @@ module datapath (
         .stallD(stallD),
         .is_divD(is_divD),
         .is_multD(is_multD),
+        .LLbit(LLbit),
 
         .div_stallE(div_stallE),
         .mult_stallE(mult_stallE),
@@ -532,6 +543,10 @@ module datapath (
     //jump
     assign pc_jumpE = rs_valueE;
     assign flush_jump_confilctE = jump_conflictE;
+
+    //LL, SC
+    assign llE = l_s_typeE[9];
+    assign scE = l_s_typeE[8];
 //EX_MEM
     ex_mem ex_mem0(
         .clk(clk),
@@ -555,6 +570,7 @@ module datapath (
         .tlb_typeE(tlb_typeE),
         .inst_tlb_refillE(inst_tlb_refillE),
         .inst_tlb_invalidE(inst_tlb_invalidE),
+        .mem_addrE(mem_addrE),
 
 
         .mem_read_enE(mem_read_enE),	
@@ -597,11 +613,12 @@ module datapath (
         .cp0_to_regM(cp0_to_regM),
         .tlb_typeM(tlb_typeM),
         .inst_tlb_refillM(inst_tlb_refillM),
-        .inst_tlb_invalidM(inst_tlb_invalidM)
+        .inst_tlb_invalidM(inst_tlb_invalidM),
+        .mem_addrM(mem_addrM)
     );
 //MEM
-    assign mem_addrM = alu_outM;
-    assign mem_enM = (mem_read_enM | mem_write_enM) & ~flush_exceptionM;
+    assign scM = l_s_typeM[8];
+    assign mem_enM = (mem_read_enM | mem_write_enM) & ~flush_exceptionM & (~scM | LLbit );  //scM->LLbit
     assign load_type = {l_s_typeM[7], l_s_typeM[6]|l_s_typeM[5], l_s_typeM[4]|l_s_typeM[3]};  //lw, lh(u), lb(u)
     // 是否需要控制 mem_en
     mem_ctrl mem_ctrl0(
@@ -703,6 +720,7 @@ module datapath (
     //branch predict result
     assign succM = ~(pred_takeM ^ actual_takeM);
     assign flush_pred_failedM = ~succM;
+
 //MEM_WB
     mem_wb mem_wb0(
         .clk(clk),

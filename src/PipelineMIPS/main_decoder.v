@@ -7,7 +7,7 @@ module main_decoder(
     //ID
     output wire sign_extD,          //立即数是否为符号扩展
 	output wire is_divD, is_multD,			//是否为除法指令
-	output wire [7:0] l_s_typeD,
+	output wire [9:0] l_s_typeD,
 	output wire [1:0] mfhi_loD,
     //EX
     output wire [1:0] reg_dstD,     	//写寄存器选择  00-> rd, 01-> rt, 10-> 写$ra
@@ -154,7 +154,7 @@ module main_decoder(
 			end
 			
 	// 访存指令
-			`EXE_LW, `EXE_LB, `EXE_LBU, `EXE_LH, `EXE_LHU: begin
+			`EXE_LW, `EXE_LB, `EXE_LBU, `EXE_LH, `EXE_LHU, `EXE_LL: begin
 				regfile_ctrl  =  4'b1_01_1;
 				mem_ctrl  =  3'b1_1_0;
 			end
@@ -162,7 +162,10 @@ module main_decoder(
 				regfile_ctrl  =  4'b0_00_1;
 				mem_ctrl  =  3'b0_0_1;
 			end
-	
+			`EXE_SC: begin	//SC需要写rt寄存器, 且ALU需要计算地址(立即数作为操作数b)
+				regfile_ctrl  =  4'b1_01_1;
+				mem_ctrl  =  3'b0_0_1;
+			end
 //  J type
 			`EXE_J: begin
 				regfile_ctrl  =  4'b0;
@@ -225,14 +228,17 @@ module main_decoder(
 
 //  lw, sw
 	wire instr_lw, instr_lh, instr_lhu, instr_lb, instr_lbu, instr_sw, instr_sh, instr_sb;
-	assign l_s_typeD = {instr_lw, instr_lh, instr_lhu, instr_lb, instr_lbu, instr_sw, instr_sh, instr_sb};
+	assign l_s_typeD = {instr_ll, instr_sc, instr_lw, instr_lh, instr_lhu, instr_lb, instr_lbu, instr_sw, instr_sh, instr_sb};
 
-	assign instr_lw 	= ~(|(op_code ^ `EXE_LW));
-    assign instr_lb 	= ~(|(op_code ^ `EXE_LB));
-    assign instr_lh 	= ~(|(op_code ^ `EXE_LH));
-    assign instr_lbu 	= ~(|(op_code ^ `EXE_LBU));
-    assign instr_lhu 	= ~(|(op_code ^ `EXE_LHU));
-    assign instr_sw 	= ~(|(op_code ^ `EXE_SW)); 
-    assign instr_sh 	= ~(|(op_code ^ `EXE_SH));
-    assign instr_sb 	= ~(|(op_code ^ `EXE_SB));
+	assign instr_lw 	= !(op_code ^ `EXE_LW);
+    assign instr_lb 	= !(op_code ^ `EXE_LB);
+    assign instr_lh 	= !(op_code ^ `EXE_LH);
+    assign instr_lbu 	= !(op_code ^ `EXE_LBU);
+    assign instr_lhu 	= !(op_code ^ `EXE_LHU);
+    assign instr_sw 	= !(op_code ^ `EXE_SW); 
+    assign instr_sh 	= !(op_code ^ `EXE_SH);
+    assign instr_sb 	= !(op_code ^ `EXE_SB);
+	assign instr_ll 	= !(op_code ^ `EXE_LL);
+	assign instr_sc 	= !(op_code ^ `EXE_SC);
+
 endmodule

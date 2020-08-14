@@ -17,7 +17,7 @@ module id_ex (
     input wire [5:0] alu_controlD,
     input wire jumpD,
     input wire [4:0] branch_judge_controlD,
-    input wire [7:0] l_s_typeD,
+    input wire [9:0] l_s_typeD,
     input wire [1:0] mfhi_loD,
     input wire [1:0] reg_dstD,		
     input wire alu_imm_selD,	
@@ -51,7 +51,7 @@ module id_ex (
     output reg [5:0] alu_controlE,
     output reg jumpE,
     output reg [4:0] branch_judge_controlE,
-    output reg [7:0] l_s_typeE,
+    output reg [9:0] l_s_typeE,
     output reg [1:0] mfhi_loE,
 
     output reg [1:0] reg_dstE,		
