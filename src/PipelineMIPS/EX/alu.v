@@ -18,7 +18,8 @@ module alu (
     output wire mult_stallE,
     output wire [63:0] alu_outE,
     output wire overflowE,
-    output wire [31:0] adder_result
+    output wire [31:0] adder_result,
+    output wire trap_resultE
 );
     wire [63:0] alu_out_div, alu_out_mult;
     wire mult_sign;
@@ -54,6 +55,7 @@ module alu (
     wire alu_clo, alu_clz;
     wire alu_madd, alu_maddu, alu_msub, alu_msubu, alu_madd_msub;
     wire alu_sc;
+    wire alu_teq, alu_tne, alu_tge, alu_tgeu, alu_tlt, alu_tltu;
 
     wire [31:0] and_result          ;
     wire [31:0] or_result           ;
@@ -135,9 +137,12 @@ module alu (
     // 溢出： 有符号相同符号相加可能会产生溢出，分为正溢出（{adder_cout, result[31]}: 01）与负溢出（{adder_cout, result[31]}:10）；
     // 建议通过有符号拓展理解；
 
+    wire alu_trap_minus;        // 内陷指令处理：
+    assign alu_trap_minus = alu_teq | alu_tne | alu_tge | alu_tgeu | alu_tlt | alu_tltu;
+    
     assign adder_a = src_aE;
-    assign adder_b = src_bE ^ {32{alu_sub | alu_subu | alu_slt | alu_sltu}};
-    assign adder_cin = alu_sub | alu_subu | alu_slt | alu_sltu;
+    assign adder_b = src_bE ^ {32{alu_sub | alu_subu | alu_slt | alu_sltu | alu_trap_minus}};
+    assign adder_cin = alu_sub | alu_subu | alu_slt | alu_sltu | alu_trap_minus;
     assign {adder_cout,adder_result} =adder_a + adder_b + adder_cin;
     assign add_sub_result = adder_result;
 
@@ -181,28 +186,37 @@ module alu (
     assign madd_sub_result = alu_madd | alu_maddu ? madd_result : msub_result;
 
     assign alu_out_not_mul_div = 
-                    ({32{alu_and        }} & and_result)            |
-                    ({32{alu_nor        }} & nor_result)            |
-                    ({32{alu_or         }} & or_result)             |
-                    ({32{alu_xor        }} & xor_result)            |
+                        ({32{alu_and        }} & and_result)            
+                    |   ({32{alu_nor        }} & nor_result)            
+                    |   ({32{alu_or         }} & or_result)             
+                    |   ({32{alu_xor        }} & xor_result)  
+
+                    |   ({32{alu_add | alu_addu | alu_sub | alu_subu}} & add_sub_result) 
                     
-                    ({32{alu_add | alu_addu | alu_sub | alu_subu}} & add_sub_result) |
+                    |   ({32{alu_slt        }} & slt_result)            
+                    |   ({32{alu_sltu       }} & sltu_result)           
                     
-                    ({32{alu_slt        }} & slt_result)            |
-                    ({32{alu_sltu       }} & sltu_result)           |
+                    |   ({32{alu_sll        }} & sll_result     )       
+                    |   ({32{alu_sll_sa     }} & sll_sa_result  )       
+                    |   ({32{alu_sra    | alu_srl    }} & sr_result      )
+                    |   ({32{alu_sra_sa | alu_srl_sa }} & sr_sa_result   )
                     
-                    ({32{alu_sll        }} & sll_result     )       |
-                    ({32{alu_sll_sa     }} & sll_sa_result  )       |
-                    ({32{alu_sra    | alu_srl    }} & sr_result      )|
-                    ({32{alu_sra_sa | alu_srl_sa }} & sr_sa_result   )|
+                    |   ({32{alu_lui        }} & lui_result)            
                     
-                    ({32{alu_lui        }} & lui_result)            |
-                    ({32{alu_clo | alu_clz}} & clzo_result)         |
-                    ({32{alu_sc         }} & sc_result)                      |
-                    ({32{alu_donothing}} & donothing_result);
+                    |   ({32{alu_clo | alu_clz}} & clzo_result)         
+                    |   ({32{alu_sc         }} & sc_result)                      
+                    
+                    |   ({32{alu_donothing}} & donothing_result);
+
+    assign trap_resultE =    alu_teq  & !(adder_result ^ 0)
+                        |   alu_tne  &  (adder_result ^ 0) 
+                        |   alu_tge  &  ~slt_result[0] 
+                        |   alu_tgeu &  ~sltu_result[0] 
+                        |   alu_tlt  &  slt_result[0] 
+                        |   alu_tltu &  sltu_result[0]; 
 
     //divide
-	assign div_sign = (alu_controlE == `ALU_SIGNED_DIV);
+	assign div_sign  = (alu_controlE == `ALU_SIGNED_DIV);
 	assign div_valid = (alu_controlE == `ALU_SIGNED_DIV || alu_controlE == `ALU_UNSIGNED_DIV);
 
     wire div_res_valid;

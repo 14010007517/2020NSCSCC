@@ -197,6 +197,7 @@ module datapath (
     wire eretE;
     wire cp0_wenE;
     wire cp0_to_regE;
+    wire trap_resultE, trap_resultM;
 
 // hazard
     wire stallD, stallE, stallW;
@@ -501,7 +502,8 @@ module datapath (
         .mult_stallE(mult_stallE),
         .alu_outE(alu_outE),
         .overflowE(overflowE),
-        .adder_result(adder_resultE)
+        .adder_result(adder_resultE),
+        .trap_resultE(trap_resultE)
     );
 
     assign mem_addrE = adder_resultE;
@@ -571,6 +573,7 @@ module datapath (
         .inst_tlb_refillE(inst_tlb_refillE),
         .inst_tlb_invalidE(inst_tlb_invalidE),
         .mem_addrE(mem_addrE),
+        .trap_resultE(trap_resultE),
 
 
         .mem_read_enE(mem_read_enE),	
@@ -614,7 +617,8 @@ module datapath (
         .tlb_typeM(tlb_typeM),
         .inst_tlb_refillM(inst_tlb_refillM),
         .inst_tlb_invalidM(inst_tlb_invalidM),
-        .mem_addrM(mem_addrM)
+        .mem_addrM(mem_addrM),
+        .trap_resultM(trap_resultM)
     );
 //MEM
     assign scM = l_s_typeM[8];
@@ -651,6 +655,7 @@ module datapath (
     
     exception exception0(
         .rst(rst),
+        .trap(trap_resultM),
         .ri(riM), .break(breakM), .syscall(syscallM), .overflow(overflowM), .addrErrorSw(addrErrorSwM), .addrErrorLw(addrErrorLwM), .pcError(pcErrorM), .eretM(eretM),
         //tlb exception
         .mem_read_enM(mem_read_enM),

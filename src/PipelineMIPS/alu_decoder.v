@@ -57,6 +57,14 @@ module alu_decoder(
 					//jump
 					// `EXE_JR:		alu_controlD <= `ALU_DONOTHING; //5
 					// `EXE_JALR:	alu_controlD <= `ALU_DONOTHING;
+
+					`EXE_TEQ: 		alu_controlD <= `ALU_TEQ;
+					`EXE_TNE: 		alu_controlD <= `ALU_TNE;
+					`EXE_TGEI: 		alu_controlD <= `ALU_TGE;
+					`EXE_TGEU: 		alu_controlD <= `ALU_TGEU;
+					`EXE_TLT: 		alu_controlD <= `ALU_TLT;
+					`EXE_TLTU: 		alu_controlD <= `ALU_TLTU;
+					
 					default:    	alu_controlD <= `ALU_DONOTHING;
 				endcase
 			//I type
@@ -100,24 +108,12 @@ module alu_decoder(
                     //     alu_controlD <= `ALU_LTZ;
                     // `EXE_BGEZ, `EXE_BGEZAL: 
                     //     alu_controlD <= `ALU_GEZ;
-					`EXE_TEQI, `EXE_TEQ: begin
-						alu_controlD <= `ALU_TEQ;
-					end
-					`EXE_TNEI, `EXE_TNE: begin
-						alu_controlD <= `ALU_TNE;
-					end
-					`EXE_TGEI, `EXE_TGEI: begin
-						alu_controlD <= `ALU_TGE;
-					end
-					`EXE_TGEIU, `EXE_TGEU: begin
-						alu_controlD <= `ALU_TGEU;
-					end
-					`EXE_TLTI, `EXE_TLT: begin
-						alu_controlD <= `ALU_TLT;
-					end
-					`EXE_TLTIU, `EXE_TLTU: begin
-						alu_controlD <= `ALU_TLTU;
-					end
+					`EXE_TEQI:		alu_controlD <= `ALU_TEQ;
+					`EXE_TNEI:		alu_controlD <= `ALU_TNE;
+					`EXE_TGEI:		alu_controlD <= `ALU_TGE;
+					`EXE_TGEIU:		alu_controlD <= `ALU_TGEU;
+					`EXE_TLTI:		alu_controlD <= `ALU_TLT;
+					`EXE_TLTIU:		alu_controlD <= `ALU_TLTU;
                     default:
                         alu_controlD <= `ALU_DONOTHING; 
                 endcase	

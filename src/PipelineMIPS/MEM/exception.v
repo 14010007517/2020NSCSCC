@@ -2,6 +2,7 @@
 
 module exception(
    input rst,
+   input wire trap,
    input ri, break, syscall, overflow, addrErrorSw, addrErrorLw, pcError, eretM,
       //tlb exception
    input wire mem_read_enM,
@@ -38,17 +39,18 @@ module exception(
    assign tlb_tlbl = inst_tlb_refill | inst_tlb_invalid | mem_read_enM & (data_tlb_refill | data_tlb_invalid);
    assign tlb_tlbs = mem_write_enM & (data_tlb_refill | data_tlb_invalid);
 
-   assign except_type =    (int)                   ? `EXC_CODE_INT :
-                           (addrErrorLw | pcError) ? `EXC_CODE_ADEL :
-                           (tlb_mod)               ? `EXC_CODE_MOD :
-                           (tlb_tlbl)              ? `EXC_CODE_TLBL :
-                           (tlb_tlbs)              ? `EXC_CODE_TLBS :
-                           (ri)                    ? `EXC_CODE_RI :
-                           (syscall)               ? `EXC_CODE_SYS :
-                           (break)                 ? `EXC_CODE_BP :
-                           (addrErrorSw)           ? `EXC_CODE_ADES :
-                           (overflow)              ? `EXC_CODE_OV :
-                           (eretM)                 ? `EXC_CODE_ERET :
+   assign except_type =    (int)                   ? `EXC_CODE_INT   :
+                           (addrErrorLw | pcError) ? `EXC_CODE_ADEL  :
+                           (tlb_mod)               ? `EXC_CODE_MOD   :
+                           (tlb_tlbl)              ? `EXC_CODE_TLBL  :
+                           (tlb_tlbs)              ? `EXC_CODE_TLBS  :
+                           (ri)                    ? `EXC_CODE_RI    :
+                           (syscall)               ? `EXC_CODE_SYS   :
+                           (break)                 ? `EXC_CODE_BP    :
+                           (addrErrorSw)           ? `EXC_CODE_ADES  :
+                           (overflow)              ? `EXC_CODE_OV    :
+                           (trap)                  ? `EXC_CODE_TR    :
+                           (eretM)                 ? `EXC_CODE_ERET  :
                                                      `EXC_CODE_NOEXC;
 
    wire BEV;
@@ -64,7 +66,7 @@ module exception(
 
    assign pc_exception = eretM ? cp0_epc : base + offset;
 
-   assign flush_exception =  (int) | (addrErrorLw | pcError | addrErrorSw) | (tlb_mod | tlb_tlbl | tlb_tlbs) | (ri) | (break) | (overflow) | (eretM) | (syscall);
+   assign flush_exception =  (int) | (addrErrorLw | pcError | addrErrorSw) | (tlb_mod | tlb_tlbl | tlb_tlbs) | (ri) | (break) | (overflow) | (trap) | (eretM) | (syscall);
 
    assign badvaddrM       =  (pcError | inst_tlb_invalid | inst_tlb_refill) ? pcM : mem_addrM;
    

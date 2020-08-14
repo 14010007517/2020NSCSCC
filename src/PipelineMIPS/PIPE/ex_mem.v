@@ -29,6 +29,7 @@ module ex_mem (
     input wire [3:0] tlb_typeE, 	
     input wire inst_tlb_refillE, inst_tlb_invalidE,
     input wire [31:0] mem_addrE,
+    input wire trap_resultE,
 
     output reg [31:0] pcM,
     output reg [31:0] alu_outM,
@@ -57,7 +58,8 @@ module ex_mem (
     output reg cp0_to_regM,
     output reg [3:0] tlb_typeM,
     output reg inst_tlb_refillM, inst_tlb_invalidM,
-    output reg [31:0] mem_addrM
+    output reg [31:0] mem_addrM,
+    output reg trap_resultM
 );
 
     always @(posedge clk) begin
@@ -91,6 +93,7 @@ module ex_mem (
             inst_tlb_refillM        <=              0;
             inst_tlb_invalidM       <=              0;
             mem_addrM               <=              0;
+            trap_resultM            <=              0;
         end
         else if(~stallM) begin
             pcM                     <=      pcE                 ;
@@ -122,6 +125,7 @@ module ex_mem (
             inst_tlb_refillM        <=      inst_tlb_refillE    ;
             inst_tlb_invalidM       <=      inst_tlb_invalidE   ;
             mem_addrM               <=      mem_addrE           ;
+            trap_resultM            <=      trap_resultE        ;
         end
     end
 endmodule
