@@ -663,7 +663,7 @@ module datapath (
 
         .cp0_status(cp0_statusW), .cp0_cause(cp0_causeW), .cp0_epc(cp0_epcW), .cp0_ebase(cp0_ebaseW),
         .pcM(pcM),
-        .alu_outM(alu_outM),
+        .mem_addrM(mem_addrM),
 
         .except_type(except_typeM),
         .flush_exception(flush_exceptionM),

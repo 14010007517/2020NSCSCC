@@ -14,7 +14,7 @@ module exception(
 
    input [31:0] cp0_status, cp0_cause, cp0_epc, cp0_ebase,
    input [31:0] pcM,
-   input [31:0] alu_outM,
+   input [31:0] mem_addrM,
 
    output [4:0] except_type,     //异常类型（同Cause CP0寄存器中的编码）
    output flush_exception,
@@ -66,6 +66,6 @@ module exception(
 
    assign flush_exception =  (int) | (addrErrorLw | pcError | addrErrorSw) | (tlb_mod | tlb_tlbl | tlb_tlbs) | (ri) | (break) | (overflow) | (eretM) | (syscall);
 
-   assign badvaddrM       =  (pcError | inst_tlb_invalid | inst_tlb_refill) ? pcM : alu_outM;
+   assign badvaddrM       =  (pcError | inst_tlb_invalid | inst_tlb_refill) ? pcM : mem_addrM;
    
 endmodule
