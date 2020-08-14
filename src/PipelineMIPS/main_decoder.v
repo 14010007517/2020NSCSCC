@@ -52,11 +52,10 @@ module main_decoder(
 	//一部分能够容易判断的信号
 	assign sign_extD = |(op_code[5:2] ^ 4'b0011);		//andi, xori, lui, ori为无符号拓展，其它为有符号拓展
 
-	assign hilo_wenD = 	!( op_code ^ `EXE_R_TYPE ) &
-						( !(funct[5:2] ^ 4'b0110) |			// div divu mult multu 	
-						  (!(funct[5:2] ^ 4'b0100) & funct[0])  //mthi mtlo
-						)
-						| madd | maddu | msub | msubu ;
+	assign hilo_wenD = 	!(op_code ^ `EXE_R_TYPE) & 
+						( 	!(funct[5:2] ^ 4'b0110) |			// div divu mult multu 	
+						  	(!(funct[5:2] ^ 4'b0100) & funct[0])  //mthi mtlo
+						) | madd | maddu | msub | msubu ;
 
 	assign hilo_to_regD = ~(|(op_code ^ `EXE_R_TYPE)) & (~(|(funct[5:2] ^ 4'b0100)) & ~funct[0]);
 														// 00--alu_outM; 01--hilo_o; 10 11--rdataM;
@@ -200,7 +199,7 @@ module main_decoder(
 						regfile_ctrl	= 4'b1_00_0;
 						mem_ctrl  		= 3'b0;
 					end
-					`EXE_MADD, `EXE_MADD, `EXE_MSUB, `EXE_MSUBU: begin
+					`EXE_MADD, `EXE_MADDU, `EXE_MSUB, `EXE_MSUBU: begin
 						regfile_ctrl	= 4'b0_00_0;
 						mem_ctrl  		= 3'b0;
 					end

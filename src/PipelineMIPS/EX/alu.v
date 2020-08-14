@@ -74,11 +74,10 @@ module alu (
     wire [31:0] lui_result          ;
     wire [31:0] donothing_result    ;
 
-    wire [31:0] clz_result          ;
-    wire [31:0] clo_result          ;
+    wire [31:0] clzo_result         ;
 
     wire [63:0] madd_result         ; //madd, maddu
-    wire [63:0] msub_restult        ; //msub, msubu
+    wire [63:0] msub_result        ; //msub, msubu
     wire [63:0] madd_sub_result     ;
 
     assign alu_and       = !(alu_controlE ^ `ALU_AND      );

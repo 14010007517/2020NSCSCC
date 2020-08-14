@@ -71,7 +71,7 @@ module inst_ascii_decoder(
                         
                         `EXE_SYSCALL: ascii<= "SYSC";
                         `EXE_BREAK: ascii<= "BREAK";
-                        default: ascii<="N-R";
+                        `EXE_SYNC: ascii<= "SYNC";
                     endcase
                 end
             `EXE_ANDI: ascii<= "ANDI";
@@ -100,7 +100,7 @@ module inst_ascii_decoder(
             `EXE_SB: ascii<= "SB";
             `EXE_SH: ascii<= "SH";
             `EXE_SW: ascii<= "SW";
-            6'b000001: begin 
+            `EXE_BRANCHS: begin 
                 case (instr[20:16])
                     `EXE_BGEZ: ascii<= "BGEZ";
                     `EXE_BGEZAL: ascii<= "BGEZAL";
@@ -115,16 +115,29 @@ module inst_ascii_decoder(
                     `EXE_TLBP: ascii<="TLBP";
                     `EXE_TLBR: ascii<="TLBR";
                     `EXE_TLBWI: ascii<="TLBWI";
+                    `EXE_WAIT: ascii<="WAIT";
+
                     default: begin
                         case (instr[25:21])
-                            5'b00100: ascii<="MTOC0";
-                            5'b00000: ascii<="MFC0";
+                            `EXE_MTC0: ascii<="MTC0";
+                            `EXE_MFC0: ascii<="MFC0";
                         endcase
                     end
                 endcase
-                
             end
-            default: ascii<= "N-R";
+            `EXE_SEPECIAL2: begin
+                case(instr[5:0])
+                    `EXE_CLO: ascii<="CLO";
+                    `EXE_CLZ: ascii<="CLZ";
+                    `EXE_MADD: ascii<="MADD";
+                    `EXE_MADDU: ascii<="MADDU";
+                    `EXE_MSUB: ascii<="MSUB";
+                    `EXE_MSUBU: ascii<="MSUBU";
+                    `EXE_MUL: ascii<="MUL";
+                endcase
+            end
+            `EXE_CACHE: ascii <= "CACHE";
+            `EXE_PREF : ascii <=  "PREF";
        endcase
        if(!instr)
             ascii<= "NOP";
