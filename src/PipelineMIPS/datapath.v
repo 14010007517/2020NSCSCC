@@ -623,7 +623,7 @@ module datapath (
     // 是否需要控制 mem_en
     mem_ctrl mem_ctrl0(
         .l_s_typeM(l_s_typeM),
-	    .addr(alu_outM[1:0]),
+	    .addr(mem_addrM[1:0]),
 
         .data_wdataM(rt_valueM),    //原始的wdata
         .mem_wdataM(mem_wdataM),    //新的wdata

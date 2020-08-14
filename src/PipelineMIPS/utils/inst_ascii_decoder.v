@@ -100,6 +100,8 @@ module inst_ascii_decoder(
             `EXE_SB: ascii<= "SB";
             `EXE_SH: ascii<= "SH";
             `EXE_SW: ascii<= "SW";
+            `EXE_LL: ascii<= "LL";
+            `EXE_SC: ascii<= "SC";
             `EXE_BRANCHS: begin 
                 case (instr[20:16])
                     `EXE_BGEZ: ascii<= "BGEZ";

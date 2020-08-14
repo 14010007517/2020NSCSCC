@@ -11,12 +11,12 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="405198333fs"></ZoomStartTime>
-      <ZoomEndTime time="405317334fs"></ZoomEndTime>
-      <Cursor1Time time="406077500fs"></Cursor1Time>
+      <ZoomStartTime time="92219167fs"></ZoomStartTime>
+      <ZoomEndTime time="94339168fs"></ZoomEndTime>
+      <Cursor1Time time="93349167fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="261"></NameColumnWidth>
+      <NameColumnWidth column_width="256"></NameColumnWidth>
       <ValueColumnWidth column_width="72"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="15" />
@@ -277,9 +277,11 @@
    <wvobject fp_name="group108" type="group">
       <obj_property name="label">ID</obj_property>
       <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="group80" type="group">
          <obj_property name="label">RegFile</obj_property>
          <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="isExpanded"></obj_property>
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/regfile0/clk" type="logic">
             <obj_property name="ElementShortName">clk</obj_property>
             <obj_property name="ObjectShortName">clk</obj_property>
@@ -324,7 +326,6 @@
       <wvobject fp_name="group85" type="group">
          <obj_property name="label">BranchPred</obj_property>
          <obj_property name="DisplayName">label</obj_property>
-         <obj_property name="isExpanded"></obj_property>
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/branch_predict0/instrD" type="array">
             <obj_property name="ElementShortName">instrD[31:0]</obj_property>
             <obj_property name="ObjectShortName">instrD[31:0]</obj_property>
@@ -345,7 +346,6 @@
       <wvobject fp_name="group909" type="group">
          <obj_property name="label">BranchJudge</obj_property>
          <obj_property name="DisplayName">label</obj_property>
-         <obj_property name="isExpanded"></obj_property>
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/branch_judge0/actual_takeE" type="logic">
             <obj_property name="ElementShortName">actual_takeE</obj_property>
             <obj_property name="ObjectShortName">actual_takeE</obj_property>
@@ -460,6 +460,31 @@
             <obj_property name="ObjectShortName">imm_ext[31:0]</obj_property>
          </wvobject>
       </wvobject>
+      <wvobject fp_name="group1402" type="group">
+         <obj_property name="label">LLbit</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="isExpanded"></obj_property>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/LLbit0/clk" type="logic">
+            <obj_property name="ElementShortName">clk</obj_property>
+            <obj_property name="ObjectShortName">clk</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/LLbit0/rst" type="logic">
+            <obj_property name="ElementShortName">rst</obj_property>
+            <obj_property name="ObjectShortName">rst</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/LLbit0/flush" type="logic">
+            <obj_property name="ElementShortName">flush</obj_property>
+            <obj_property name="ObjectShortName">flush</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/LLbit0/llE" type="logic">
+            <obj_property name="ElementShortName">llE</obj_property>
+            <obj_property name="ObjectShortName">llE</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/LLbit0/LLbit" type="logic">
+            <obj_property name="ElementShortName">LLbit</obj_property>
+            <obj_property name="ObjectShortName">LLbit</obj_property>
+         </wvobject>
+      </wvobject>
    </wvobject>
    <wvobject fp_name="group222" type="group">
       <obj_property name="label">EXE</obj_property>
@@ -489,8 +514,8 @@
             <obj_property name="ObjectShortName">src_bE[31:0]</obj_property>
          </wvobject>
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/alu0/alu_controlE" type="array">
-            <obj_property name="ElementShortName">alu_controlE[4:0]</obj_property>
-            <obj_property name="ObjectShortName">alu_controlE[4:0]</obj_property>
+            <obj_property name="ElementShortName">alu_controlE[5:0]</obj_property>
+            <obj_property name="ObjectShortName">alu_controlE[5:0]</obj_property>
          </wvobject>
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/alu0/sa" type="array">
             <obj_property name="ElementShortName">sa[4:0]</obj_property>
@@ -770,9 +795,11 @@
    <wvobject fp_name="group223" type="group">
       <obj_property name="label">MEM</obj_property>
       <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="group158" type="group">
          <obj_property name="label">MemCtrl</obj_property>
          <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="isExpanded"></obj_property>
          <wvobject fp_name="group321" type="group">
             <obj_property name="label">W</obj_property>
             <obj_property name="DisplayName">label</obj_property>
@@ -793,6 +820,7 @@
          <wvobject fp_name="group322" type="group">
             <obj_property name="label">R</obj_property>
             <obj_property name="DisplayName">label</obj_property>
+            <obj_property name="isExpanded"></obj_property>
             <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/mem_ctrl0/mem_rdataM" type="array">
                <obj_property name="ElementShortName">mem_rdataM[31:0]</obj_property>
                <obj_property name="ObjectShortName">mem_rdataM[31:0]</obj_property>
@@ -906,7 +934,6 @@
       <wvobject fp_name="group191" type="group">
          <obj_property name="label">Exception</obj_property>
          <obj_property name="DisplayName">label</obj_property>
-         <obj_property name="isExpanded"></obj_property>
          <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/exception0/rst" type="logic">
             <obj_property name="ElementShortName">rst</obj_property>
             <obj_property name="ObjectShortName">rst</obj_property>
@@ -1194,7 +1221,6 @@
    <wvobject fp_name="group452" type="group">
       <obj_property name="label">I_Cache</obj_property>
       <obj_property name="DisplayName">label</obj_property>
-      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="group531" type="group">
          <obj_property name="label">Axi part</obj_property>
          <obj_property name="DisplayName">label</obj_property>
@@ -2276,8 +2302,8 @@
          <obj_property name="ObjectShortName">is_multD</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/main_decoder0/l_s_typeD" type="array">
-         <obj_property name="ElementShortName">l_s_typeD[7:0]</obj_property>
-         <obj_property name="ObjectShortName">l_s_typeD[7:0]</obj_property>
+         <obj_property name="ElementShortName">l_s_typeD[9:0]</obj_property>
+         <obj_property name="ObjectShortName">l_s_typeD[9:0]</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_top/soc_lite/u_cpu/datapath/main_decoder0/mfhi_loD" type="array">
          <obj_property name="ElementShortName">mfhi_loD[1:0]</obj_property>
@@ -2579,7 +2605,6 @@
    <wvobject fp_name="group728" type="group">
       <obj_property name="label">TLB</obj_property>
       <obj_property name="DisplayName">label</obj_property>
-      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="/tb_top/soc_lite/u_cpu/tlb0/clk" type="logic">
          <obj_property name="ElementShortName">clk</obj_property>
          <obj_property name="ObjectShortName">clk</obj_property>
