@@ -6,7 +6,7 @@ module main_decoder(
 
     //ID
     output wire sign_extD,          //立即数是否为符号扩展
-	output wire is_divD,is_multD,			//是否为除法指令
+	output wire is_divD, is_multD,			//是否为除法指令
 	output wire [7:0] l_s_typeD,
 	output wire [1:0] mfhi_loD,
     //EX
@@ -33,6 +33,10 @@ module main_decoder(
 	wire mtc0;
 	wire mfhi;
 	wire mflo;
+	wire mul;
+	wire madd, maddu, msub, msubu;
+	wire div, divu, mult, multu;
+	wire mthi, mtlo;
 
 	assign op_code = instrD[31:26];
 	assign rs = instrD[25:21];
@@ -48,14 +52,17 @@ module main_decoder(
 	//一部分能够容易判断的信号
 	assign sign_extD = |(op_code[5:2] ^ 4'b0011);		//andi, xori, lui, ori为无符号拓展，其它为有符号拓展
 
-	assign hilo_wenD = ~(|( op_code ^ `EXE_R_TYPE )) 
-						& ( 	~(|(funct[5:2] ^ 4'b0110)) 			// div divu mult multu 	
-							| 	( ~(|(funct[5:2] ^ 4'b0100)) & funct[0]) //mthi mtlo
-						  );
+	assign hilo_wenD = 	!( op_code ^ `EXE_R_TYPE ) &
+						( !(funct[5:2] ^ 4'b0110) |			// div divu mult multu 	
+						  (!(funct[5:2] ^ 4'b0100) & funct[0])  //mthi mtlo
+						)
+						| madd | maddu | msub | msubu ;
+
 	assign hilo_to_regD = ~(|(op_code ^ `EXE_R_TYPE)) & (~(|(funct[5:2] ^ 4'b0100)) & ~funct[0]);
 														// 00--alu_outM; 01--hilo_o; 10 11--rdataM;
 	assign is_divD = ~(|op_code) & ~(|(funct[5:1] ^ 5'b01101));	//opcode==0, funct==01101x
-	assign is_multD = (~(|op_code) & ~(|(funct[5:1] ^ 5'b01100))) | op_code == `EXE_MUL;
+	assign is_multD = (~(|op_code) & ~(|(funct[5:1] ^ 5'b01100))) | mul | madd | maddu | msub | msubu;
+
 	assign mfhi = !(op_code ^ `EXE_R_TYPE) & !(funct ^ `EXE_MFHI);
 	assign mflo = !(op_code ^ `EXE_R_TYPE) & !(funct ^ `EXE_MFLO);
 	assign mfhi_loD = {mfhi, mflo};
@@ -74,6 +81,13 @@ module main_decoder(
 	assign TLBWR 	= !(op_code ^ `EXE_COP0) & !(funct ^ `EXE_TLBWR	);
 	assign tlb_typeD = {TLBWR, TLBWI, TLBR, TLBP};
 
+	// special2
+	assign mul 		= !(op_code ^ `EXE_SEPECIAL2) & !(funct ^ `EXE_MUL	);
+	assign madd		= !(op_code ^ `EXE_SEPECIAL2) & !(funct ^ `EXE_MADD	);
+	assign maddu	= !(op_code ^ `EXE_SEPECIAL2) & !(funct ^ `EXE_MADDU);
+	assign msub		= !(op_code ^ `EXE_SEPECIAL2) & !(funct ^ `EXE_MSUB	);
+	assign msubu	= !(op_code ^ `EXE_SEPECIAL2) & !(funct ^ `EXE_MSUBU);
+
 	always @(*) begin
 		riD = 1'b0;
 		case(op_code)
@@ -90,7 +104,8 @@ module main_decoder(
 					
 					// 跳转执行零
 					`EXE_JR, `EXE_MULT, `EXE_MULTU, `EXE_DIV, `EXE_DIVU, `EXE_MTHI, `EXE_MTLO,
-					`EXE_SYSCALL, `EXE_BREAK : begin
+					`EXE_SYSCALL, `EXE_BREAK,
+					`EXE_SYNC: begin
 						regfile_ctrl  =  4'b0;
 						mem_ctrl  =  3'b0;
 					end
@@ -172,18 +187,35 @@ module main_decoder(
 					end
 
 					default: begin
-						riD  =  |(funct ^ `EXE_ERET) & |(funct ^ `EXE_TLBR) & |(funct ^ `EXE_TLBP) & |(funct ^ `EXE_TLBWI) & |(funct ^ `EXE_TLBWR);
+						riD  =  |(funct ^ `EXE_ERET) & |(funct ^ `EXE_TLBR) & |(funct ^ `EXE_TLBP) & |(funct ^ `EXE_TLBWI) & |(funct ^ `EXE_TLBWR) & |(funct ^ `EXE_WAIT);
 						regfile_ctrl  =  4'b0_00_0;
 						mem_ctrl  =  3'b0;
 					end
 				endcase
 			end
 
-			`EXE_MUL: begin
-				regfile_ctrl  =  4'b1_00_0;
-				mem_ctrl  =  3'b0;
+			`EXE_SEPECIAL2: begin
+				case(funct)
+					`EXE_MUL, `EXE_CLZ, `EXE_CLO: begin
+						regfile_ctrl	= 4'b1_00_0;
+						mem_ctrl  		= 3'b0;
+					end
+					`EXE_MADD, `EXE_MADD, `EXE_MSUB, `EXE_MSUBU: begin
+						regfile_ctrl	= 4'b0_00_0;
+						mem_ctrl  		= 3'b0;
+					end
+					default: begin
+						riD 			= 1'b1;
+						regfile_ctrl	= 4'b0_00_0;
+						mem_ctrl  		= 3'b0;
+					end 
+				endcase
 			end
 
+			`EXE_CACHE, `EXE_PREF: begin
+				regfile_ctrl  =  4'b0;
+				mem_ctrl  =  3'b0;
+			end
 			default: begin
 				riD  =  1;
 				regfile_ctrl  =  4'b0;
@@ -194,7 +226,6 @@ module main_decoder(
 
 //  lw, sw
 	wire instr_lw, instr_lh, instr_lhu, instr_lb, instr_lbu, instr_sw, instr_sh, instr_sb;
-
 	assign l_s_typeD = {instr_lw, instr_lh, instr_lhu, instr_lb, instr_lbu, instr_sw, instr_sh, instr_sb};
 
 	assign instr_lw 	= ~(|(op_code ^ `EXE_LW));

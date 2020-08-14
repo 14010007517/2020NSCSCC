@@ -6,7 +6,7 @@ module alu (
     input wire flush_exceptionM,
     input wire stallM,
     input wire [31:0] src_aE, src_bE,
-    input wire [4:0] alu_controlE,
+    input wire [5:0] alu_controlE,
     input wire [4:0] sa,
     input wire [63:0] hilo,
     input wire stallD,
@@ -48,7 +48,10 @@ module alu (
     wire alu_sr_sa      ;
 
     wire alu_lui        ;      
-    wire alu_donothing  ;     
+    wire alu_donothing  ;
+
+    wire alu_clo, alu_clz;
+    wire alu_madd, alu_maddu, alu_msub, alu_msubu, alu_madd_msub;
 
     wire [31:0] and_result          ;
     wire [31:0] or_result           ;
@@ -71,6 +74,13 @@ module alu (
     wire [31:0] lui_result          ;
     wire [31:0] donothing_result    ;
 
+    wire [31:0] clz_result          ;
+    wire [31:0] clo_result          ;
+
+    wire [63:0] madd_result         ; //madd, maddu
+    wire [63:0] msub_restult        ; //msub, msubu
+    wire [63:0] madd_sub_result     ;
+
     assign alu_and       = !(alu_controlE ^ `ALU_AND      );
     assign alu_or        = !(alu_controlE ^ `ALU_OR       );
     assign alu_nor       = !(alu_controlE ^ `ALU_NOR      );
@@ -91,6 +101,14 @@ module alu (
 
     assign alu_lui       = !(alu_controlE ^ `ALU_LUI      );
     assign alu_donothing = !(alu_controlE ^ `ALU_DONOTHING);
+
+    assign alu_clo       = !(alu_controlE ^ `ALU_CLO);
+    assign alu_clz       = !(alu_controlE ^ `ALU_CLZ);
+    assign alu_madd      = !(alu_controlE ^ `ALU_MADD_MULT);
+    assign alu_maddu     = !(alu_controlE ^ `ALU_MADDU_MULT);
+    assign alu_msub      = !(alu_controlE ^ `ALU_MSUB_MULT);
+    assign alu_msubu     = !(alu_controlE ^ `ALU_MSUBU_MULT);
+    assign alu_madd_msub = alu_madd | alu_maddu | alu_msub | alu_msubu;
 
     assign alu_mthi = !(alu_controlE ^ `ALU_MTHI);
     assign alu_mtlo = !(alu_controlE ^ `ALU_MTLO);
@@ -138,6 +156,25 @@ module alu (
 
     assign donothing_result = src_aE;
 
+    wire [31:0] clzo_a; //clz or clo
+    assign clzo_a = alu_clz ? src_aE : ~src_aE;
+    assign clzo_result = 
+                clzo_a[31] ?  0 : clzo_a[30] ?  1 : clzo_a[29] ?  2 : 
+                clzo_a[28] ?  3 : clzo_a[27] ?  4 : clzo_a[26] ?  5 : 
+                clzo_a[25] ?  6 : clzo_a[24] ?  7 : clzo_a[23] ?  8 : 
+                clzo_a[22] ?  9 : clzo_a[21] ? 10 : clzo_a[20] ? 11 : 
+                clzo_a[19] ? 12 : clzo_a[18] ? 13 : clzo_a[17] ? 14 : 
+                clzo_a[16] ? 15 : clzo_a[15] ? 16 : clzo_a[14] ? 17 : 
+                clzo_a[13] ? 18 : clzo_a[12] ? 19 : clzo_a[11] ? 20 : 
+                clzo_a[10] ? 21 : clzo_a[ 9] ? 22 : clzo_a[ 8] ? 23 : 
+                clzo_a[ 7] ? 24 : clzo_a[ 6] ? 25 : clzo_a[ 5] ? 26 : 
+                clzo_a[ 4] ? 27 : clzo_a[ 3] ? 28 : clzo_a[ 2] ? 29 : 
+                clzo_a[ 1] ? 30 : clzo_a[ 0] ? 31 : 32;
+    
+    assign madd_result = hilo + alu_out_mult;
+    assign msub_result = hilo - alu_out_mult;
+    assign madd_sub_result = alu_madd | alu_maddu ? madd_result : msub_result;
+
     assign alu_out_not_mul_div = 
                     ({32{alu_and        }} & and_result)            |
                     ({32{alu_nor        }} & nor_result)            |
@@ -155,7 +192,8 @@ module alu (
                     ({32{alu_sra_sa | alu_srl_sa }} & sr_sa_result   )       |
                     
                     ({32{alu_lui        }} & lui_result)            |
-                    ({32{alu_donothing  }} & donothing_result);
+                    ({32{alu_clo | alu_clz}} & clzo_result)         |
+                    ({32{alu_donothing  }} & donothing_result)      ;
 
     //divide
 	assign div_sign = (alu_controlE == `ALU_SIGNED_DIV);
@@ -183,8 +221,8 @@ module alu (
     //multiply
     reg [3:0] cnt;
 
-	assign mult_sign = (alu_controlE == `ALU_SIGNED_MULT);
-    assign mult_valid = (alu_controlE == `ALU_SIGNED_MULT) | (alu_controlE == `ALU_UNSIGNED_MULT);
+	assign mult_sign = (alu_controlE == `ALU_SIGNED_MULT) | alu_madd | alu_msub;
+    assign mult_valid = (alu_controlE == `ALU_SIGNED_MULT) | (alu_controlE == `ALU_UNSIGNED_MULT) | alu_madd_msub;
 
     assign alu_out_mult = mult_sign ? alu_out_signed_mult : alu_out_unsigned_mult;
 
@@ -221,7 +259,8 @@ module alu (
 
     //RESULT
     assign alu_outE = ({64{div_valid}} & alu_out_div)
-                    | ({64{mult_valid}} & alu_out_mult)
+                    | ({64{mult_valid & ~alu_madd_msub}} & alu_out_mult)
+                    | ({64{alu_madd_msub}} & madd_sub_result)
                     | ({64{alu_mthi}} & {src_aE, hilo[31:0]})
                     | ({64{alu_mtlo}} & {hilo[63:32], src_aE})
                     | ({64{~mult_valid & ~div_valid & ~alu_mthi & ~alu_mtlo}} & {32'b0, alu_out_not_mul_div});

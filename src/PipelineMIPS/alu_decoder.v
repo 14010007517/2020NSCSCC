@@ -8,7 +8,7 @@
 module alu_decoder(
 	input wire [31:0] instrD,
 	
-    output reg [4:0] alu_controlD,
+    output reg [5:0] alu_controlD,
 	output reg [4:0] branch_judge_controlD
     );
 	
@@ -40,7 +40,7 @@ module alu_decoder(
 						//div and mul
 					`EXE_DIV:   	alu_controlD <= `ALU_SIGNED_DIV;
 					`EXE_DIVU:  	alu_controlD <= `ALU_UNSIGNED_DIV;
-					`EXE_MULT, `EXE_MUL:  	alu_controlD <= `ALU_SIGNED_MULT;
+					`EXE_MULT:  	alu_controlD <= `ALU_SIGNED_MULT;
 					`EXE_MULTU: 	alu_controlD <= `ALU_UNSIGNED_MULT;
 
 					//移位指令
@@ -71,6 +71,19 @@ module alu_decoder(
 				//memory
 			`EXE_LW, `EXE_LB, `EXE_LBU, `EXE_LH, `EXE_LHU, `EXE_SW, `EXE_SB, `EXE_SH:
 						alu_controlD <= `ALU_ADDU;
+
+			`EXE_SEPECIAL2:
+				case(funct)
+					`EXE_CLO:	alu_controlD <= `ALU_CLO		;
+					`EXE_CLZ:	alu_controlD <= `ALU_CLZ		;
+					`EXE_MUL:   alu_controlD <= `ALU_SIGNED_MULT;
+					`EXE_MADD:	alu_controlD <= `ALU_MADD_MULT	;
+					`EXE_MADDU:	alu_controlD <= `ALU_MADDU_MULT	;
+					`EXE_MSUB:	alu_controlD <= `ALU_MSUB_MULT	;
+					`EXE_MSUBU:	alu_controlD <= `ALU_MSUBU_MULT	;
+					default: 	alu_controlD <= `ALU_DONOTHING	;
+				endcase	
+
 			// `EXE_BEQ:
             //     alu_controlD <= `ALU_EQ;
             // `EXE_BGTZ:

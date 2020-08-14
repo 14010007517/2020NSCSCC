@@ -76,7 +76,7 @@ module datapath (
     wire jumpD;
     wire jump_conflictD;
     wire is_in_delayslot_iD;
-    wire [4:0] alu_controlD;
+    wire [5:0] alu_controlD, alu_controlE;
     wire [4:0] branch_judge_controlD;
     wire is_divD;
     wire inst_tlb_refillD, inst_tlb_invalidD;
@@ -89,7 +89,6 @@ module datapath (
     wire pred_takeE;
 
     wire [1:0] reg_dstE;
-    wire [4:0] alu_controlE;
 
     wire [31:0] src_aE, src_bE;
     wire [63:0] alu_outE;

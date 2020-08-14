@@ -36,7 +36,7 @@
 
 `define EXE_MULT    6'b011000
 `define EXE_MULTU   6'b011001
-`define EXE_MUL     6'b011100
+`define EXE_MUL     6'b000010
 
 `define EXE_DIV  6'b011010
 `define EXE_DIVU  6'b011011
@@ -101,6 +101,21 @@
 `define EXE_SYNC 6'b001111
 `define EXE_PREF 6'b110011
 
+//跑PMON时添加
+`define EXE_SEPECIAL 6'b000000
+`define EXE_SEPECIAL2 6'b011100
+`define EXE_CACHE 6'b101111
+`define EXE_PREF 6'b110011
+`define EXE_SYNC 6'b001111
+`define EXE_WAIT 6'b100000
+
+`define EXE_CLZ 6'b100000
+`define EXE_CLO 6'b100001
+
+`define EXE_MADD  6'b000000
+`define EXE_MADDU 6'b000001
+`define EXE_MSUB  6'b000100
+`define EXE_MSUBU 6'b000101
 
 
 //Exception code
