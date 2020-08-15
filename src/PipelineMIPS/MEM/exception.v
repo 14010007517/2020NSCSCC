@@ -40,14 +40,14 @@ module exception(
    assign tlb_tlbs = mem_write_enM & (data_tlb_refill | data_tlb_invalid);
 
    assign except_type =    (int)                   ? `EXC_CODE_INT   :
-                           (addrErrorLw | pcError) ? `EXC_CODE_ADEL  :
                            (tlb_mod)               ? `EXC_CODE_MOD   :
                            (tlb_tlbl)              ? `EXC_CODE_TLBL  :
                            (tlb_tlbs)              ? `EXC_CODE_TLBS  :
-                           (ri)                    ? `EXC_CODE_RI    :
+                           (addrErrorLw | pcError) ? `EXC_CODE_ADEL  :
+                           (addrErrorSw)           ? `EXC_CODE_ADES  :
                            (syscall)               ? `EXC_CODE_SYS   :
                            (break)                 ? `EXC_CODE_BP    :
-                           (addrErrorSw)           ? `EXC_CODE_ADES  :
+                           (ri)                    ? `EXC_CODE_RI    :
                            (overflow)              ? `EXC_CODE_OV    :
                            (trap)                  ? `EXC_CODE_TR    :
                            (eretM)                 ? `EXC_CODE_ERET  :

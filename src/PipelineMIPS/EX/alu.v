@@ -216,8 +216,13 @@ module alu (
                     |   ({32{alu_donothing}} & donothing_result);
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     assign trap_resultE =   alu_teq  & !(adder_result ^ 0)
                         |   alu_tne  & |(adder_result ^ 0) 
+=======
+    assign trap_resultE =    alu_teq  & !(adder_result ^ 0)
+                        |   alu_tne  &  |(adder_result ^ 0) 
+>>>>>>> Stashed changes
 =======
     assign trap_resultE =    alu_teq  & !(adder_result ^ 0)
                         |   alu_tne  &  |(adder_result ^ 0) 

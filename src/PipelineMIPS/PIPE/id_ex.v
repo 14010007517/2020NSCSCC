@@ -36,11 +36,8 @@ module id_ex (
     input wire [3:0] tlb_typeD,
     input wire inst_tlb_refillD, inst_tlb_invalidD,
     input wire movnD, movzD,
-<<<<<<< Updated upstream
-=======
     input wire branchL_D,
 
->>>>>>> Stashed changes
 
     output reg [31:0] pcE,
     output reg [31:0] rd1E, rd2E,
@@ -76,12 +73,8 @@ module id_ex (
     output reg cp0_to_regE,
     output reg [3:0] tlb_typeE,
     output reg inst_tlb_refillE, inst_tlb_invalidE,
-<<<<<<< Updated upstream
-    output reg movnE, movzE
-=======
     output reg movnE, movzE,
     output reg branchL_E
->>>>>>> Stashed changes
 );
     always @(posedge clk) begin
         if(rst | flushE) begin
@@ -124,49 +117,6 @@ module id_ex (
             inst_tlb_invalidE       <=      0   ;
             movnE                   <=      0   ;
             movzE                   <=      0   ;
-<<<<<<< Updated upstream
-        end 
-        else if(~stallE) begin
-            pcE                     <= pcD                  ;
-            rd1E                    <= rd1D                 ;
-            rd2E                    <= rd2D                 ;
-            rsE                     <= rsD                  ;
-            rtE                     <= rtD                  ;
-            rdE                     <= rdD                  ;
-            immE                    <= immD                 ;
-            pc_plus4E               <= pc_plus4D            ;
-            instrE                  <= instrD               ;
-            pc_branchE              <= pc_branchD           ;
-            pred_takeE              <= pred_takeD           ;
-            branchE                 <= branchD              ;
-            jump_conflictE          <= jump_conflictD       ;
-            saE                     <= saD                  ;
-            is_in_delayslot_iE      <= is_in_delayslot_iD   ;
-            alu_controlE            <= alu_controlD         ;
-            jumpE                   <= jumpD                ;
-            branch_judge_controlE   <= branch_judge_controlD;
-            l_s_typeE               <= l_s_typeD            ;
-            mfhi_loE                <= mfhi_loD             ;
-            reg_dstE		        <= reg_dstD 		    ; 
-			alu_imm_selE	        <= alu_imm_selD 	    ;
-			mem_read_enE	        <= mem_read_enD		    ;
-			mem_write_enE	        <= mem_write_enD	    ;
-			reg_write_enE	        <= reg_write_enD 	    ;
-			mem_to_regE		        <= mem_to_regD 		    ;
-			hilo_wenE		        <= hilo_wenD		    ;
-			hilo_to_regE	        <= hilo_to_regD		    ;
-			riE				        <= riD				    ;
-			breakE			        <= breakD			    ;
-			syscallE		        <= syscallD			    ;
-			eretE			        <= eretD			    ;
-			cp0_wenE		        <= cp0_wenD			    ;
-			cp0_to_regE		        <= cp0_to_regD		    ;
-            tlb_typeE               <= tlb_typeD            ;
-            inst_tlb_refillE        <= inst_tlb_refillD     ;
-            inst_tlb_invalidE       <= inst_tlb_invalidD    ;
-            movnE                   <= movnD                ;
-            movzE                   <= movzD                ;
-=======
             branchL_E               <=      0   ;
         end 
         else if(~stallE) begin
@@ -210,7 +160,6 @@ module id_ex (
             movnE                   <=  movnD                   ;
             movzE                   <=  movzD                   ;
             branchL_E               <=  branchL_D               ;
->>>>>>> Stashed changes
         end
     end
 

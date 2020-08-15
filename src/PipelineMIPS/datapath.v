@@ -441,11 +441,7 @@ module datapath (
         .inst_tlb_invalidD(inst_tlb_invalidD),
         .movnD(movnD),
         .movzD(movzD),
-<<<<<<< Updated upstream
-
-=======
         .branchL_D(branchL_D),
->>>>>>> Stashed changes
         
         .alu_imm_selD(alu_imm_selD),
         .mem_read_enD(mem_read_enD),
@@ -495,12 +491,8 @@ module datapath (
         .inst_tlb_refillE(inst_tlb_refillE),
         .inst_tlb_invalidE(inst_tlb_invalidE),
         .movnE(movnE),
-<<<<<<< Updated upstream
-        .movzE(movzE)
-=======
         .movzE(movzE),
         .branchL_E(branchL_E)
->>>>>>> Stashed changes
     );
 //EX
     alu alu0(
@@ -594,19 +586,12 @@ module datapath (
         .inst_tlb_invalidE(inst_tlb_invalidE),
         .mem_addrE(mem_addrE),
         .trap_resultE(trap_resultE),
-<<<<<<< Updated upstream
-
-
-        .mem_read_enE(mem_read_enE),	
-        .mem_write_enE(mem_write_enE),
-        .reg_write_enE(reg_write_enE & ~(movnE & rt_valueE == 0 | movzE & rt_valueE != 0)), 
-=======
         .branchL_E(branchL_E),
 
         .mem_read_enE(mem_read_enE),	
         .mem_write_enE(mem_write_enE),
         .reg_write_enE(reg_write_enE & ~(movnE & !(rt_valueE ^ 0) | movzE & (rt_valueE ^ 0)), 
->>>>>>> Stashed changes
+
         .mem_to_regE(mem_to_regE), 	
         .hilo_to_regE(hilo_to_regE),	
         .riE(riE),			
@@ -646,12 +631,8 @@ module datapath (
         .inst_tlb_refillM(inst_tlb_refillM),
         .inst_tlb_invalidM(inst_tlb_invalidM),
         .mem_addrM(mem_addrM),
-<<<<<<< Updated upstream
-        .trap_resultM(trap_resultM)
-=======
         .trap_resultM(trap_resultM),
         .branchL_M(branchL_M)
->>>>>>> Stashed changes
     );
 //MEM
     assign scM = l_s_typeM[8];
