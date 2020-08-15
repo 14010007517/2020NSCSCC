@@ -117,7 +117,6 @@
 //跑PMON时添加
 `define EXE_SEPECIAL    6'b000000
 `define EXE_SEPECIAL2   6'b011100
-`define EXE_CACHE       6'b101111
 `define EXE_PREF        6'b110011
 `define EXE_SYNC        6'b001111
 `define EXE_WAIT        6'b100000
@@ -130,6 +129,17 @@
 `define EXE_MSUB  6'b000100
 `define EXE_MSUBU 6'b000101
 
+`define EXE_CACHE       6'b101111
+//Cache Op
+//I cache
+`define I_IndexInvalid            5'b00000
+`define I_IndexStoreTag           5'b01000
+`define I_HitInvalid              5'b10000
+//D cache
+`define D_IndexWriteBackInvalid   5'b00001
+`define D_IndexStoreTag           5'b01001
+`define D_HitInvalid              5'b10001
+`define D_HitWriteBackInvalid     5'b10101
 
 //Exception code
 `define EXC_CODE_INT        5'h00
@@ -169,6 +179,9 @@
 `define CP0_EBASE       5'd15   //sel=1
 `define CP0_CONFIG      5'd16   //sel=0
 `define CP0_CONFIG1     5'd16   //sel=1
+
+`define CP0_TAG_LO     5'd28   //sel=0
+`define CP0_TAG_HI     5'd29   //sel=0
 
 //status
 `define IE_BIT 0              //全局中断使能

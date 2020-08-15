@@ -23,7 +23,8 @@ module main_decoder(
 	output wire cp0_wenD,
 	output wire cp0_to_regD,
 	output wire [3:0] tlb_typeD,
-	output wire movzD, movnD
+	output wire movzD, movnD,
+	output wire [6:0] cacheD
     //WB
 );
 // declare
@@ -139,11 +140,25 @@ module main_decoder(
 
 	//  B族指令
 			// 可以把B族指令归纳为default中
-			`EXE_CACHE, `EXE_PREF,
+			`EXE_PREF,
 			`EXE_BEQ, `EXE_BNE, `EXE_BLEZ, `EXE_BGTZ,
  			`EXE_BEQL, `EXE_BGTZL, `EXE_BLEZL, `EXE_BNEL: begin
 				regfile_ctrl  =  4'b0;
 				mem_ctrl  =  3'b0;
+			end
+
+			`EXE_CACHE: begin
+				case(rt)
+					`I_IndexStoreTag, `D_IndexStoreTag: begin
+						regfile_ctrl  =  4'b0_00_1;
+						mem_ctrl  =  3'b0;
+					end
+					default: begin
+						riD = 1'b1;
+						regfile_ctrl  =  4'b0_00_0;
+						mem_ctrl  =  3'b0;
+					end
+				endcase
 			end
 
 			`EXE_REGIMM: begin
@@ -259,4 +274,18 @@ module main_decoder(
 	assign instr_lwr	= !(op_code ^ `EXE_LWR);
 	assign instr_swl	= !(op_code ^ `EXE_SWL);
 	assign instr_swr	= !(op_code ^ `EXE_SWR);
+
+
+// CACHE
+	wire I_II, I_IST, I_HI, D_IWI, D_IST, D_HI, D_HWI;
+
+	assign I_II 		=!(op_code ^ `EXE_CACHE) & !(rt ^ `I_IndexInvalid         );
+	assign I_IST	 	=!(op_code ^ `EXE_CACHE) & !(rt ^ `I_IndexStoreTag        );
+	assign I_HI	 		=!(op_code ^ `EXE_CACHE) & !(rt ^ `I_HitInvalid           );
+	assign D_IWI	 	=!(op_code ^ `EXE_CACHE) & !(rt ^ `D_IndexWriteBackInvalid);
+	assign D_IST	 	=!(op_code ^ `EXE_CACHE) & !(rt ^ `D_IndexStoreTag        );
+	assign D_HI	 		=!(op_code ^ `EXE_CACHE) & !(rt ^ `D_HitInvalid           );
+	assign D_HWI	 	=!(op_code ^ `EXE_CACHE) & !(rt ^ `D_HitWriteBackInvalid  );
+
+	assign cacheD = {I_II, I_IST, I_HI, D_IWI, D_IST, D_HI, D_HWI};
 endmodule

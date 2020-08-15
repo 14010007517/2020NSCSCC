@@ -22,6 +22,7 @@ module datapath (
     output wire mem_write_enE,
     input wire d_cache_stall,
     output wire stallM,
+    output wire [6:0] cacheM,
 
     // TLB
     output wire flushM,
@@ -81,6 +82,7 @@ module datapath (
     wire is_divD;
     wire inst_tlb_refillD, inst_tlb_invalidD;
     wire movzD, movnD, movzE, movnE;
+    wire [6:0] cacheD;
 //EX
     wire [31:0] pcE;
     wire [31:0] rd1E, rd2E, mem_wdataE;
@@ -112,6 +114,7 @@ module datapath (
     wire inst_tlb_refillE, inst_tlb_invalidE;
     wire [31:0] adder_resultE;
     wire llE, scE, LLbit;
+    wire [6:0] cacheE;
 //MEM
     wire [31:0] pcM;
     wire [31:0] alu_outM;
@@ -242,7 +245,8 @@ module datapath (
         .cp0_to_regD(cp0_to_regD),
         .tlb_typeD(tlb_typeD),
         .movnD(movnD),
-        .movzD(movzD)
+        .movzD(movzD),
+        .cacheD(cacheD)
     );
     alu_decoder alu_decoder0(
         .instrD(instrD),
@@ -443,6 +447,7 @@ module datapath (
         .movnD(movnD),
         .movzD(movzD),
         .branchL_D(branchL_D),
+        .cacheD(cacheD),
         
         .alu_imm_selD(alu_imm_selD),
         .mem_read_enD(mem_read_enD),
@@ -493,7 +498,8 @@ module datapath (
         .inst_tlb_invalidE(inst_tlb_invalidE),
         .movnE(movnE),
         .movzE(movzE),
-        .branchL_E(branchL_E)
+        .branchL_E(branchL_E),
+        .cacheE(cacheE)
     );
 //EX
     alu alu0(
@@ -602,6 +608,7 @@ module datapath (
         .eretE(eretE),		
         .cp0_wenE(cp0_wenE),		
         .cp0_to_regE(cp0_to_regE),
+        .cacheE(cacheE),
 
         .pcM(pcM),
         .alu_outM(alu_outM),
@@ -634,7 +641,8 @@ module datapath (
         .inst_tlb_invalidM(inst_tlb_invalidM),
         .mem_addrM(mem_addrM),
         .trap_resultM(trap_resultM),
-        .branchL_M(branchL_M)
+        .branchL_M(branchL_M),
+        .cacheM(cacheM)
     );
 //MEM
     assign scM = l_s_typeM[8];

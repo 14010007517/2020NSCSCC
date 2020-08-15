@@ -1,6 +1,10 @@
 module i_cache (
     input wire clk, rst,
     
+    //cache指令
+    input wire [6:0] cacheM,
+    input wire [19:0] data_pfn,
+
     //tlb
     input wire no_cache,
     //datapath
@@ -111,7 +115,11 @@ module i_cache (
     wire data_back;     //一次数据握手成功
     wire read_finish;   //读事务结束
 
-
+    //cache指令
+    wire [1:0] cache_way;
+    assign cache_way = data_pfn[1:0];
+    wire Cache_IndexStoreTag;
+    assign Cache_IndexStoreTag = cacheM[5];
     //-------------debug-------------
     //-------------debug-------------
 
@@ -207,6 +215,9 @@ module i_cache (
                 valid_bits_way[2][tt] <= 0;
                 valid_bits_way[3][tt] <= 0;
             end
+        end
+        else if(Cache_IndexStoreTag) begin
+            valid_bits_way[cache_way][index] <= 0;
         end
         else begin
             valid_bits_way[0][index] <= wena_tag_ram_way[0] ? 1'b1 : valid_bits_way[0][index];

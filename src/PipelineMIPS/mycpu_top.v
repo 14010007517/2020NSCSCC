@@ -119,6 +119,7 @@ module mycpu_top (
     wire [2:0] d_arsize     ;
     wire d_arvalid          ;
     wire d_arready          ;
+    wire [6:0]  cacheM      ;
 
     wire[31:0] d_rdata      ;
     wire d_rlast            ;
@@ -193,6 +194,7 @@ module mycpu_top (
         .mem_write_enE(mem_write_enE),
         .d_cache_stall(d_cache_stall),
         .stallM(stallM),
+        .cacheM(cacheM),
 
         .debug_wb_pc       (debug_wb_pc       ),  
         .debug_wb_rf_wen   (debug_wb_rf_wen   ),  
@@ -249,6 +251,10 @@ module mycpu_top (
     i_cache i_cache(
         .clk(clk), .rst(rst),
 
+        //cache指令
+        .cacheM(cacheM),
+        .data_pfn(data_pfn),    //cache指令都使用tlb的端口2做地址转换
+
         //TLB
         .no_cache(no_cache_i),
         
@@ -276,6 +282,9 @@ module mycpu_top (
 
     d_cache d_cache(
         .clk(clk), .rst(rst),
+
+        //cache指令
+        .cacheM(cacheM),
 
         //TLB
         .no_cache(no_cache_d),

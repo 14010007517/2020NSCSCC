@@ -37,7 +37,7 @@ module id_ex (
     input wire inst_tlb_refillD, inst_tlb_invalidD,
     input wire movnD, movzD,
     input wire branchL_D,
-
+    input wire [6:0] cacheD,
 
     output reg [31:0] pcE,
     output reg [31:0] rd1E, rd2E,
@@ -74,7 +74,8 @@ module id_ex (
     output reg [3:0] tlb_typeE,
     output reg inst_tlb_refillE, inst_tlb_invalidE,
     output reg movnE, movzE,
-    output reg branchL_E
+    output reg branchL_E,
+    output reg [6:0] cacheE
 );
     always @(posedge clk) begin
         if(rst | flushE) begin
@@ -118,6 +119,7 @@ module id_ex (
             movnE                   <=      0   ;
             movzE                   <=      0   ;
             branchL_E               <=      0   ;
+            cacheE                  <=      0   ;
         end 
         else if(~stallE) begin
             pcE                     <=  pcD                     ;
@@ -160,6 +162,7 @@ module id_ex (
             movnE                   <=  movnD                   ;
             movzE                   <=  movzD                   ;
             branchL_E               <=  branchL_D               ;
+            cacheE                  <=  cacheD                  ;
         end
     end
 

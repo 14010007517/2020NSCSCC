@@ -1,6 +1,9 @@
 module d_cache (
     input wire clk, rst,
 
+    //cache指令
+    input wire [6:0] cacheM,
+
     //tlb
     input wire no_cache,
     //datapath
@@ -148,6 +151,12 @@ module d_cache (
     wire data_go;       //写事务一次数据握手成功
     wire read_finish;   //读事务结束
     wire write_finish;  //写事务结束
+
+    //cache指令
+    wire [1:0] cache_way;
+    assign cache_way = data_pfn[1:0];
+    wire Cache_IndexStoreTag;
+    assign Cache_IndexStoreTag = cacheM[2];
 
     //-------------------debug-----------------
     //-------------------debug-----------------
@@ -304,6 +313,9 @@ module d_cache (
                 valid_bits_way[3][tt] <= 0;
             end
         end
+        else if(Cache_IndexStoreTag) begin
+            valid_bits_way[cache_way][index] <= 0;
+        end
         else begin
             valid_bits_way[0][index] <= wena_tag_ram_way[0] ? 1'b1 : valid_bits_way[0][index];
             valid_bits_way[1][index] <= wena_tag_ram_way[1] ? 1'b1 : valid_bits_way[1][index];
@@ -332,6 +344,9 @@ module d_cache (
                 dirty_bits_way[2][tt] <= 0;
                 dirty_bits_way[3][tt] <= 0;
             end
+        end
+        else if(Cache_IndexStoreTag) begin
+            dirty_bits_way[cache_way][index] <= 0;
         end
         else begin
             if(write_dirty_bit_en) begin

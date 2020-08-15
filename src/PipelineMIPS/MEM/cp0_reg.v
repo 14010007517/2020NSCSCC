@@ -61,6 +61,9 @@ module cp0_reg(
    reg [31:0] ebase_reg;   //15, 1
    reg [31:0] config_reg;  //16, 0
    reg [31:0] config1_reg; //16, 1
+
+   reg [31:0] tag_hi_reg;
+   reg [31:0] tag_lo_reg;
    //-------------------------------------------
 
    //cp0输出
@@ -93,6 +96,9 @@ module cp0_reg(
          ebase_reg      <= 32'h8000_0000;
 
          wired_reg      <= 32'b0;
+
+         tag_hi_reg     <= 32'b0;
+         tag_lo_reg     <= 32'b0;
       end
       else if(wen) begin
          case (addr)
@@ -109,6 +115,12 @@ module cp0_reg(
             end
             `CP0_WIRED: begin
                wired_reg[`WIRED_BITS] <= wdata[`WIRED_BITS];
+            end
+            `CP0_TAG_HI: begin
+               tag_hi_reg <= wdata;
+            end
+            `CP0_TAG_LO: begin
+               tag_lo_reg <= wdata;
             end
             default: begin
                /**/
@@ -344,6 +356,12 @@ module cp0_reg(
          end
          `CP0_CONFIG   : begin
  				rdata = (sel==3'b000) ? config_reg : config1_reg;         
+         end
+         `CP0_TAG_HI: begin
+            rdata = tag_hi_reg;
+         end
+         `CP0_TAG_LO: begin
+            rdata = tag_lo_reg;
          end
          default:
             rdata = 32'b0;
