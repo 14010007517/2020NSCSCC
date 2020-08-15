@@ -263,6 +263,7 @@ module datapath (
         .flush_pred_failedM     (flush_pred_failedM),
         .flush_exceptionM       (flush_exceptionM),
         .branchL_M(branchL_M),
+        .actual_takeM(actual_takeM),
 
         .rsE(rsE),  .rsD(rsD),
         .rtE(rtE),  .rtD(rtD),

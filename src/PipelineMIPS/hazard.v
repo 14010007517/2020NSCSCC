@@ -7,7 +7,7 @@ module hazard (
     input wire [13:0] l_s_typeE,
 
     input wire flush_jump_confilctE, flush_pred_failedM, flush_exceptionM,
-    input wire branchL_M,
+    input wire branchL_M, actual_takeM,
 
     input wire [4:0] rsE, rsD,
     input wire [4:0] rtE, rtD,
@@ -18,6 +18,9 @@ module hazard (
     output wire flushF, flushD, flushE, flushM, flushW,
     output wire [1:0] forward_aE, forward_bE
 );
+    wire flush_branch_likely_M;
+    wire flush_branch_likely_M = ~actual_takeM & branchL_M;
+
     assign forward_aE = rsE != 0 && reg_write_enM && (rsE == reg_writeM) ? 2'b01 :
                         rsE != 0 && reg_write_enW && (rsE == reg_writeW) ? 2'b10 :
                         2'b00;
@@ -42,7 +45,7 @@ module hazard (
     */
     assign flushF = 1'b0;
     assign flushD = flush_exceptionM;
-    assign flushE = flush_exceptionM | (flush_pred_failedM & ~longest_stall) | (stall_ltypeD & ~longest_stall);     
-    assign flushM = flush_exceptionM | (flush_pred_failedM & branchL_M);
+    assign flushE = flush_exceptionM | (flush_pred_failedM & ~longest_stall) | (stall_ltypeD & ~longest_stall) ;     
+    assign flushM = flush_exceptionM | (flush_branch_likely_M & ~longest_stall);
     assign flushW = 1'b0;
 endmodule
