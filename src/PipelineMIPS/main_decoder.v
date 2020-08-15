@@ -139,8 +139,10 @@ module main_decoder(
 
 	//  B族指令
 			// 可以把B族指令归纳为default中
-			`EXE_BEQ, `EXE_BNE, `EXE_BLEZ, `EXE_BGTZ: begin
-				regfile_ctrl  =  4'b0_00_0;
+			`EXE_CACHE, `EXE_PREF,
+			`EXE_BEQ, `EXE_BNE, `EXE_BLEZ, `EXE_BGTZ,
+ 			`EXE_BEQL, `EXE_BGTZL, `EXE_BLEZL, `EXE_BNEL: begin
+				regfile_ctrl  =  4'b0;
 				mem_ctrl  =  3'b0;
 			end
 
@@ -228,12 +230,6 @@ module main_decoder(
 						mem_ctrl  		= 3'b0;
 					end 
 				endcase
-			end
-
-			`EXE_CACHE, `EXE_PREF,
- 			`EXE_BEQL, `EXE_BGTZL, `EXE_BLEZL, `EXE_BNEL:begin
-				regfile_ctrl  =  4'b0;
-				mem_ctrl  =  3'b0;
 			end
 			default: begin
 				riD  =  1;

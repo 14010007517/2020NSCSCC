@@ -159,6 +159,7 @@ module datapath (
     wire [31:0] rt_valueM;
     wire inst_tlb_refillM, inst_tlb_invalidM;
     wire scM;
+    wire flush_branch_likely_M;
 //WB
     wire [31:0] pcW;
     wire reg_write_enW;
@@ -262,8 +263,7 @@ module datapath (
         .flush_jump_confilctE   (flush_jump_confilctE),
         .flush_pred_failedM     (flush_pred_failedM),
         .flush_exceptionM       (flush_exceptionM),
-        .branchL_M(branchL_M),
-        .actual_takeM(actual_takeM),
+        .flush_branch_likely_M(flush_branch_likely_M),
 
         .rsE(rsE),  .rsD(rsD),
         .rtE(rtE),  .rtD(rtD),
@@ -501,6 +501,7 @@ module datapath (
         .rst(rst),
         .flushE(flushE),
         .flush_exceptionM(flush_exceptionM),
+        .flush_branch_likely_M(flush_branch_likely_M),
         .stallM(stallM),
         .src_aE(src_aE), .src_bE(src_bE),
         .alu_controlE(alu_controlE),
@@ -740,6 +741,9 @@ module datapath (
     //branch predict result
     assign succM = ~(pred_takeM ^ actual_takeM);
     assign flush_pred_failedM = ~succM;
+
+    //branch likely flush
+    assign flush_branch_likely_M = ~actual_takeM & branchL_M;
 
 //MEM_WB
     mem_wb mem_wb0(

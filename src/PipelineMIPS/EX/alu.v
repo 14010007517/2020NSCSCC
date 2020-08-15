@@ -4,6 +4,7 @@ module alu (
     input wire clk, rst,
     input wire flushE,
     input wire flush_exceptionM,
+    input wire flush_branch_likely_M,
     input wire stallM,
     input wire [31:0] src_aE, src_bE,
     input wire [5:0] alu_controlE,
@@ -230,11 +231,11 @@ module alu (
     wire div_res_ready;
 
     assign div_res_ready = div_valid & ~stallM;
-    assign div_stallE = div_valid & ~div_res_valid & ~flush_exceptionM;
+    assign div_stallE = div_valid & ~div_res_valid & ~flush_exceptionM & ~flush_branch_likely_M;
 
 	div_radix2 DIV(
 		.clk(clk),
-		.rst(rst | flushE),
+		.rst(rst | flushE | flush_branch_likely_M),
 		.a(src_aE),         //divident
 		.b(src_bE),         //divisor
 		.sign(div_sign),    //1 signed
@@ -264,14 +265,14 @@ module alu (
 
     assign unsigned_mult_ce = ~mult_sign & mult_valid & ~mult_ready;
     assign signed_mult_ce = mult_sign & mult_valid & ~mult_ready;
-    assign mult_stallE = mult_valid & ~mult_ready & ~flush_exceptionM;
+    assign mult_stallE = mult_valid & ~mult_ready & ~flush_exceptionM & ~flush_branch_likely_M;
 
     signed_mult signed_mult0 (
         .CLK(clk),  // input wire CLK
         .A(src_aE),      // input wire [31 : 0] A
         .B(src_bE),      // input wire [31 : 0] B
         .CE(signed_mult_ce),    // input wire CE
-        .SCLR(flushE),
+        .SCLR(flushE | flush_branch_likely_M),
         .P(alu_out_signed_mult)      // output wire [63 : 0] P
     );
 
@@ -280,7 +281,7 @@ module alu (
         .A(src_aE),      // input wire [31 : 0] A
         .B(src_bE),      // input wire [31 : 0] B
         .CE(unsigned_mult_ce),    // input wire CE
-        .SCLR(flushE),
+        .SCLR(flushE | flush_branch_likely_M),
         .P(alu_out_unsigned_mult)      // output wire [63 : 0] P
     );
 

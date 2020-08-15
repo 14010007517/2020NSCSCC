@@ -13,13 +13,19 @@ module branch_predict (
     output wire branchL_D,
     output wire pred_takeD
 );
-
-    assign branchD = ( !(instrD[31:26] ^ `EXE_REGIMM) & (!(instrD[19:17] ^ 3'b000) | !(instrD[19:17] ^ 3'b001)) ) 
-                    | !(instrD[31:28] ^ 4'b0001); //4'b0001 -> beq, bgtz, blez, bne
+    wire [5:0] op_code, funct;
+    wire [4:0] rt;
+    assign op_code = instrD[31:26];
+	assign rs = instrD[25:21];
+	assign rt = instrD[20:16];
+	assign funct = instrD[5:0];
+    
+    assign branchD = ( !(op_code ^ `EXE_REGIMM) & (!(instrD[19:17] ^ 3'b000) | !(instrD[19:17] ^ 3'b001)) ) 
+                    | !(op_code[5:2] ^ 4'b0001); //4'b0001 -> beq, bgtz, blez, bne
                                                     // 3'b000 -> BLTZ BLTZAL BGEZAL BGEZ
                                                     // 3'b001 -> BGEZALL BGEZL BLTZALL BLTZL
-    assign branchL_D = ( !(instrD[31:26] ^ `EXE_REGIMM) & !(instrD[19:17] ^ 3'b001) );
-
+    assign branchL_D = ( !(op_code ^ `EXE_REGIMM) & !(instrD[19:17] ^ 3'b001) ) |
+                         !(op_code[5:2] ^ 4'b0101); //beql, bgtzl, blezl, bnel
 
     parameter Strongly_not_taken = 2'b00, Weakly_not_taken = 2'b01, Weakly_taken = 2'b11, Strongly_taken = 2'b10;
     parameter PHT_DEPTH = 6;
