@@ -254,6 +254,7 @@ module mycpu_top (
         //cache指令
         .cacheM(cacheM),
         .data_pfn(data_pfn),    //cache指令都使用tlb的端口2做地址转换
+        .data_vaddrM(data_addr),
 
         //TLB
         .no_cache(no_cache_i),

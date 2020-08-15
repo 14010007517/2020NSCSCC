@@ -3,6 +3,7 @@ module i_cache (
     
     //cache指令
     input wire [6:0] cacheM,
+    input wire [31:0] data_vaddrM,
     input wire [19:0] data_pfn,
 
     //tlb
@@ -117,6 +118,8 @@ module i_cache (
 
     //cache指令
     wire [1:0] cache_way;
+    wire [INDEX_WIDTH-1: 0] cache_index;
+    assign cache_index = data_vaddrM[INDEX_WIDTH+OFFSET_WIDTH-1 : OFFSET_WIDTH];
     assign cache_way = data_pfn[1:0];
     wire Cache_IndexStoreTag;
     assign Cache_IndexStoreTag = cacheM[5];
@@ -217,7 +220,7 @@ module i_cache (
             end
         end
         else if(Cache_IndexStoreTag) begin
-            valid_bits_way[cache_way][index] <= 0;
+            valid_bits_way[cache_way][cache_index] <= 0;
         end
         else begin
             valid_bits_way[0][index] <= wena_tag_ram_way[0] ? 1'b1 : valid_bits_way[0][index];
