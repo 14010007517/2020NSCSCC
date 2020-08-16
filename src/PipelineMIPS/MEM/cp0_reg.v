@@ -93,7 +93,7 @@ module cp0_reg(
          config_reg     <= `CONFIG_INIT;
          config1_reg    <= `CONFIG1_INIT;
          prid_reg       <= `PRID_INIT;
-         ebase_reg      <= 32'h8000_0000;
+         ebase_reg      <= 32'h8000_0000; //初始化最高位为1
 
          wired_reg      <= 32'b0;
 
@@ -106,7 +106,7 @@ module cp0_reg(
                compare_reg <= wdata;
             end
             `CP0_EBASE: begin
-               ebase_reg <= wdata;
+               ebase_reg[`EXCEPTION_BASE_BITS] <= wdata[`EXCEPTION_BASE_BITS];
             end
             `CP0_CONFIG: begin   //不会写config1
                config_reg[`K23_BITS] <= wdata[`K23_BITS];

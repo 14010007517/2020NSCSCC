@@ -232,6 +232,10 @@
 //prid (read only)
 `define PRID_INIT  32'h00004220;
 
+//ebase
+//最高位读出为1
+`define EXCEPTION_BASE_BITS 29:12
+
 //TLB
 //TLB Config
 `define TLB_LINE_NUM 32
