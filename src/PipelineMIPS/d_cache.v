@@ -157,19 +157,23 @@ module d_cache (
     assign HitWriteBackInvalid = cacheM[0];
     assign HitWriteBackInvalidE = cacheE[0];
 
-    wire cache_dirty;
+    wire cache_dirty, cache_hit_dirty;
     assign cache_dirty = dirty_bits_way[cache_way][index];
-    wire cache_hit_dirty;
-    // assign cache_hit_dirty = hit & dirty_bits_way[sel][index];
-    assign cache_hit_dirty = 0; // 优化时序
+    wire [3:0] cache_hit_dirty_t;
+    assign cache_hit_dirty_t[0] = dirty_bits_way[0][index];
+    assign cache_hit_dirty_t[1] = dirty_bits_way[1][index];
+    assign cache_hit_dirty_t[2] = dirty_bits_way[2][index];
+    assign cache_hit_dirty_t[3] = dirty_bits_way[3][index];
+    assign cache_hit_dirty = hit & cache_hit_dirty_t[sel];
+    // assign cache_hit_dirty = 0; // 优化时序
 
     //-------------------debug-----------------
     //-------------------debug-----------------
 
-    assign sel_mask[0] = valid_way[0] & (tag_way[0][TAG_WIDTH:1] == tag); 
-    assign sel_mask[1] = valid_way[1] & (tag_way[1][TAG_WIDTH:1] == tag); 
-    assign sel_mask[2] = valid_way[2] & (tag_way[2][TAG_WIDTH:1] == tag); 
-    assign sel_mask[3] = valid_way[3] & (tag_way[3][TAG_WIDTH:1] == tag); 
+    assign sel_mask[0] = valid_way[0] & !(tag_way[0][TAG_WIDTH:1] ^ tag); 
+    assign sel_mask[1] = valid_way[1] & !(tag_way[1][TAG_WIDTH:1] ^ tag); 
+    assign sel_mask[2] = valid_way[2] & !(tag_way[2][TAG_WIDTH:1] ^ tag); 
+    assign sel_mask[3] = valid_way[3] & !(tag_way[3][TAG_WIDTH:1] ^ tag); 
 
     encoder4x2 encoder0(sel_mask, sel);
 
@@ -214,7 +218,7 @@ module d_cache (
         end
     end
 
-    assign stall = ~(state==IDLE || (state==HitJudge) && hit && ~no_cache || ~data_en) || (IndexWriteBackInvalid & cache_dirty & ~write_finish) || (HitWriteBackInvalid & cache_hit_dirty & ~write_finish);
+    assign stall = ~( !(state^IDLE) || !(state^HitJudge) && hit && ~no_cache || ~data_en) || (IndexWriteBackInvalid & cache_dirty) || (HitWriteBackInvalid & cache_hit_dirty);
     assign data_rdata = hit & ~no_cache & ~collisionM ? block_sel_way[sel]:
                         collisionM     ? data_wdata_r: saved_rdata;
 //AXI
