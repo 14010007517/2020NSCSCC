@@ -3,6 +3,7 @@ module d_cache (
 
     //cache指令
     input wire [6:0] cacheM,
+    input wire [6:0] cacheE,
 
     //tlb
     input wire no_cache,
@@ -155,9 +156,13 @@ module d_cache (
     //cache指令
     wire [1:0] cache_way;
     assign cache_way = data_pfn[1:0];
-    wire Cache_IndexStoreTag;
-    assign Cache_IndexStoreTag = cacheM[2];
+    wire IndexStoreTag, IndexWriteBackInvalid, IndexWriteBackInvalidE;
+    assign IndexStoreTag = cacheM[2];
+    assign IndexWriteBackInvalid = cacheM[3];
+    assign IndexWriteBackInvalidE = cacheE[3];
 
+    wire cache_dirty;
+    assign cache_dirty = dirty_bits_way[cache_way][index];
     //-------------------debug-----------------
     //-------------------debug-----------------
 //FSM
@@ -193,7 +198,7 @@ module d_cache (
         collisionM <= rst ? 0 : collisionE;
     end
 
-    assign stall = ~(state==IDLE || (state==HitJudge) && hit && ~no_cache || ~data_en);
+    assign stall = ~(state==IDLE || (state==HitJudge) && hit && ~no_cache || ~data_en) || (IndexWriteBackInvalid & cache_dirty & ~write_finish);
     assign data_rdata = hit & ~no_cache & ~collisionM ? block_sel_way[sel]:
                         collisionM     ? data_wdata_r: saved_rdata;
 //AXI
@@ -204,8 +209,9 @@ module d_cache (
                     read_finish      ? 1'b0 : read_req;
         
         write_req <= (rst)              ? 1'b0 :
-                     ~no_cache & data_en && (state == HitJudge) && miss && dirty && !write_req ? 1'b1 :
-                     write & no_cache & (state == HitJudge) & ~read_req ? 1'b1 :
+                     ~no_cache && data_en && (state == HitJudge) && miss && dirty && !write_req ? 1'b1 :
+                     write & no_cache & (state == HitJudge) & ~write_req ? 1'b1 :
+                     IndexWriteBackInvalid & cache_dirty & ~write_req ? 1'b1:
                      write_finish       ? 1'b0 : write_req;
     end
     
@@ -264,16 +270,20 @@ module d_cache (
             {TAG_WIDTH{evict_mask[2]}} & tag_way[2][TAG_WIDTH : 1]|
             {TAG_WIDTH{evict_mask[3]}} & tag_way[3][TAG_WIDTH : 1]
         ), index} <<OFFSET_WIDTH;
+    
+    wire [31:0] cache_dirty_write_addr;
+    assign cache_dirty_write_addr = {tag_way[cache_way][TAG_WIDTH : 1], index} << OFFSET_WIDTH;
 
-
-    assign awaddr = ~no_cache ? dirty_write_addr : data_paddr;
+    assign awaddr = IndexWriteBackInvalid & cache_dirty ? cache_dirty_write_addr :
+                    ~no_cache ? dirty_write_addr : data_paddr;
     assign awlen = ~no_cache ? BLOCK_NUM-1 : 4'd0;
     assign awsize = ~no_cache ? 4'b10 :
                                 data_wen==4'b1111 ? 4'b10:
                                 data_wen==4'b1100 || data_wen==4'b0011 ? 4'b01: 4'b00;
     assign awvalid = write_req & ~waddr_rcv;
 
-    assign wdata = ~no_cache ? block_way[evict_way][wcnt] : data_wdata;
+    assign wdata = IndexWriteBackInvalid & cache_dirty ? block_way[cache_way][wcnt] :
+                    ~no_cache ? block_way[evict_way][wcnt] : data_wdata;
 
     assign wstrb = ~no_cache ? 4'b1111 : data_wen;
     assign wlast = wcnt==awlen;
@@ -313,7 +323,7 @@ module d_cache (
                 valid_bits_way[3][tt] <= 0;
             end
         end
-        else if(Cache_IndexStoreTag) begin
+        else if(IndexStoreTag | IndexWriteBackInvalid) begin
             valid_bits_way[cache_way][index] <= 0;
         end
         else begin
@@ -345,7 +355,7 @@ module d_cache (
                 dirty_bits_way[3][tt] <= 0;
             end
         end
-        else if(Cache_IndexStoreTag) begin
+        else if(IndexStoreTag | (IndexWriteBackInvalid & write_finish)) begin
             dirty_bits_way[cache_way][index] <= 0;
         end
         else begin
@@ -361,8 +371,8 @@ module d_cache (
     end
 //cache ram
     //read
-    assign enb_tag_ram = (mem_read_enE || mem_write_enE) && ~stallM; 
-    assign enb_data_bank = (mem_read_enE || mem_write_enE) && ~stallM; //#sw时，不用读取data# 改：sw遇到miss和dirty, 仍然需要读 #除非延迟一个周期写。
+    assign enb_tag_ram = (mem_read_enE || mem_write_enE || IndexWriteBackInvalidE) && ~stallM; 
+    assign enb_data_bank = (mem_read_enE || mem_write_enE || IndexWriteBackInvalidE) && ~stallM; //#sw时，不用读取data# 改：sw遇到miss和dirty, 仍然需要读 #除非延迟一个周期写。
 
     assign addrb = indexE;  //read: 读tag ram和data ram; write: 读tag ram
     //write

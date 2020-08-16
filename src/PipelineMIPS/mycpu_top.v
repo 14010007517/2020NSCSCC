@@ -120,6 +120,7 @@ module mycpu_top (
     wire d_arvalid          ;
     wire d_arready          ;
     wire [6:0]  cacheM      ;
+    wire [6:0]  cacheE      ;
 
     wire[31:0] d_rdata      ;
     wire d_rlast            ;
@@ -195,6 +196,7 @@ module mycpu_top (
         .d_cache_stall(d_cache_stall),
         .stallM(stallM),
         .cacheM(cacheM),
+        .cacheE(cacheE),
 
         .debug_wb_pc       (debug_wb_pc       ),  
         .debug_wb_rf_wen   (debug_wb_rf_wen   ),  
@@ -286,6 +288,7 @@ module mycpu_top (
 
         //cache指令
         .cacheM(cacheM),
+        .cacheE(cacheE),
 
         //TLB
         .no_cache(no_cache_d),

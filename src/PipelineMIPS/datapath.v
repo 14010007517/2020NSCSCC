@@ -22,7 +22,7 @@ module datapath (
     output wire mem_write_enE,
     input wire d_cache_stall,
     output wire stallM,
-    output wire [6:0] cacheM,
+    output wire [6:0] cacheM, cacheE,
 
     // TLB
     output wire flushM,
@@ -114,7 +114,6 @@ module datapath (
     wire inst_tlb_refillE, inst_tlb_invalidE;
     wire [31:0] adder_resultE;
     wire llE, scE, LLbit;
-    wire [6:0] cacheE;
 //MEM
     wire [31:0] pcM;
     wire [31:0] alu_outM;

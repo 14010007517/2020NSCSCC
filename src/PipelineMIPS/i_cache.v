@@ -122,7 +122,9 @@ module i_cache (
     assign cache_index = data_vaddrM[INDEX_WIDTH+OFFSET_WIDTH-1 : OFFSET_WIDTH];
     assign cache_way = data_pfn[1:0];
     wire Cache_IndexStoreTag;
+    wire Cache_IndexInvalid;
     assign Cache_IndexStoreTag = cacheM[5];
+    assign Cache_IndexInvalid = cacheM[6];
     //-------------debug-------------
     //-------------debug-------------
 
@@ -219,7 +221,7 @@ module i_cache (
                 valid_bits_way[3][tt] <= 0;
             end
         end
-        else if(Cache_IndexStoreTag) begin
+        else if(Cache_IndexStoreTag | Cache_IndexInvalid) begin
             valid_bits_way[cache_way][cache_index] <= 0;
         end
         else begin
