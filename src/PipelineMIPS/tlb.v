@@ -61,11 +61,11 @@ assign vaddr1 = inst_vaddr;
     //端口2查找地址来源有load/store类指令的地址，和TLBP时的EntryHi
 assign vaddr2 = TLBP ? EntryHi_in : data_vaddr;
 
-wire [`TLB_LINE_NUM-1: 0] find_mask1, find_mask2;
-wire [`LOG2_TLB_LINE_NUM-1:0] find_index1, find_index2;
-reg [`LOG2_TLB_LINE_NUM-1:0] find_index2_r;
+wire  [`TLB_LINE_NUM-1: 0]     find_mask1, find_mask2       ;
+wire  [`LOG2_TLB_LINE_NUM-1:0] find_index1, find_index2     ;
+reg   [`LOG2_TLB_LINE_NUM-1:0] find_index1_r, find_index2_r ;
 wire find1, find2;
-reg find2_r;
+reg find1_r, find2_r;
 assign find1 = |find_mask1;
 assign find2 = |find_mask2;
 
@@ -150,24 +150,72 @@ assign find_index1=
 
 //--------------------------读TLB逻辑-----------------------------
 wire [`LOG2_TLB_LINE_NUM-1: 0] index1, index2;
-assign index1 = find_index1;
-assign index2 = TLBR ? Index_in[`INDEX_BITS] : find_index2_r;
+assign index1 = find_index1_r;
+// assign index2 = TLBR ? Index_in[`INDEX_BITS] : find_index2_r;
+// assign index1 = find_index1;
+assign index2 = TLBR ? Index_in[`INDEX_BITS] : find_index2;
 
 wire [31:0] EntryLo0_read1;
 wire [31:0] EntryLo1_read1;
 
-wire [31:0] EntryHi_read2;
-wire [31:0] PageMask_read2;
-wire [31:0] EntryLo0_read2;
-wire [31:0] EntryLo1_read2;
+// wire [31:0] EntryHi_read2;
+// wire [31:0] PageMask_read2;
+// wire [31:0] EntryLo0_read2;
+// wire [31:0] EntryLo1_read2;
 
-assign EntryLo0_read1 = TLB_EntryLo0[index1];
-assign EntryLo1_read1 = TLB_EntryLo1[index1];
+// reg [31:0] EntryLo0_read1;
+// reg [31:0] EntryLo1_read1;
 
-assign EntryHi_read2  = TLB_EntryHi[index2];
-assign PageMask_read2 = TLB_PageMask[index2];
-assign EntryLo0_read2 = TLB_EntryLo0[index2];
-assign EntryLo1_read2 = TLB_EntryLo1[index2];
+reg [31:0] EntryHi_read2;
+reg [31:0] PageMask_read2;
+reg [31:0] EntryLo0_read2;
+reg [31:0] EntryLo1_read2;
+
+// wire [31:0] EntryLo0_read1_r;
+// wire [31:0] EntryLo1_read1_r;
+
+wire [31:0] EntryHi_read2_r;
+wire [31:0] PageMask_read2_r;
+wire [31:0] EntryLo0_read2_r;
+wire [31:0] EntryLo1_read2_r;
+
+assign EntryLo0_read1 =TLB_EntryLo0[index1];
+assign EntryLo1_read1 =TLB_EntryLo1[index1];
+
+// assign EntryLo0_read1_r =TLB_EntryLo0[index1];
+// assign EntryLo1_read1_r =TLB_EntryLo1[index1];
+
+assign EntryHi_read2_r  =TLB_EntryHi[index2];
+assign PageMask_read2_r =TLB_PageMask[index2];
+assign EntryLo0_read2_r =TLB_EntryLo0[index2];
+assign EntryLo1_read2_r =TLB_EntryLo1[index2];
+
+always @(posedge clk) begin
+    if(rst | flushM) begin
+        // EntryLo0_read1  <= 0;
+        // EntryLo1_read1  <= 0;
+        EntryHi_read2   <= 0;
+        PageMask_read2  <= 0;
+        EntryLo0_read2  <= 0;
+        EntryLo1_read2  <= 0;
+    end
+    else if(~stallM) begin
+        // EntryLo0_read1  <= EntryLo0_read1_r;
+        // EntryLo1_read1  <= EntryLo1_read1_r;
+        EntryHi_read2   <= EntryHi_read2_r ;
+        PageMask_read2  <= PageMask_read2_r;
+        EntryLo0_read2  <= EntryLo0_read2_r;
+        EntryLo1_read2  <= EntryLo1_read2_r;
+    end 
+end
+
+// assign EntryLo0_read1 = TLB_EntryLo0[index1];
+// assign EntryLo1_read1 = TLB_EntryLo1[index1];
+
+// assign EntryHi_read2  = TLB_EntryHi[index2];
+// assign PageMask_read2 = TLB_PageMask[index2];
+// assign EntryLo0_read2 = TLB_EntryLo0[index2];
+// assign EntryLo1_read2 = TLB_EntryLo1[index2];
 //--------------------------读TLB逻辑-----------------------------
 
 //--------------------------写TLB逻辑-----------------------------
@@ -231,23 +279,26 @@ assign no_cache_d = data_kseg01M ? (data_kseg1M ? 1'b1 : 1'b0) :
                     data_flag[`C_BITS]==3'b010 ? 1'b1 : 1'b0;
 
 /*inst地址映射*/
-wire inst_odd;
-assign inst_odd = inst_vaddr[`OFFSET_WIDTH];
+wire inst_oddE;
+reg inst_oddM;
+assign inst_oddE = inst_vaddr[`OFFSET_WIDTH];
 
-wire inst_kseg01, inst_kseg1;
-assign inst_kseg01 = inst_vaddr[31:30]==2'b10 ? 1'b1 : 1'b0;
-assign inst_kseg1 = inst_vaddr[31:29]==3'b101 ? 1'b1 : 1'b0;
+wire inst_kseg01E, inst_kseg1E;
+reg  inst_kseg01M, inst_kseg1M;
+assign inst_kseg01E = inst_vaddr[31:30]==2'b10 ? 1'b1 : 1'b0;
+assign inst_kseg1E = inst_vaddr[31:29]==3'b101 ? 1'b1 : 1'b0;
 
-wire [`TAG_WIDTH-1:0] inst_vpn;
-assign inst_vpn = inst_vaddr[31:`OFFSET_WIDTH];
+wire [`TAG_WIDTH-1:0] inst_vpnE;
+reg [`TAG_WIDTH-1:0] inst_vpnM;
+assign inst_vpnE = inst_vaddr[31:`OFFSET_WIDTH];
 
-assign inst_pfn = inst_kseg01? {3'b0, inst_vpn[`TAG_WIDTH-4:0]} :
-                 ~inst_odd   ? EntryLo0_read1[`PFN_BITS] : EntryLo1_read1[`PFN_BITS];
+assign inst_pfn = inst_kseg01M? {3'b0, inst_vpnM[`TAG_WIDTH-4:0]} :
+                 ~inst_oddM  ? EntryLo0_read1[`PFN_BITS] : EntryLo1_read1[`PFN_BITS];
 
 wire [5:0] inst_flag;
-assign inst_flag = ~inst_odd ? EntryLo0_read1[`FLAG_BITS] : EntryLo1_read1[`FLAG_BITS];
+assign inst_flag = ~inst_oddM ? EntryLo0_read1[`FLAG_BITS] : EntryLo1_read1[`FLAG_BITS];
 
-assign no_cache_i = inst_kseg01 ? (inst_kseg1 ? 1'b1 : 1'b0) :
+assign no_cache_i = inst_kseg01M ? (inst_kseg1M ? 1'b1 : 1'b0) :
                     inst_flag[`C_BITS]==3'b010 ? 1'b1 : 1'b0;
 
 /*TLB指令*/
@@ -262,8 +313,8 @@ assign Index_out    = find2 ? find_index2 : 32'h8000_0000;
 
 //异常
     //取指TLB异常
-assign inst_tlb_refill  = inst_kseg01 ? 1'b0 : (inst_en & ~find1);
-assign inst_tlb_invalid = inst_kseg01 ? 1'b0 : (inst_en & find1 & ~inst_flag[`V_BIT]);
+assign inst_tlb_refill  = inst_kseg01M ? 1'b0 : (inst_en & ~find1_r);
+assign inst_tlb_invalid = inst_kseg01M ? 1'b0 : (inst_en & find1_r & ~inst_flag[`V_BIT]);
 
     //load/store TLB异常
 wire data_V, data_D;
@@ -279,20 +330,36 @@ assign data_tlb_modify  = data_kseg01M ? 1'b0 : mem_write_enM & find2_r & data_V
 //--------------------------pipeline---------------------------------
 always @(posedge clk) begin
     if(rst | flushM) begin
-        find_index2_r   <= 0;
+        find1_r         <= 0;
         find2_r         <= 0;
+        find_index1_r   <= 0;
+        find_index2_r   <= 0;
+
         data_oddM       <= 0;
         data_kseg01M    <= 0;
         data_kseg1M     <= 0;
         data_vpnM       <= 0;
+
+        inst_oddM       <= 0;
+        inst_kseg01M    <= 0;
+        inst_kseg1M     <= 0;
+        inst_vpnM       <= 0;
     end
     else if(~stallM) begin
-        find_index2_r   <= find_index2  ;
+        find1_r         <= find1        ;
         find2_r         <= find2        ;
+        find_index1_r   <= find_index1  ;
+        find_index2_r   <= find_index2  ;
+
         data_oddM       <= data_oddE    ;
         data_kseg01M    <= data_kseg01E ;
         data_kseg1M     <= data_kseg1E  ;
         data_vpnM       <= data_vpnE    ;
+
+        inst_oddM       <= inst_oddE    ;
+        inst_kseg01M    <= inst_kseg01E ;
+        inst_kseg1M     <= inst_kseg1E  ;
+        inst_vpnM       <= inst_vpnE    ;
     end
 end
 //--------------------------pipeline---------------------------------
