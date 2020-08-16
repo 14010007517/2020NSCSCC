@@ -272,7 +272,9 @@ reg data_kseg01M;
 wire data_kseg1E;
 reg data_kseg1M;
 assign data_kseg01E = data_vaddr[31:30]==2'b10 ? 1'b1 : 1'b0;
-assign data_kseg1E = data_vaddr[31:29]==3'b101 ? 1'b1 : 1'b0;
+assign data_kseg1E = data_vaddr[31:29]==3'b101 
+                    || (data_vaddr[31] & ~(|data_vaddr[30:22]) & (|data_vaddr[21:20])) //8010_0000 - 803F_FFFF 为跑监控程序时用户代码空间。直接设置为非cache，从而不用实现i_cache和d_cache的一致性
+                    ? 1'b1 : 1'b0;
 
 wire [`TAG_WIDTH-1:0] data_vpnE;
 reg [`TAG_WIDTH-1:0] data_vpnM;
