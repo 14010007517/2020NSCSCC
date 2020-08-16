@@ -2,7 +2,7 @@
 
 module tlb (
     input wire clk, rst,
-    input wire stallM, flushM,
+    input wire stallM, flushM, stallF,
     input wire [31:0] inst_vaddr,
     input wire [31:0] data_vaddr,
     input wire inst_en,
@@ -166,18 +166,16 @@ wire [31:0] EntryLo1_read1;
 // reg [31:0] EntryLo0_read1;
 // reg [31:0] EntryLo1_read1;
 
-reg [31:0] EntryHi_read2;
-reg [31:0] PageMask_read2;
-reg [31:0] EntryLo0_read2;
-reg [31:0] EntryLo1_read2;
+wire [31:0] EntryHi_read2;
+wire [31:0] PageMask_read2;
+wire [31:0] EntryLo0_read2;
+wire [31:0] EntryLo1_read2;
 
 // wire [31:0] EntryLo0_read1_r;
 // wire [31:0] EntryLo1_read1_r;
 
-wire [31:0] EntryHi_read2_r;
-wire [31:0] PageMask_read2_r;
-wire [31:0] EntryLo0_read2_r;
-wire [31:0] EntryLo1_read2_r;
+reg [31:0] EntryLo0_read2_r;
+reg [31:0] EntryLo1_read2_r;
 
 assign EntryLo0_read1 =TLB_EntryLo0[index1];
 assign EntryLo1_read1 =TLB_EntryLo1[index1];
@@ -185,27 +183,23 @@ assign EntryLo1_read1 =TLB_EntryLo1[index1];
 // assign EntryLo0_read1_r =TLB_EntryLo0[index1];
 // assign EntryLo1_read1_r =TLB_EntryLo1[index1];
 
-assign EntryHi_read2_r  =TLB_EntryHi[index2];
-assign PageMask_read2_r =TLB_PageMask[index2];
-assign EntryLo0_read2_r =TLB_EntryLo0[index2];
-assign EntryLo1_read2_r =TLB_EntryLo1[index2];
+assign EntryHi_read2  =TLB_EntryHi[index2];
+assign PageMask_read2 =TLB_PageMask[index2];
+assign EntryLo0_read2 =TLB_EntryLo0[index2];
+assign EntryLo1_read2 =TLB_EntryLo1[index2];
 
 always @(posedge clk) begin
     if(rst | flushM) begin
         // EntryLo0_read1  <= 0;
         // EntryLo1_read1  <= 0;
-        EntryHi_read2   <= 0;
-        PageMask_read2  <= 0;
-        EntryLo0_read2  <= 0;
-        EntryLo1_read2  <= 0;
+        EntryLo0_read2_r  <= 0;
+        EntryLo1_read2_r  <= 0;
     end
     else if(~stallM) begin
         // EntryLo0_read1  <= EntryLo0_read1_r;
         // EntryLo1_read1  <= EntryLo1_read1_r;
-        EntryHi_read2   <= EntryHi_read2_r ;
-        PageMask_read2  <= PageMask_read2_r;
-        EntryLo0_read2  <= EntryLo0_read2_r;
-        EntryLo1_read2  <= EntryLo1_read2_r;
+        EntryLo0_read2_r  <= EntryLo0_read2;
+        EntryLo1_read2_r  <= EntryLo1_read2;
     end 
 end
 
@@ -270,10 +264,10 @@ assign data_vpnE = data_vaddr[31:`OFFSET_WIDTH];
 
 //M阶段的data的物理页号
 assign data_pfn = data_kseg01M? {3'b0, data_vpnM[`TAG_WIDTH-4:0]} :
-                 ~data_oddM   ? EntryLo0_read2[`PFN_BITS] : EntryLo1_read2[`PFN_BITS];
+                 ~data_oddM   ? EntryLo0_read2_r[`PFN_BITS] : EntryLo1_read2_r[`PFN_BITS];
 
 wire [5:0] data_flag;
-assign data_flag = ~data_oddM ? EntryLo0_read2[`FLAG_BITS] : EntryLo1_read2[`FLAG_BITS];
+assign data_flag = ~data_oddM ? EntryLo0_read2_r[`FLAG_BITS] : EntryLo1_read2_r[`FLAG_BITS];
 
 assign no_cache_d = data_kseg01M ? (data_kseg1M ? 1'b1 : 1'b0) :
                     data_flag[`C_BITS]==3'b010 ? 1'b1 : 1'b0;
@@ -330,31 +324,38 @@ assign data_tlb_modify  = data_kseg01M ? 1'b0 : mem_write_enM & find2_r & data_V
 //--------------------------pipeline---------------------------------
 always @(posedge clk) begin
     if(rst | flushM) begin
-        find1_r         <= 0;
         find2_r         <= 0;
-        find_index1_r   <= 0;
         find_index2_r   <= 0;
 
         data_oddM       <= 0;
         data_kseg01M    <= 0;
         data_kseg1M     <= 0;
         data_vpnM       <= 0;
-
-        inst_oddM       <= 0;
-        inst_kseg01M    <= 0;
-        inst_kseg1M     <= 0;
-        inst_vpnM       <= 0;
     end
     else if(~stallM) begin
-        find1_r         <= find1        ;
         find2_r         <= find2        ;
-        find_index1_r   <= find_index1  ;
         find_index2_r   <= find_index2  ;
 
         data_oddM       <= data_oddE    ;
         data_kseg01M    <= data_kseg01E ;
         data_kseg1M     <= data_kseg1E  ;
         data_vpnM       <= data_vpnE    ;
+    end
+end
+
+always@(posedge clk) begin
+    if(rst) begin
+        find1_r         <= 0;
+        find_index1_r   <= 0;
+
+        inst_oddM       <= 0;
+        inst_kseg01M    <= 0;
+        inst_kseg1M     <= 0;
+        inst_vpnM       <= 0;
+    end
+    else if(~stallF) begin
+        find1_r         <= find1        ;
+        find_index1_r   <= find_index1  ;
 
         inst_oddM       <= inst_oddE    ;
         inst_kseg01M    <= inst_kseg01E ;

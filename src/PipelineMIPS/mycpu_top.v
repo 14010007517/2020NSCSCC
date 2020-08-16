@@ -210,8 +210,9 @@ module mycpu_top (
     tlb tlb0(
         .clk(clk), .rst(rst),
         .stallM(stallM), .flushM(flushM),
+        .stallF(stallF),
         //datapath
-        .inst_vaddr(pcF),
+        .inst_vaddr(pc_next),
         .data_vaddr(mem_addrE),
 
         .inst_en(inst_en_tmp),
