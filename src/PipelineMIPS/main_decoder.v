@@ -173,7 +173,7 @@ module main_decoder(
 						regfile_ctrl  =  4'b0_00_0;
 						mem_ctrl  =  3'b0;
 					end
-					`EXE_TEQI, `EXE_TNEI, `EXE_TGEI, `EXE_TGEI, `EXE_TLTI, `EXE_TLTIU: begin
+					`EXE_TEQI, `EXE_TNEI, `EXE_TGEI, `EXE_TGEIU, `EXE_TLTI, `EXE_TLTIU: begin
 						regfile_ctrl  =  4'b0_00_1;
 						mem_ctrl  =  3'b0;
 					end

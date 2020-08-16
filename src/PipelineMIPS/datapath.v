@@ -597,7 +597,7 @@ module datapath (
 
         .mem_read_enE(mem_read_enE),	
         .mem_write_enE(mem_write_enE),
-        .reg_write_enE(reg_write_enE & ~(movnE & !(rt_valueE ^ 0) | movzE & (rt_valueE ^ 0))), 
+        .reg_write_enE(reg_write_enE & ~(movnE && (rt_valueE == 0) || movzE && (rt_valueE != 0))), 
 
         .mem_to_regE(mem_to_regE), 	
         .hilo_to_regE(hilo_to_regE),	

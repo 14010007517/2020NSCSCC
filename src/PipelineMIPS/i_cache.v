@@ -94,16 +94,6 @@ module i_cache (
     wire [LOG2_WAY_NUM-1:0] sel; //改变WAY_NUM需同时改变
     wire [WAY_NUM-1:0] sel_mask;
 
-    assign sel_mask[0] = valid_way[0] & (tag_way[0][TAG_WIDTH:1] == tag); 
-    assign sel_mask[1] = valid_way[1] & (tag_way[1][TAG_WIDTH:1] == tag); 
-    assign sel_mask[2] = valid_way[2] & (tag_way[2][TAG_WIDTH:1] == tag); 
-    assign sel_mask[3] = valid_way[3] & (tag_way[3][TAG_WIDTH:1] == tag); 
-
-    encoder4x2 encoder0(sel_mask, sel);
-
-    assign hit =  ~no_cache & (inst_en | HitInvalid) & (|sel_mask);
-    assign miss =  ~no_cache & (inst_en | HitInvalid) & ~hit;
-
     //evict
     wire [LOG2_WAY_NUM-1:0] evict_way;   //改变WAY_NUM需同时改变
     wire [WAY_NUM-1:0] evict_mask;
@@ -132,6 +122,16 @@ module i_cache (
     assign HitInvalidE = cacheE[4];
     //-------------debug-------------
     //-------------debug-------------
+
+    assign sel_mask[0] = valid_way[0] & (tag_way[0][TAG_WIDTH:1] == tag); 
+    assign sel_mask[1] = valid_way[1] & (tag_way[1][TAG_WIDTH:1] == tag); 
+    assign sel_mask[2] = valid_way[2] & (tag_way[2][TAG_WIDTH:1] == tag); 
+    assign sel_mask[3] = valid_way[3] & (tag_way[3][TAG_WIDTH:1] == tag); 
+
+    encoder4x2 encoder0(sel_mask, sel);
+
+    assign hit =  ~no_cache & (inst_en | HitInvalid) & (|sel_mask);
+    assign miss =  ~no_cache & (inst_en | HitInvalid) & ~hit;
 
 //FSM
     reg [1:0] state;
