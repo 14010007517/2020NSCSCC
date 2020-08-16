@@ -21,6 +21,7 @@ module d_cache (
     input wire mem_read_enE,
     input wire mem_write_enE,
     input wire stallM,
+    input wire flushM,
 
     //arbitrater
     output wire [31:0] araddr,
@@ -202,8 +203,14 @@ module d_cache (
 
     assign collisionE = mem_read_enE & write & hit & (mem_addrE == data_vaddr);
     always@(posedge clk) begin
-        data_wdata_r <= rst ? 0 : data_wdata;
-        collisionM <= rst ? 0 : collisionE;
+        if(rst | flushM) begin
+            collisionM  <= 0;
+            data_wdata_r <= 0;
+        end
+        else if(~stallM) begin
+            collisionM  <= collisionE;
+            data_wdata_r <= data_wdata;
+        end
     end
 
     assign stall = ~(state==IDLE || (state==HitJudge) && hit && ~no_cache || ~data_en) || (IndexWriteBackInvalid & cache_dirty & ~write_finish) || (HitWriteBackInvalid & cache_hit_dirty & ~write_finish);

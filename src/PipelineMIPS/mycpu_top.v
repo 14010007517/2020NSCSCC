@@ -195,6 +195,7 @@ module mycpu_top (
         .mem_write_enE(mem_write_enE),
         .d_cache_stall(d_cache_stall),
         .stallM(stallM),
+        .flushM(flushM),
         .cacheM(cacheM),
         .cacheE(cacheE),
 
@@ -308,6 +309,7 @@ module mycpu_top (
         .mem_read_enE(mem_read_enE),
         .mem_write_enE(mem_write_enE),
         .stallM(stallM),
+        .flushM(flushM),
         
         //arbitrater
         .araddr          (d_araddr ),
