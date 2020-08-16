@@ -89,31 +89,31 @@ assign find_index2=
 ({5{find_mask2[4 ]}} & 5'd4 ) |
 ({5{find_mask2[5 ]}} & 5'd5 ) |
 ({5{find_mask2[6 ]}} & 5'd6 ) |
-({5{find_mask2[7 ]}} & 5'd7 ) |
-({5{find_mask2[8 ]}} & 5'd8 ) |
-({5{find_mask2[9 ]}} & 5'd9 ) |
-({5{find_mask2[10]}} & 5'd10) |
-({5{find_mask2[11]}} & 5'd11) |
-({5{find_mask2[12]}} & 5'd12) |
-({5{find_mask2[13]}} & 5'd13) |
-({5{find_mask2[14]}} & 5'd14) |
-({5{find_mask2[15]}} & 5'd15) |
-({5{find_mask2[16]}} & 5'd16) |
-({5{find_mask2[17]}} & 5'd17) |
-({5{find_mask2[18]}} & 5'd18) |
-({5{find_mask2[19]}} & 5'd19) |
-({5{find_mask2[20]}} & 5'd20) |
-({5{find_mask2[21]}} & 5'd21) |
-({5{find_mask2[22]}} & 5'd22) |
-({5{find_mask2[23]}} & 5'd23) |
-({5{find_mask2[24]}} & 5'd24) |
-({5{find_mask2[25]}} & 5'd25) |
-({5{find_mask2[26]}} & 5'd26) |
-({5{find_mask2[27]}} & 5'd27) |
-({5{find_mask2[28]}} & 5'd28) |
-({5{find_mask2[29]}} & 5'd29) |
-({5{find_mask2[30]}} & 5'd30) |
-({5{find_mask2[31]}} & 5'd31);
+({5{find_mask2[7 ]}} & 5'd7 ) ;
+// ({5{find_mask2[8 ]}} & 5'd8 ) |
+// ({5{find_mask2[9 ]}} & 5'd9 ) |
+// ({5{find_mask2[10]}} & 5'd10) |
+// ({5{find_mask2[11]}} & 5'd11) |
+// ({5{find_mask2[12]}} & 5'd12) |
+// ({5{find_mask2[13]}} & 5'd13) |
+// ({5{find_mask2[14]}} & 5'd14) |
+// ({5{find_mask2[15]}} & 5'd15) |
+// ({5{find_mask2[16]}} & 5'd16) |
+// ({5{find_mask2[17]}} & 5'd17) |
+// ({5{find_mask2[18]}} & 5'd18) |
+// ({5{find_mask2[19]}} & 5'd19) |
+// ({5{find_mask2[20]}} & 5'd20) |
+// ({5{find_mask2[21]}} & 5'd21) |
+// ({5{find_mask2[22]}} & 5'd22) |
+// ({5{find_mask2[23]}} & 5'd23) |
+// ({5{find_mask2[24]}} & 5'd24) |
+// ({5{find_mask2[25]}} & 5'd25) |
+// ({5{find_mask2[26]}} & 5'd26) |
+// ({5{find_mask2[27]}} & 5'd27) |
+// ({5{find_mask2[28]}} & 5'd28) |
+// ({5{find_mask2[29]}} & 5'd29) |
+// ({5{find_mask2[30]}} & 5'd30) |
+// ({5{find_mask2[31]}} & 5'd31);
 
 assign find_index1=
 ({5{find_mask1[0 ]}} & 5'd0 ) |
@@ -123,31 +123,31 @@ assign find_index1=
 ({5{find_mask1[4 ]}} & 5'd4 ) |
 ({5{find_mask1[5 ]}} & 5'd5 ) |
 ({5{find_mask1[6 ]}} & 5'd6 ) |
-({5{find_mask1[7 ]}} & 5'd7 ) |
-({5{find_mask1[8 ]}} & 5'd8 ) |
-({5{find_mask1[9 ]}} & 5'd9 ) |
-({5{find_mask1[10]}} & 5'd10) |
-({5{find_mask1[11]}} & 5'd11) |
-({5{find_mask1[12]}} & 5'd12) |
-({5{find_mask1[13]}} & 5'd13) |
-({5{find_mask1[14]}} & 5'd14) |
-({5{find_mask1[15]}} & 5'd15) |
-({5{find_mask1[16]}} & 5'd16) |
-({5{find_mask1[17]}} & 5'd17) |
-({5{find_mask1[18]}} & 5'd18) |
-({5{find_mask1[19]}} & 5'd19) |
-({5{find_mask1[20]}} & 5'd20) |
-({5{find_mask1[21]}} & 5'd21) |
-({5{find_mask1[22]}} & 5'd22) |
-({5{find_mask1[23]}} & 5'd23) |
-({5{find_mask1[24]}} & 5'd24) |
-({5{find_mask1[25]}} & 5'd25) |
-({5{find_mask1[26]}} & 5'd26) |
-({5{find_mask1[27]}} & 5'd27) |
-({5{find_mask1[28]}} & 5'd28) |
-({5{find_mask1[29]}} & 5'd29) |
-({5{find_mask1[30]}} & 5'd30) |
-({5{find_mask1[31]}} & 5'd31);
+({5{find_mask1[7 ]}} & 5'd7 ) ;
+// ({5{find_mask1[8 ]}} & 5'd8 ) |
+// ({5{find_mask1[9 ]}} & 5'd9 ) |
+// ({5{find_mask1[10]}} & 5'd10) |
+// ({5{find_mask1[11]}} & 5'd11) |
+// ({5{find_mask1[12]}} & 5'd12) |
+// ({5{find_mask1[13]}} & 5'd13) |
+// ({5{find_mask1[14]}} & 5'd14) |
+// ({5{find_mask1[15]}} & 5'd15) |
+// ({5{find_mask1[16]}} & 5'd16) |
+// ({5{find_mask1[17]}} & 5'd17) |
+// ({5{find_mask1[18]}} & 5'd18) |
+// ({5{find_mask1[19]}} & 5'd19) |
+// ({5{find_mask1[20]}} & 5'd20) |
+// ({5{find_mask1[21]}} & 5'd21) |
+// ({5{find_mask1[22]}} & 5'd22) |
+// ({5{find_mask1[23]}} & 5'd23) |
+// ({5{find_mask1[24]}} & 5'd24) |
+// ({5{find_mask1[25]}} & 5'd25) |
+// ({5{find_mask1[26]}} & 5'd26) |
+// ({5{find_mask1[27]}} & 5'd27) |
+// ({5{find_mask1[28]}} & 5'd28) |
+// ({5{find_mask1[29]}} & 5'd29) |
+// ({5{find_mask1[30]}} & 5'd30) |
+// ({5{find_mask1[31]}} & 5'd31);
 
 assign find_index3 = 
 ({5{find_mask3[0 ]}} & 5'd0 ) |
@@ -157,31 +157,31 @@ assign find_index3 =
 ({5{find_mask3[4 ]}} & 5'd4 ) |
 ({5{find_mask3[5 ]}} & 5'd5 ) |
 ({5{find_mask3[6 ]}} & 5'd6 ) |
-({5{find_mask3[7 ]}} & 5'd7 ) |
-({5{find_mask3[8 ]}} & 5'd8 ) |
-({5{find_mask3[9 ]}} & 5'd9 ) |
-({5{find_mask3[10]}} & 5'd10) |
-({5{find_mask3[11]}} & 5'd11) |
-({5{find_mask3[12]}} & 5'd12) |
-({5{find_mask3[13]}} & 5'd13) |
-({5{find_mask3[14]}} & 5'd14) |
-({5{find_mask3[15]}} & 5'd15) |
-({5{find_mask3[16]}} & 5'd16) |
-({5{find_mask3[17]}} & 5'd17) |
-({5{find_mask3[18]}} & 5'd18) |
-({5{find_mask3[19]}} & 5'd19) |
-({5{find_mask3[20]}} & 5'd20) |
-({5{find_mask3[21]}} & 5'd21) |
-({5{find_mask3[22]}} & 5'd22) |
-({5{find_mask3[23]}} & 5'd23) |
-({5{find_mask3[24]}} & 5'd24) |
-({5{find_mask3[25]}} & 5'd25) |
-({5{find_mask3[26]}} & 5'd26) |
-({5{find_mask3[27]}} & 5'd27) |
-({5{find_mask3[28]}} & 5'd28) |
-({5{find_mask3[29]}} & 5'd29) |
-({5{find_mask3[30]}} & 5'd30) |
-({5{find_mask3[31]}} & 5'd31);
+({5{find_mask3[7 ]}} & 5'd7 ) ;
+// ({5{find_mask3[8 ]}} & 5'd8 ) |
+// ({5{find_mask3[9 ]}} & 5'd9 ) |
+// ({5{find_mask3[10]}} & 5'd10) |
+// ({5{find_mask3[11]}} & 5'd11) |
+// ({5{find_mask3[12]}} & 5'd12) |
+// ({5{find_mask3[13]}} & 5'd13) |
+// ({5{find_mask3[14]}} & 5'd14) |
+// ({5{find_mask3[15]}} & 5'd15) |
+// ({5{find_mask3[16]}} & 5'd16) |
+// ({5{find_mask3[17]}} & 5'd17) |
+// ({5{find_mask3[18]}} & 5'd18) |
+// ({5{find_mask3[19]}} & 5'd19) |
+// ({5{find_mask3[20]}} & 5'd20) |
+// ({5{find_mask3[21]}} & 5'd21) |
+// ({5{find_mask3[22]}} & 5'd22) |
+// ({5{find_mask3[23]}} & 5'd23) |
+// ({5{find_mask3[24]}} & 5'd24) |
+// ({5{find_mask3[25]}} & 5'd25) |
+// ({5{find_mask3[26]}} & 5'd26) |
+// ({5{find_mask3[27]}} & 5'd27) |
+// ({5{find_mask3[28]}} & 5'd28) |
+// ({5{find_mask3[29]}} & 5'd29) |
+// ({5{find_mask3[30]}} & 5'd30) |
+// ({5{find_mask3[31]}} & 5'd31);
 //--------------------------查找逻辑-----------------------------
 
 //--------------------------读TLB逻辑-----------------------------

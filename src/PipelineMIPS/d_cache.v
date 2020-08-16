@@ -160,7 +160,8 @@ module d_cache (
     wire cache_dirty;
     assign cache_dirty = dirty_bits_way[cache_way][index];
     wire cache_hit_dirty;
-    assign cache_hit_dirty = hit & dirty_bits_way[sel][index];
+    // assign cache_hit_dirty = hit & dirty_bits_way[sel][index];
+    assign cache_hit_dirty = 0; // 优化时序
 
     //-------------------debug-----------------
     //-------------------debug-----------------

@@ -238,7 +238,7 @@
 
 //TLB
 //TLB Config
-`define TLB_LINE_NUM 32
+`define TLB_LINE_NUM 8
 `define TAG_WIDTH 20
 `define OFFSET_WIDTH 12
 `define LOG2_TLB_LINE_NUM 5
