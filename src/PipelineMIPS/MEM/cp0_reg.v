@@ -171,19 +171,18 @@ module cp0_reg(
       if(rst) begin
          cause_reg     <= `CAUSE_INIT;
       end
-      else if(flush_exception) begin
-         cause_reg[`BD_BIT] <= is_in_delayslot;
-         cause_reg[`EXC_CODE_BITS] <= except_type;
-      end
-      else if(cause_wen) begin
-         cause_reg[`IP1_IP0_BITS] <= wdata[`IP1_IP0_BITS];  //软件中断
-      end
       else begin
+         if(flush_exception) begin
+            cause_reg[`BD_BIT] <= is_in_delayslot;
+            cause_reg[`EXC_CODE_BITS] <= except_type;
+         end
+         else if(cause_wen) begin
+            cause_reg[`IP1_IP0_BITS] <= wdata[`IP1_IP0_BITS];  //软件中断
+         end
          //外部中断
          cause_reg[`IP7_IP2_BITS] <= ~stallW ? ext_int : 0;
       end
    end
-
    //epc
    wire epc_wen;
    assign epc_wen = wen & (addr == `CP0_EPC);
