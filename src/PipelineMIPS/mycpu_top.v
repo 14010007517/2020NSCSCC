@@ -166,7 +166,7 @@ module mycpu_top (
             ila_hit_d
             }
         ), // input wire [31:0]  probe1 
-        .probe2(araddr), // input wire [31:0]  probe2 
+        .probe2(mem_addrM), // input wire [31:0]  probe2 
         .probe3(rdata), // input wire [31:0]  probe3 
         .probe4({flush_exceptionM, stallF, stallM, tlb_instr}) // input wire [3:0]  probe4
     );
@@ -381,7 +381,7 @@ module mycpu_top (
 
         //ila debug
         .ila_ar_sel(ila_ar_sel),
-        .ila_ar_sel(ila_r_sel),
+        .ila_r_sel(ila_r_sel),
     //I CACHE
         .i_araddr          (i_araddr ),
         .i_arlen           (i_arlen  ),
