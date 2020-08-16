@@ -125,8 +125,8 @@ module d_cache (
 
     encoder4x2 encoder0(sel_mask, sel);
 
-    assign hit = data_en & (|sel_mask);
-    assign miss = data_en & ~hit;
+    assign hit = ~no_cache & (data_en | HitInvalid | HitWriteBackInvalid) & (|sel_mask);
+    assign miss = ~no_cache & (data_en | HitInvalid | HitWriteBackInvalid) & ~hit;
     
     //evict_way
     wire [LOG2_WAY_NUM-1:0] evict_way;
@@ -157,12 +157,20 @@ module d_cache (
     wire [1:0] cache_way;
     assign cache_way = data_pfn[1:0];
     wire IndexStoreTag, IndexWriteBackInvalid, IndexWriteBackInvalidE;
+    wire HitInvalid, HitInvalidE, HitWriteBackInvalid, HitWriteBackInvalidE;
     assign IndexStoreTag = cacheM[2];
     assign IndexWriteBackInvalid = cacheM[3];
     assign IndexWriteBackInvalidE = cacheE[3];
+    assign HitInvalid = cacheM[1];
+    assign HitInvalidE = cacheE[1];
+    assign HitWriteBackInvalid = cacheM[0];
+    assign HitWriteBackInvalidE = cacheE[0];
 
     wire cache_dirty;
     assign cache_dirty = dirty_bits_way[cache_way][index];
+    wire cache_hit_dirty;
+    assign cache_hit_dirty = hit & dirty_bits_way[sel][index];
+
     //-------------------debug-----------------
     //-------------------debug-----------------
 //FSM
@@ -198,7 +206,7 @@ module d_cache (
         collisionM <= rst ? 0 : collisionE;
     end
 
-    assign stall = ~(state==IDLE || (state==HitJudge) && hit && ~no_cache || ~data_en) || (IndexWriteBackInvalid & cache_dirty & ~write_finish);
+    assign stall = ~(state==IDLE || (state==HitJudge) && hit && ~no_cache || ~data_en) || (IndexWriteBackInvalid & cache_dirty & ~write_finish) || (HitWriteBackInvalid & cache_hit_dirty & ~write_finish);
     assign data_rdata = hit & ~no_cache & ~collisionM ? block_sel_way[sel]:
                         collisionM     ? data_wdata_r: saved_rdata;
 //AXI
@@ -212,6 +220,7 @@ module d_cache (
                      ~no_cache && data_en && (state == HitJudge) && miss && dirty && !write_req ? 1'b1 :
                      write & no_cache & (state == HitJudge) & ~write_req ? 1'b1 :
                      IndexWriteBackInvalid & cache_dirty & ~write_req ? 1'b1:
+                     HitWriteBackInvalid & cache_hit_dirty & ~write_req ? 1'b1:
                      write_finish       ? 1'b0 : write_req;
     end
     
@@ -273,8 +282,11 @@ module d_cache (
     
     wire [31:0] cache_dirty_write_addr;
     assign cache_dirty_write_addr = {tag_way[cache_way][TAG_WIDTH : 1], index} << OFFSET_WIDTH;
+    wire [31:0] cache_hit_dirty_write_addr;
+    assign cache_hit_dirty_write_addr = {tag_way[sel][TAG_WIDTH : 1], index} << OFFSET_WIDTH;
 
     assign awaddr = IndexWriteBackInvalid & cache_dirty ? cache_dirty_write_addr :
+                    HitWriteBackInvalid & cache_dirty ? cache_hit_dirty_write_addr :
                     ~no_cache ? dirty_write_addr : data_paddr;
     assign awlen = ~no_cache ? BLOCK_NUM-1 : 4'd0;
     assign awsize = ~no_cache ? 4'b10 :
@@ -283,7 +295,8 @@ module d_cache (
     assign awvalid = write_req & ~waddr_rcv;
 
     assign wdata = IndexWriteBackInvalid & cache_dirty ? block_way[cache_way][wcnt] :
-                    ~no_cache ? block_way[evict_way][wcnt] : data_wdata;
+                   HitWriteBackInvalid & cache_hit_dirty ? block_way[sel][wcnt] :
+                   ~no_cache ? block_way[evict_way][wcnt] : data_wdata;
 
     assign wstrb = ~no_cache ? 4'b1111 : data_wen;
     assign wlast = wcnt==awlen;
@@ -326,6 +339,9 @@ module d_cache (
         else if(IndexStoreTag | IndexWriteBackInvalid) begin
             valid_bits_way[cache_way][index] <= 0;
         end
+        else if( hit & HitInvalid | hit & HitWriteBackInvalid & write_finish) begin
+            valid_bits_way[sel][index] <= 0;
+        end
         else begin
             valid_bits_way[0][index] <= wena_tag_ram_way[0] ? 1'b1 : valid_bits_way[0][index];
             valid_bits_way[1][index] <= wena_tag_ram_way[1] ? 1'b1 : valid_bits_way[1][index];
@@ -358,6 +374,9 @@ module d_cache (
         else if(IndexStoreTag | (IndexWriteBackInvalid & write_finish)) begin
             dirty_bits_way[cache_way][index] <= 0;
         end
+        else if(HitWriteBackInvalid & write_finish) begin
+            dirty_bits_way[sel][index] <= 0;
+        end
         else begin
             if(write_dirty_bit_en) begin
                 case(write_way_sel)
@@ -371,8 +390,8 @@ module d_cache (
     end
 //cache ram
     //read
-    assign enb_tag_ram = (mem_read_enE || mem_write_enE || IndexWriteBackInvalidE) && ~stallM; 
-    assign enb_data_bank = (mem_read_enE || mem_write_enE || IndexWriteBackInvalidE) && ~stallM; //#sw时，不用读取data# 改：sw遇到miss和dirty, 仍然需要读 #除非延迟一个周期写。
+    assign enb_tag_ram = (mem_read_enE || mem_write_enE || IndexWriteBackInvalidE || HitInvalidE || HitWriteBackInvalidE) && ~stallM; 
+    assign enb_data_bank = (mem_read_enE || mem_write_enE || IndexWriteBackInvalidE || HitWriteBackInvalidE) && ~stallM; //#sw时，不用读取data# 改：sw遇到miss和dirty, 仍然需要读 #除非延迟一个周期写。
 
     assign addrb = indexE;  //read: 读tag ram和data ram; write: 读tag ram
     //write

@@ -2,6 +2,7 @@ module i_cache (
     input wire clk, rst,
     
     //cache指令
+    input wire [6:0] cacheE,
     input wire [6:0] cacheM,
     input wire [31:0] data_vaddrM,
     input wire [19:0] data_pfn,
@@ -100,8 +101,8 @@ module i_cache (
 
     encoder4x2 encoder0(sel_mask, sel);
 
-    assign hit = inst_en & (|sel_mask);
-    assign miss = inst_en & ~hit;
+    assign hit =  ~no_cache & (inst_en | HitInvalid) & (|sel_mask);
+    assign miss =  ~no_cache & (inst_en | HitInvalid) & ~hit;
 
     //evict
     wire [LOG2_WAY_NUM-1:0] evict_way;   //改变WAY_NUM需同时改变
@@ -121,10 +122,14 @@ module i_cache (
     wire [INDEX_WIDTH-1: 0] cache_index;
     assign cache_index = data_vaddrM[INDEX_WIDTH+OFFSET_WIDTH-1 : OFFSET_WIDTH];
     assign cache_way = data_pfn[1:0];
-    wire Cache_IndexStoreTag;
-    wire Cache_IndexInvalid;
-    assign Cache_IndexStoreTag = cacheM[5];
-    assign Cache_IndexInvalid = cacheM[6];
+    wire IndexStoreTag;
+    wire IndexInvalid;
+    wire HitInvalid, HitInvalidE;   //实现为直接将那一行cache line无效，而不管是否命中
+
+    assign IndexStoreTag = cacheM[5];
+    assign IndexInvalid = cacheM[6];
+    assign HitInvalid = cacheM[4];
+    assign HitInvalidE = cacheE[4];
     //-------------debug-------------
     //-------------debug-------------
 
@@ -221,8 +226,14 @@ module i_cache (
                 valid_bits_way[3][tt] <= 0;
             end
         end
-        else if(Cache_IndexStoreTag | Cache_IndexInvalid) begin
+        else if(IndexStoreTag | IndexInvalid) begin
             valid_bits_way[cache_way][cache_index] <= 0;
+        end
+        else if(HitInvalid) begin
+            valid_bits_way[0][cache_index] <= 0;
+            valid_bits_way[1][cache_index] <= 0;
+            valid_bits_way[2][cache_index] <= 0;
+            valid_bits_way[3][cache_index] <= 0;
         end
         else begin
             valid_bits_way[0][index] <= wena_tag_ram_way[0] ? 1'b1 : valid_bits_way[0][index];

@@ -149,7 +149,8 @@ module main_decoder(
 
 			`EXE_CACHE: begin
 				case(rt)
-					`I_IndexStoreTag, `D_IndexStoreTag, `I_IndexInvalid, `D_IndexWriteBackInvalid: begin
+					`I_IndexStoreTag, `D_IndexStoreTag, `I_IndexInvalid, `D_IndexWriteBackInvalid,
+					`I_HitInvalid, `D_HitInvalid, `D_HitWriteBackInvalid: begin
 						regfile_ctrl  =  4'b0_00_1;
 						mem_ctrl  =  3'b0;
 					end

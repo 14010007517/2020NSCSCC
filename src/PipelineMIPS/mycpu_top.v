@@ -254,6 +254,7 @@ module mycpu_top (
         .clk(clk), .rst(rst),
 
         //cache指令
+        .cacheE(cacheE),
         .cacheM(cacheM),
         .data_pfn(data_pfn),    //cache指令都使用tlb的端口2做地址转换
         .data_vaddrM(data_addr),
