@@ -294,6 +294,7 @@ module mycpu_top (
         .mem_read_enE(mem_read_enE),
         .mem_write_enE(mem_write_enE),
         .stallM(stallM),
+        .flushM(flushM),
         
         //arbitrater
         .araddr          (d_araddr ),
