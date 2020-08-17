@@ -193,7 +193,7 @@
 
 `define CU_BITS 31:28   //4'b0001
 `define ERL_BIT 2       //没实现
-`define STATUS_INIT 32'h10400000;
+`define STATUS_INIT 32'h00400000;
 
 //cause
 `define BD_BIT 31             //延迟槽
